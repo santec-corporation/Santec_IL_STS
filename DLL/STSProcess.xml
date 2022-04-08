@@ -1,0 +1,1562 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>STSProcess</name>
+    </assembly>
+    <members>
+        <member name="T:Santec.STSProcess.ILItem">
+            <summary>
+            ILItem
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.Device">
+            <summary>
+            MPM Device number　0～
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.Slot">
+            <summary>
+            MPM Slot number 0～
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.Channel">
+            <summary>
+            MPM Channel number 1～
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.Range">
+            <summary>
+            MPM Range 1～
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.SOP">
+            <summary>
+            SOP index
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.ILItem.ILData">
+            <summary>
+            IL data arrray
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.STSDataStructForSlot">
+            <summary>
+            STS data assignment structure Slot
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForSlot.MPMNumber">
+            <summary>
+            MPM number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForSlot.SlotNumber">
+            <summary>
+            Slot number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForSlot.RangeNumber">
+            <summary>
+            range number
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForSlot.SOP">
+            <summary>
+            sop index
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForSlot.SweepCount">
+            <summary>
+            Sweep count 
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.MatrixExtensions">
+            <summary>
+            Matrix process class
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetRowLength(System.Single[0:,0:])">
+            <summary>
+             行数取得　Float型配列
+            </summary>
+            <param name="data">2次元配列</param>
+            <returns>resulte</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetColumnLength(System.Single[0:,0:])">
+            <summary>
+             列数取得　Float型配列
+            </summary>
+            <param name="data">2次元配列</param>
+            <returns>resulte</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetRowLength(System.Double[0:,0:])">
+            <summary>
+            行数取得
+            </summary>
+            <param name="data">矩阵二维数组</param>
+            <returns>行数</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetColumnLength(System.Double[0:,0:])">
+            <summary>
+            列数取得
+            </summary>
+            <param name="data">矩阵二维数组</param>
+            <returns>列数</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetRow(System.Single[0:,0:],System.Int32)">
+            <summary>
+            配列から行データを取り出す(Float型)
+            </summary>
+            <param name="data">data</param>
+            <param name="r">index</param>
+            <returns>result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.GetColumin(System.Single[0:,0:],System.Int32)">
+            <summary>
+             2次元配列から行データを取得する
+            </summary>
+            <param name="data">float型2次元配列</param>
+            <param name="c">行番号</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.ToMatrix(System.Single[],System.Int32,System.Int32)">
+            <summary>
+            将一维数组按照行列转换成二维数组矩阵
+            </summary>
+            <param name="data">一维数组</param>
+            <param name="row">行数</param>
+            <param name="column">列数</param>
+            <returns>矩阵二维数组</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Transpose(System.Single[0:,0:])">
+            <summary>
+            Matrix transpose
+            将矩阵转置，得到一个新矩阵
+            </summary>
+            <param name="data">Original matrix 要转置的矩阵</param>
+            <returns>Transposed matrix 原矩阵经过转置得到的新矩阵</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Multiply(System.Single[0:,0:],System.Single[0:,0:])">
+            <summary>
+            矩阵相乘
+            </summary>
+            <param name="a">矩阵A</param>
+            <param name="b">矩阵B</param>
+            <returns>计算后矩阵</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Multiply(System.Double[0:,0:],System.Single[0:,0:])">
+            <summary>
+            矩阵相乘
+            </summary>
+            <param name="a">矩阵A</param>
+            <param name="b">矩阵B</param>
+            <returns>计算后矩阵</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Inverse(System.Double[0:,0:])">
+            <summary>
+            求逆矩阵　逆行列を求める（掃き出し法）
+            </summary>
+            <param name="matrix">矩阵数组</param>
+            <returns>逆矩阵</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Inverse3(System.Single[0:,0:])">
+            <summary>
+            求逆矩阵　逆行列を求める（掃き出し法）
+            </summary>
+            <param name="matrix">矩阵数组</param>
+            <returns>逆矩阵</returns>
+        </member>
+        <member name="M:Santec.STSProcess.MatrixExtensions.Inverse2(System.Double[0:,0:])">
+            <summary>
+            求逆矩阵
+            </summary>
+            <param name="matrix">矩阵数组</param>
+            <returns>逆矩阵</returns>
+        </member>
+        <member name="T:Santec.STSProcess.CommonMethods">
+            <summary>
+            Common method
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.SetProcessWorkingSetSize(System.IntPtr,System.Int32,System.Int32)">
+            kernel32.dllのインポート
+        </member>
+        <member name="F:Santec.STSProcess.CommonMethods.LIGHTSPEED">
+            <summary>
+            C = 299792458
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Make_Wavelength_Table(System.Double,System.Double,System.Double)">
+            <summary>
+            波長　テーブル作成
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="endwave">end wavelength(nm)</param>
+            <param name="stepwave">step</param>
+            <returns>Errorcode</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Convert2Decibel(System.Double)">
+            <summary>
+            mW →dBm
+            </summary>
+            <param name="value">待转值</param>
+            <returns>转换后结果</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Conver2Power(System.Single)">
+            <summary>
+            dBm→mW
+            </summary>
+            <param name="value">待转值</param>
+            <returns>转换后结果</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_Voltage_To_dBm(System.Single)">
+            <summary>
+            Convete voltage to dBm
+            </summary>
+            <param name="value">vlotage[V]</param>
+            <returns>Resulte</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_dBm_To_mW(System.Single)">
+            <summary>
+            dBm to mW
+            </summary>
+            <param name="value">power dBm</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_dBm_To_W(System.Single)">
+            <summary>
+            dBm to W
+            </summary>
+            <param name="value">power dBm</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_W_To_dBm(System.Double)">
+            <summary>
+            W to dBm
+            </summary>
+            <param name="value">current value W</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_mW_To_dBm(System.Double)">
+            <summary>
+            mW to dBm
+            </summary>
+            <param name="value">currnt mW</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_nm_To_THz(System.Double)">
+            <summary>
+            nm to THz
+            </summary>
+            <param name="value">wavelength nm</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_THz_To_nm(System.Double)">
+            <summary>
+            THz to nm
+            </summary>
+            <param name="value">Frequency THz</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_Interpolation(System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Interpolation 
+            </summary>
+            <param name="x1">x1</param>
+            <param name="y1">y1</param>
+            <param name="x2">x2</param>
+            <param name="y2">y2</param>
+            <param name="targetX">target value</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Cal_Interpolation(System.Double[],System.Double[],System.Double)">
+            <summary>
+            Interpolation 
+            </summary>
+            <param name="x">x</param>
+            <param name="y">y</param>
+            <param name="targetX">target x</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.CopyArray``1(``0[]@,``0[])">
+            <summary>
+            复制Arrary
+            </summary>
+            <typeparam name="T">数组元素类型</typeparam>
+            <param name="destination">目标数组</param>
+            <param name="source">源数组</param>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.Memory_Zip(System.IntPtr)">
+            <summary>
+            Memory out of rangeのエラーを解消する対策関数
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.CommonMethods.RescalingData(System.Single[],System.Single[],System.Single[]@)">
+            <summary>
+            小数点部分の補間
+            </summary>
+            <param name="indexs">索引数据</param>
+            <param name="data">原始数据</param>
+            <param name="calData">拟合数据</param>
+        </member>
+        <member name="T:Santec.STSProcess.ErrorCode">
+            <summary>
+            Analysis Class Errorcode
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.Unknown">
+            <summary>
+            Unknown
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.MeasureNotMatch">
+            <summary>
+            measurement data miss much
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.MeasureNotRescaling">
+            <summary>
+            measurement data not done to rescaling
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.MeasureNotExist">
+            <summary>
+            measurement data is nothing 
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.ReferenceNotMatch">
+            <summary>
+            reference data miss much
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.ReferenceNotRescaling">
+            <summary>
+            reference data not done to rescaling
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.ReferenceNotExist">
+            <summary>
+            reference data is Nothing
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.NoCalculated">
+            <summary>
+            data not done to calculated
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.ParameterError">
+            <summary>
+            parameter error
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.Failure">
+            <summary>
+            failure
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ErrorCode.Succeed">
+            <summary>
+            succeed
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.Range_Threshold">
+            <summary>
+            Range阈值及处理
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_10_Range_Threshold_Range1">
+            <summary>
+            MPM-10 Range Threshold Range1
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_10_Range_Threshold_Range2">
+            <summary>
+            MPM-10 Range Threshold Range2
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_10_Range_Threshold_Range3">
+            <summary>
+            MPM-10 Range Threshold Range3
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_10_Range_Threshold_Range4">
+            <summary>
+            MPM-10 Range Threshold Range4
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_10_Range_Threshold_Range5">
+            <summary>
+            MPM-10 Range Threshold Range5
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_211_Range_Threshold_Range1">
+            <summary>
+            MPM-211 Range Threshold Range1
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_211_Range_Threshold_Range2">
+            <summary>
+            MPM-211 Range Threshold Range2
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_211_Range_Threshold_Range3">
+            <summary>
+            MPM-211 Range Threshold Range3
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_211_Range_Threshold_Range4">
+            <summary>
+            MPM-211 Range Threshold Range4
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_211_Range_Threshold_Range5">
+            <summary>
+            MPM-211 Range Threshold Range5
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_212_Range_Threshold_Range1">
+            <summary>
+            MPM-212 Range Threshold Range1
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_212_Range_Threshold_Range2">
+            <summary>
+            MPM-212 Range Threshold Range2
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_212_Range_Threshold_Range3">
+            <summary>
+            MPM-212 Range Threshold Range3
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_212_Range_Threshold_Range4">
+            <summary>
+            MPM-212 Range Threshold Range4
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_212_Range_Threshold_Range5">
+            <summary>
+            MPM-212 Range Threshold Range5
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_213_Range_Threshold_Range1">
+            <summary>
+            MPM-213 Range Threshold Range1
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_213_Range_Threshold_Range2">
+            <summary>
+            MPM-213 Range Threshold Range2
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_213_Range_Threshold_Range3">
+            <summary>
+            MPM-213 Range Threshold Range3
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold.MPM_213_Range_Threshold_Range4">
+            <summary>
+            MPM-213 Range Threshold Range4
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Range_Threshold._type">
+            <summary>
+            模块类型
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.Range_Threshold.#ctor(Santec.STSProcess.Module_Type)">
+            <summary>
+            构造
+            </summary>
+            <param name="type"></param>
+        </member>
+        <member name="M:Santec.STSProcess.Range_Threshold.GetRanges(System.Int32[]@)">
+            <summary>
+            获取支持Range
+            </summary>
+            <param name="ranges">Range数组</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.Range_Threshold.MergeData(System.Collections.Generic.Dictionary{System.Int32,System.Single[0:,0:]},System.Single[]@,System.Single[]@)">
+            <summary>
+            合并数据
+            </summary>
+            <param name="rawData">待合并数据</param>
+            <param name="mergeMonitor">监控功率</param>
+            <param name="mergePower">合并后功率</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.Range_Threshold.GetRangeThreshold(System.Int32,System.Double@,System.Double@)">
+            <summary>
+            获取Range功率范围
+            </summary>
+            <param name="range">Range档位</param>
+            <param name="maxPower">最大功率</param>
+            <param name="minPower">最小功率</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.STSProcess.Module_Type">
+            <summary>
+            MPM Module type for merge
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Module_Type.MPM_10">
+            <summary>
+            MPM-10
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Module_Type.MPM_211">
+            <summary>
+            MPM-211
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Module_Type.MPM_212">
+            <summary>
+            MPM-212
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Module_Type.MPM_213">
+            <summary>
+            MPM-213
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.Module_Type.MPM_215">
+            <summary>
+            MPM-215
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.RawItem">
+            <summary>
+            データ保持クラス
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Device">
+            <summary>
+            MPM番号
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Slot">
+            <summary>
+            Slot
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Channel">
+            <summary>
+            Ch
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Range">
+            <summary>
+            レンジ
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.SOP">
+            <summary>
+            SOP
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.SweepCount">
+            <summary>
+            Sweep Count 
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.TriggerIndexs">
+            <summary>
+            DAQ トリガインデックス配列
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.MPMIndexs">
+            <summary>
+            MPMインデックス
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Monitors">
+            <summary>
+            モニターデータ
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.Powers">
+            <summary>
+            パワーデータ
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.RawItem.RawItemDataType.NoData">
+            <summary>
+            データなし
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.RawItem.RawItemDataType.Original">
+            <summary>
+            リスケーリング前
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.RawItem.RawItemDataType.Processed">
+            <summary>
+            リスケーリング処理後
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.IndexDataType">
+            <summary>
+            トリガインデックスタイプ
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.MonitorDataType">
+            <summary>
+            モニタータイプ
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.RawItem.PowerDataType">
+            <summary>
+            パワーデータタイプ
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.RescalingMode">
+            <summary>
+            Enumeration of Rescaling Mode
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.RescalingMode.Freerun_SPU">
+            <summary>
+            Freerun,SPU Mode
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.RescalingMode.Freerun_Referencemodule">
+            <summary>
+            Freerun,Reference Module mode
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.ILSTS">
+            <summary>
+            IL Caluclate
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.ILSTS.ilList">
+            <summary>
+            IL List
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL(System.Single[]@)">
+             <summary>
+            IL Calurate(1ch)
+             </summary>
+             <param name="ilData">ILdata</param>
+             <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL">
+            <summary>
+            IL Calurate(Allch)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL(Santec.STSProcess.RawItem,Santec.STSProcess.RawItem,System.Single[]@)">
+            <summary>
+            IL 計算　内部用
+            </summary>
+            <param name="rawItem">測定PMItem</param>
+            <param name="moniITem">測定 Monitor Item</param>
+            <param name="ilData">IL計算結果</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL(System.Single[],System.Single[],System.Single[],System.Single[])">
+            <summary>
+            计算IL
+            </summary>
+            <param name="measPower">测试功率数据</param>
+            <param name="measMonitor">测试监控数据</param>
+            <param name="refPower">参考功率数据</param>
+            <param name="refMonitor">参考监控数据</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL_Merge(Santec.STSProcess.Module_Type)">
+            <summary>
+             IL data Merge
+            </summary>
+            <param name="type">Module_Type</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode"/></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Cal_IL_Merge(System.Single[0:,0:],System.Single[0:,0:],System.Single[],System.Single[],System.Int32[],Santec.STSProcess.Module_Type,System.Single[]@)">
+            <summary>
+            マージ関数
+            </summary>
+            <param name="measPower">测试功率数据</param>
+            <param name="measMonitor">测试监控数据</param>
+            <param name="refPower">参考功率数据</param>
+            <param name="refMonitor">参考监控数据</param>
+            <param name="ranges">Ranges数组</param>
+            <param name="type">功率计类型</param>
+            <param name="ilData">插损数据</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Get_IL_Data(System.Single[]@,Santec.STSProcess.STSDataStruct)">
+            MPM以外のパワーメータでも対応できるように別途マージ関数を作成する
+            <summary>
+            Get_IL_Data
+            </summary>
+            <param name="ilData">ILdata</param>
+            <param name="setting">setting struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.ILSTS.Get_IL_Merge_Data(System.Single[]@,Santec.STSProcess.STSDataStructForMerge)">
+            <summary>
+            Get IL Mergedata
+            </summary>
+            <param name="ilData">ILdata</param>
+            <param name="setting">setting Struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.STSProcess.PDLSTS">
+            <summary>
+            PDL Calculate Class
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.Default_SOP_array">
+            <summary>
+            デフォルトSOP配列
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.SOPinError">
+            <summary>
+            SOP補正係数
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.SOPinErrorLVP">
+            <summary>
+            SOP　補正係数垂直偏波
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.SOPinErrorLHP">
+            <summary>
+            SOP　補正係数　水平
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.SOPinErrorL45">
+            <summary>
+            SOP補正係数　45度直線
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.SOPinErrorRCP">
+            <summary>
+            SOP補正係数　右回り円偏波
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS.AfterCalIL">
+            <summary>
+            SOP波長感度補正を乗せたILデータ
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Add_PCU_CalData(System.Single[0:,0:,0:])">
+            <summary>
+            Add Calcurated Each SOP Array from PCU Class
+            </summary>
+            <param name="errorArray">Calcurated SOP data[waveindex,SOP index, Cal index]</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Add_PCU_CalData(System.Single[0:,0:],System.Single[0:,0:],System.Single[0:,0:],System.Single[0:,0:])">
+            <summary>
+            Add Calcurated Each SOP Array from PCU Class
+            </summary>
+            <param name="errorV"></param>
+            <param name="errorH"></param>
+            <param name="error45"></param>
+            <param name="errorRC"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cal_PDL(System.Single[0:,0:],System.Single[]@,System.Single[]@,System.Single[]@,System.Single[]@)">
+            <summary>
+            Calcurate PDL And IL
+            </summary>
+            <param name="ilData">4SOP IL　data</param>
+            <param name="pdl">PDL array</param>
+            <param name="il">IL array</param>
+            <param name="maxIL">maxIL</param>
+            <param name="minIL">minIL</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Get_Calibrated_IL(System.Single[0:,0:]@)">
+            <summary>
+            Return IL data of cancel to SOP Wavelength dependence
+            </summary>
+            <param name="calibratedIL"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cal_All_Wave_For_Mulle_Parameter(System.Single[0:,0:],System.Double[],System.Double[]@,System.Double[]@,System.Double[]@,System.Double[]@)">
+            <summary>
+            计算PDL
+            </summary>
+            <param name="ilData">4偏振态数据</param>
+            <param name="targetwavelengthtable">目标波长数组</param>
+            <param name="m11">m11mW</param>
+            <param name="m12">m12mW</param>
+            <param name="m13">m13mW</param>
+            <param name="m14">m14mW</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cancel_SOP_Wavelength_Dependence(System.Single[0:,0:],System.Single[0:,0:]@)">
+            <summary>
+            SOP波長補正
+            </summary>
+            <param name="inT">数据</param>
+            <param name="sopCorrectionResult">校准数据</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cal_Mueller(System.Single[0:,0:],System.Double[]@,System.Double[]@,System.Double[]@,System.Double[]@)">
+            <summary>
+            Mueller計算
+            </summary>
+            <param name="sopCorrectionResult">校准数据</param>
+            <param name="m11">m11(mW)</param>
+            <param name="m12">m12(mW)</param>
+            <param name="m13">m13(mW)</param>
+            <param name="m14">m1(mW)</param>
+            <returns>错误代码<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS._m11">
+            <summary>
+            m11数组
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS._m12">
+            <summary>
+            m12数组
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS._m13">
+            <summary>
+            m13数组
+            </summary>
+        </member>
+        <member name="F:Santec.STSProcess.PDLSTS._m14">
+            <summary>
+            m14数组
+            </summary>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Get_Mueller_Raw_Data(System.Double[]@,System.Double[]@,System.Double[]@,System.Double[]@)">
+            <summary>
+            Get for Mueller calculate result
+            </summary>
+            <param name="m11">m11 (H+V)/2</param>
+            <param name="m12">m12 (H-V)/2</param>
+            <param name="m13">m13 L45-m11</param>
+            <param name="m14">m14 RC-m11</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cal_PDL_Parameter(System.Double[],System.Double[],System.Double[],System.Double[],System.Single[]@,System.Single[]@,System.Single[]@,System.Single[]@)">
+            <summary>
+            PDL calculation with mueller parameter
+            </summary>
+            <param name="m11">m11</param>
+            <param name="m12">m12</param>
+            <param name="m13">m13</param>
+            <param name="m14">m14</param>
+            <param name="pdl">PDL</param>
+            <param name="il">IL</param>
+            <param name="maxIL">maxIL</param>
+            <param name="minIL">minIL</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.STSProcess.PDLSTS.Cal_2SOP_IL(System.Single[0:,0:],System.Single[]@)">
+            <summary>
+            Calcurate IL from HLP,VLP data
+            </summary>
+            <param name="ilData">ILdata</param>
+            <param name="calData">calucrate data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.STSProcess.STSDataStruct">
+            <summary>
+            STS data assignment structure
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.MPMNumber">
+            <summary>
+            MPM number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.SlotNumber">
+            <summary>
+            Slot number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.ChannelNumber">
+            <summary>
+            Channel number 1-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.RangeNumber">
+            <summary>
+            range number
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.SOP">
+            <summary>
+            sop index
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStruct.SweepCount">
+            <summary>
+            Sweep Count 1-
+            </summary>
+        </member>
+        <member name="T:Santec.STSProcess.STSDataStructForMerge">
+            <summary>
+            STS data assignment structure for merge
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForMerge.MPMNumber">
+            <summary>
+            MPM Number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForMerge.SlotNumber">
+            <summary>
+            Slot Number 0-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForMerge.ChannelNumber">
+            <summary>
+            Channel number 1-
+            </summary>
+        </member>
+        <member name="P:Santec.STSProcess.STSDataStructForMerge.SOP">
+            <summary>
+            SOP index 
+            </summary>
+        </member>
+        <member name="T:Santec.Rescaling_Process.MonitorData">
+            <summary>
+             Monitorデータ用クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.MonitorData.SmeMode">
+            <summary>
+            SME mode Flag
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.MonitorData.OriginalMonitor">
+            <summary>
+             MonitorデータがSME処理してあるかどうか
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.MonitorData.MonitorUseMPM">
+            <summary>
+            216 flag
+            </summary>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Add(System.Int32,System.Int32,System.Int32,System.Single[],System.Single[],System.Single[])">
+            <summary>
+            モニターデータ追加
+            </summary>
+            <param name="device">MPM device number</param>
+            <param name="count"> Sweep count</param>
+            <param name="sop">SOP index</param>
+            <param name="triggers">Trigger index</param>
+            <param name="monitors">monitor data</param>
+            <param name="rescaledMonitors">after rescaling monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Get(System.Int32,System.Int32,System.Int32,Santec.STSProcess.RawItem@)">
+             <summary>
+             モニターデータ出力
+             </summary>
+             <param name="device">MPM devicenumber</param>
+            <param name="count">Sweep Count </param>
+             <param name="sop">SOP index</param>
+             <param name="rawItem">Data</param>
+             <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Remove(System.Int32,System.Int32,System.Int32)">
+             <summary>
+             data Remove
+             </summary>
+             <param name="device">MPM device</param>
+            <param name="count">Sweep Count</param>
+             <param name="sop">SOP index</param>
+             <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Set_Rescaling_Index(System.Single[])">
+            <summary>
+            波長ターゲットインデックスからDAQのリスケーリングインデックスを計算
+            </summary>
+            <param name="targetIndex">Target index</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Get_Rescaling_Index(System.Int32,System.Int32,System.Int32,System.Single[]@)">
+            <summary>
+            リスケーリングトリガインデックスの読み出し
+            </summary>
+            <param name="device">デバイス番号</param>
+            <param name="count">SweeCount</param>
+            <param name="sop">SOPindex</param>
+            <param name="rescalingIndex">rescaling index</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Get_Monitor_MPM_number">
+            <summary>
+            モニターデータがどこにいるかサーチする
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Exist_Data(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            モニターデータが存在するか
+            </summary>
+            <param name="device">MPM番号</param>
+            <param name="count">Sweep Count</param>
+            <param name="sop">SOPinxdex</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Cal_MPM_index_offset(System.Double)">
+            <summary>
+            MPM index オフセット計算216 用
+            </summary>
+            <param name="offset">offset index</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Set_Rescaling_Monitor">
+            <summary>
+            Monitor Data Rescaling 
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Set_Rescaling_DAQmx_Monitor">
+            <summary>
+            DAQ监控数据重建
+            DAQモニターデータのリスケーリング
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.MonitorData.Set_Rescaling_MPM_Monitor">
+            <summary>
+            216モニターデータをリスケーリング
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.Rescaling_Process.RawData">
+            <summary>
+            MPMデータ保持/処理クラス
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.RawData.locker">
+            <summary>
+            Locker
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.RawData.SmeMode">
+            <summary>
+            SME mode Flag
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.RawData.SamplingFrequency">
+            <summary>
+            DAQmx速度
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.RawData.AverageTime_ms">
+            <summary>
+            MPM Averaging Time
+            </summary>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Add(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Single[],System.Single[])">
+            <summary>
+            Data Add
+            </summary>
+            <param name="device">MPM device number</param>
+            <param name="slot">MPM slot number</param>
+            <param name="channel">MPM channel</param>
+            <param name="range">MPM range</param>
+            <param name="sop">SOP index</param>
+            <param name="count">Sweep Count </param>
+            <param name="powers">powermeter data</param>
+            <param name="rescaledPowers">after rescaling PM data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Get(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,Santec.STSProcess.RawItem@)">
+            <summary>
+            Get data
+            </summary>
+            <param name="device">MPM devicenumber</param>
+            <param name="slot">MPM Slot number</param>
+            <param name="channel">MPM channel number</param>
+            <param name="range">Range number -1 or range index</param>
+            <param name="sop">SOP index</param>
+            <param name="rawItem">Data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Remove(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            data Remove
+            </summary>
+            <param name="device">MPM device</param>
+            <param name="slot">MPM Slot</param>
+            <param name="channel">MPM channel</param>
+            <param name="range">Range number -1 of range index</param>
+            <param name="sop">SOP index</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Set_Rescaling_Index(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Single[])">
+            <summary>
+             MonitorDataクラスからのDAQindexをMPMデータのインデックスに展開
+            </summary>
+            <param name="device">MPM番号</param>
+            <param name="slot">Slot</param>
+            <param name="ch">ch</param>
+            <param name="range">range number</param>
+            <param name="sop">Sop index</param>
+            <param name="targetIndex">Target index</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Set_Index_Align(System.Single[])">
+            <summary>
+            MPM Index→DAQのIndexにあわせる
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Cal_MPM_index_offset(System.Double)">
+            <summary>
+            MPM index オフセット計算
+            </summary>
+            <param name="offset">offset index</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.RawData.Set_Rescaling_Powers">
+            <summary>
+            パワーデータのリスケーリング
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.Rescaling_Process.ProcessingData">
+            <summary>
+            リスケーリング補助クラス
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.Rawdata">
+            <summary>
+            MPM測定用データ　
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.Refdata">
+            <summary>
+            MPM　Referenceデータ
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.MonitorRawdata">
+            <summary>
+            Monitor測定用データ
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.MonitorRefdata">
+            <summary>
+            Monitor Reference用データ
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.TargetWavelengths">
+            <summary>
+            ターゲット波長テーブル
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.SweepWavelengths">
+            <summary>
+            Sweep波長テーブル
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.ProcessingData.StartWavelength">
+            <summary>
+            sweep start wavelength(nm)
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.ProcessingData.StopWavelength">
+            <summary>
+            Sweep Stop wavelength (nm)
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.ProcessingData.ActualStepWavelength">
+            <summary>
+            Actual Sweep Step wavelength(nm)
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.ProcessingData.RescalingStepWavelenth">
+            <summary>
+            Rescaling step wavelength(nm)
+            </summary>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Ref_MPMData_CH(System.Single[],Santec.STSProcess.STSDataStruct)">
+            <summary>
+             Add in MPM Reference data
+            </summary>
+            <param name="loggindata">MPM reference dadta</param>
+            <param name="setting">Data Infrotmation Struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Meas_MPMData_CH(System.Single[],Santec.STSProcess.STSDataStruct)">
+            <summary>
+            Add in MPM Measurement data
+            </summary>
+            <param name="loggindata">MPM measurement data</param>
+            <param name="setting">Data Infrotmation Struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Ref_MPMData_Slot(System.Single[0:,0:],Santec.STSProcess.STSDataStructForSlot)">
+            <summary>
+            Add in MPM Reference data of solt
+            </summary>
+            <param name="loggindata">MPM reference dadta</param>
+            <param name="setting">Data Infrotmation Struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Meas_MPMData_Slot(System.Single[0:,0:],Santec.STSProcess.STSDataStructForSlot)">
+            <summary>
+            Add in MPM Measurement data of slot
+            </summary>
+            <param name="loggindata">2D logg data array</param>
+            <param name="setting">data struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Ref_MonitorData(System.Single[],System.Single[],Santec.STSProcess.STSDataStruct)">
+            <summary>
+             Add in Monitor reference data 
+            </summary>
+            <param name="triggerIndex">trigger data array</param>
+            <param name="monitorData">monitor data array</param>
+            <param name="setting">data struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Meas_MonitorData(System.Single[],System.Single[],Santec.STSProcess.STSDataStruct)">
+            <summary>
+            Add in Monitor measurement data
+            </summary>
+            <param name="triggerIndex">Trigger index array</param>
+            <param name="monitorData">Monitor data array</param>
+            <param name="setting">Setting structure</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Ref_Rawdata(System.Single[],System.Single[],Santec.STSProcess.STSDataStruct)">
+            <summary>
+            Add in processed refernce raw data
+            </summary>
+            <param name="MPMData">MPM data</param>
+            <param name="monitorData">monitor data</param>
+            <param name="setting">data information struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Meas_Rawdata(System.Single[],System.Single[])">
+            <summary>
+            Add in prosessed measurement raw data(1ch用）
+            </summary>
+            <param name="powerData">MPM data</param>
+            <param name="monitorData">monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Add_Meas_Rawdata_for_Merge(System.Single[0:,0:],System.Single[0:,0:],System.Int32[])">
+            <summary>
+            Add in prosessed measurment raw data for merge
+            </summary>
+            <param name="powerData">2D MPM data</param>
+            <param name="monitorData">2D monitor data</param>
+            <param name="ranges">Range number</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Refdata(Santec.STSProcess.STSDataStruct)">
+            <summary>
+            Clear Reference data for ch
+            </summary>
+            <param name="setting">data struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Measdata(Santec.STSProcess.STSDataStruct)">
+            <summary>
+            Clear Measurement data
+            </summary>
+            <param name="setting">Date Struct</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Refdata">
+            <summary>
+            Reference data clear
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Measdata">
+            <summary>
+            Measurement data clear
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Ref_Monitordata(System.Int32,System.Int32,System.Int32)">
+            <summary>
+             モニターリファレンスデータの削除　
+            </summary>
+            <param name="devnumber">デバイス番号</param>
+            <param name="count">Sweep Count</param>
+            <param name="SOPnumber">SOPindex</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode"/></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Meas_Monitordata(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            モニター測定データの削除
+            </summary>
+            <param name="devnumber">デバイス番号</param>
+            <param name="count">SweepCount</param>
+            <param name="SOPnumber">SOPindex</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode"/></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Ref_MPMdata(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            MPMリファレンスデータの削除
+            </summary>
+            <param name="device">デバイス番号</param>
+            <param name="slot">Slot</param>
+            <param name="ch">ch</param>
+            <param name="rangenumber">レンジ番号</param>
+            <param name="SOPnumber">SOPindex</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode"/></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Clear_Meas_MPMdata(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+             MPM 測定データの削除
+            </summary>
+            <param name="device">デバイス番号</param>
+            <param name="slot">slot</param>
+            <param name="ch">ch</param>
+            <param name="rangenumber">レンジ番号</param>
+            <param name="SOPnumber">SOPindex</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode"/></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Make_Target_Wavelength_Table(System.Double,System.Double,System.Double)">
+            <summary>
+            Make target wavelength table
+            </summary>
+            <param name="startwave">Start wavelength(nm)</param>
+            <param name="endwave">Stop wavelength(nm)</param>
+            <param name="targetdatastep">Rescaling step(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Set_Target_Wavelength_Table(System.Double[])">
+            <summary>
+             Set target wavelength table
+            </summary>
+            <param name="targetdata">wavelength data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Make_Sweep_Wavelength_Table(System.Double,System.Double,System.Double)">
+            <summary>
+            make sweep wavelength table
+            </summary>
+            <param name="startwave">start wavelength[nm]</param>
+            <param name="endwave">stop wavelength[nm]</param>
+            <param name="triggerstep">trigger step[nm]</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Set_Sweep_Wavelength_Table(System.Double[])">
+            <summary>
+             Set Sweep wavelength tabel
+            </summary>
+            <param name="wavedata">wavelength data array</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Get_Target_Wavelength_Table(System.Double[]@)">
+            <summary>
+            Get target wavelength table
+            </summary>
+            <param name="wavelengths">wavelength data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="F:Santec.Rescaling_Process.ProcessingData.targetIndexs">
+            <summary>
+            ターゲットインデックス
+            </summary>
+        </member>
+        <member name="M:Santec.Rescaling_Process.ProcessingData.Make_Target_Index">
+            <summary>
+            ターゲット波長インデックスの作成
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="T:Santec.Rescaling_Process.Rescaling">
+            <summary>
+            Rescaling Class
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.Rescaling.MPMAVG">
+            <summary>
+            Averaging Time(msec)
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.Rescaling.SamplingRate">
+            <summary>
+            SPU sampling_rate
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.Rescaling.IsOriginalMonitor">
+            <summary>
+            Original Monitor data flag
+            </summary>
+        </member>
+        <member name="P:Santec.Rescaling_Process.Rescaling.RescalingMode">
+            <summary>
+            Rescaling mode
+            </summary>
+        </member>
+        <member name="F:Santec.Rescaling_Process.Rescaling.monitor_216flag">
+            <summary>
+            内部変数　モニターに216使用するか
+            </summary>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Set_Rescaling_Setting(Santec.STSProcess.RescalingMode)">
+            <summary>
+            setting for Rescaling mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Set_Rescaling_Setting(Santec.STSProcess.RescalingMode,System.Double,System.Boolean)">
+            <summary>
+            setting for Rescaling mode
+            </summary>
+            <param name="mode">mode</param>
+            <param name="avg">MPM Averaging time(msec)</param>
+            <param name="isOriginalMonitor">sup orignal data flag</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_Rescaling">
+            <summary>
+            Rescaling for Refernece data
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_Rescaling">
+            <summary>
+             Rescaling for Measurement data
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_Freerun_DAQ_Rescaling">
+            <summary>
+            Reference　データ　Freerun　DAQモードリスケーリング
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_Freerun_DAQ_Rescaling">
+            <summary>
+            Meas データ　Freerun DAQモードリスケーリング
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_SME_DAQ_Rescaling">
+            <summary>
+            SME　DAQモード 通常STS使用なし(Reference)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_SME_DAQ_Rescaling">
+            <summary>
+            SME DAQモード　通常STS使用なし（meas）
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_Freerun_RefModule_Rescaling">
+            <summary>
+            MPM-216使用時　Freerun リスケーリングモード(ref)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_Freerun_RefModule_Rescaling">
+            <summary>
+            MPM-216使用時 Freerun リスケーリングモード(meas)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_SME_RefModule_Rescaling">
+            <summary>
+            MPM-216使用時　SME リスケーリングモード(ref)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_SME_RefModule_Rescaling">
+            <summary>
+            MPM-216使用時　SME　リスケーリングモード(meas)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_RefData_Rescaling(System.Boolean,System.Boolean)">
+            <summary>
+            Reference data Rescaling
+            </summary>
+            <param name="isSmeMode">SME mode flag</param>
+            <param name="isRefModule">216 flag</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_MeasData_Rescaling(System.Boolean,System.Boolean)">
+            <summary>
+            Measurement data rescaling
+            </summary>
+            <param name="isSmeMode">SME mode flag</param>
+            <param name="isRefModule">216 flag</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_Ref_Rescaling_Index">
+            <summary>
+            wavelength index rescaling(ref)
+            /// </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_Meas_Rescaling_Index">
+            <summary>
+            wavelength index rescaling (meas)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_Ref_MPMIndex_offset">
+            <summary>
+            MPM index offset(ref)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Cal_Meas_MPMIndex_offset">
+            <summary>
+            MPM index offset(meas)
+            </summary>
+            <returns>errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Rescaling_Ref_MPM">
+            <summary>
+            MPM data rescaling (ref)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Rescaling_Ref_DAQ">
+            <summary>
+            monitor data rescaling (ref)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Rescaling_Meas_MPM">
+            <summary>
+            MPM data rescaling (meas)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Rescaling_Meas_DAQ">
+            <summary>
+            Monitor data rescaling (meas)
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Get_Ref_RawData(Santec.STSProcess.STSDataStruct,System.Single[]@,System.Single[]@)">
+            <summary>
+            get rescaling raw data of reference
+            </summary>
+            <param name="setting">setting struct</param>
+            <param name="rawData">rawdata</param>
+            <param name="monitor">monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+        <member name="M:Santec.Rescaling_Process.Rescaling.Get_Meas_RawData(Santec.STSProcess.STSDataStruct,System.Single[]@,System.Single[]@)">
+            <summary>
+            Get rescaling raw data of measurement
+            </summary>
+            <param name="setting">setting struct</param>
+            <param name="rawData">raw data</param>
+            <param name="monitor">monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.STSProcess.ErrorCode">ErrorCode</see></returns>
+        </member>
+    </members>
+</doc>

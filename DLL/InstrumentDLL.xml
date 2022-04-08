@@ -1,0 +1,3742 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>InstrumentDLL</name>
+    </assembly>
+    <members>
+        <member name="T:Santec.CommunicationTerminator">
+            <summary>
+             通信用デリミタ
+            </summary>
+        </member>
+        <member name="F:Santec.CommunicationTerminator.CrLf">
+            <summary>
+            CrLf
+            </summary>
+        </member>
+        <member name="F:Santec.CommunicationTerminator.Cr">
+            <summary>
+             Cr
+            </summary>
+        </member>
+        <member name="F:Santec.CommunicationTerminator.Lf">
+            <summary>
+             Lf
+             </summary>
+        </member>
+        <member name="T:Santec.Communication.BaseCommunication">
+            <summary>
+            通讯基类
+            通信基本クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.BaseCommunication.IsConnected">
+            <summary>
+            是否连接
+            接続されているか
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.BaseCommunication.Terminator">
+            <summary>
+            指令通信结束符
+            通信用デリミタ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.BaseCommunication.TimeOut">
+            <summary>
+            超时时间
+            通信タイムアウト(msec)
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.BaseCommunication.locker">
+            <summary>
+            多线程访问锁,防止多线程同时读写
+            複数スレッドが同時にWrite/Readを行うのを防ぐためのマルチスレッドロッカー
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.BaseCommunication.BinaryBlockReadFlag">
+            <summary>
+             バイナリブロック読み出し有効フラグ
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.Connect">
+            <summary>
+            设备连接
+            デバイス接続用
+            </summary>
+            <returns>异常代码（例外コード）<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.DisConnect">
+            <summary>
+            断开连接
+            デバイス切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.Echo(System.String,System.String@)">
+            <summary>
+            询问
+            コマンドクエリ
+            </summary>
+            <param name="command"></param>
+            <param name="answer"></param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.Read(System.String@)">
+            <summary>
+            读取
+            Read
+            </summary>
+            <param name="answer"></param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.Write(System.String)">
+            <summary>
+            写入
+            </summary>
+            <param name="command">待写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BinaryRead(System.Int32,System.Byte[]@)">
+             <summary>
+            字节数组读取
+            バイナリデータ読み出し
+             </summary>
+             <param name="length">长度</param>
+             <param name="answer">读取到内容</param>
+             <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BlockBinalyRead(System.Int32,System.Byte[]@)">
+            <summary>
+            　バイナリブロック読み出し
+            </summary>
+            <param name="length"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BulkBinalyRead(System.Int32,System.Byte[]@)">
+            <summary>
+            バイナリ一括読み出し
+            </summary>
+            <param name="length"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BaseRead(System.String@)">
+            <summary>
+            基础读取
+            ベースリード
+            </summary>
+            <param name="data">字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            基础读取字节
+            ベースバイナリリード
+            </summary>
+            <param name="data">字节数组数据</param>
+            <param name="lenght">长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.BaseWrite(System.String)">
+            <summary>
+            基础写入
+            ベースライト
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.GetEncodingString(System.Byte[],System.Text.Encoding)">
+            <summary>
+            字节组转字符串
+            バイト→文字エンコード関数
+            </summary>
+            <param name="bytes">字节数组</param>
+            <param name="encoding">编码类型</param>
+            <returns>字符串</returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.GetEncodingBytes(System.String,System.Text.Encoding)">
+            <summary>
+            字符串转字节组
+            文字列→バイトエンコード関数
+            </summary>
+            <param name="text">字符串</param>
+            <param name="encoding">编码类型</param>
+            <returns>字节数组</returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.StringBuilderContains(System.Text.StringBuilder,System.String)">
+            <summary>
+            StringBuilder检查是否存在字符
+            StringBuliderと文字列の整合確認関数
+            </summary>
+            <param name="sb">StringBuilder数据</param>
+            <param name="str">字符串</param>
+            <returns>是否存在</returns>
+        </member>
+        <member name="M:Santec.Communication.BaseCommunication.StringCheckforStringBuilder(System.Text.StringBuilder,System.String)">
+            <summary>
+            StringBuilder内に指定した文字列の1文字でもあるか確認する
+            /// </summary>
+            <param name="data"></param>
+            <param name="str"></param>
+            <returns>ありなし</returns>
+        </member>
+        <member name="T:Santec.Communication.CommunicationMethod">
+            <summary>
+            Communication Method
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.CommunicationMethod.GPIB">
+            <summary>
+            GPIB
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.CommunicationMethod.C232C">
+            <summary>
+            RS 232C
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.CommunicationMethod.TCPIP">
+            <summary>
+            TCP/IP
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.CommunicationMethod.USB">
+            <summary>
+            USB 
+            </summary>
+        </member>
+        <member name="T:Santec.Communication.DAQmx">
+            <summary>
+            DAQmx
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.samplingFrequency">
+            <summary>
+            サンプリングレート　100KHz
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.acquisitionSampling">
+            <summary>
+            読み出し数
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.remainingCount">
+            <summary>
+            残りの読み出し予定数
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.readingTotalCount">
+            <summary>
+            読み出し総数
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.analogReader">
+            <summary>
+            Reader
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.DAQmx.DeviceName">
+            <summary>
+            デバイスName
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.DAQmx.TaskIsRunning">
+            <summary>
+            タスク動作
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.DAQmx.Logging_ExceptionCode">
+            <summary>
+            Logging用エラーコード
+            マルチタスク用
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Get_DeviceName">
+            <summary>
+            获取DAQmx所有设备
+            PCに接続されているDAQのデバイス番号を取得
+            </summary>
+            <returns>DAQmx资源</returns>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.AIChannelTask">
+            <summary>
+            AItask　アナログインプット用タスク
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.AICopyTask">
+            <summary>
+            補助用　AICopyTask
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.DAQmx.Logging_stop">
+            <summary>
+            Logging　停止用フラグ
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.AOChannelTask">
+            <summary>
+            AOTAsk　アナログアウトプット用タスク
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.DAQmx.DOChannelTask">
+            <summary>
+            デジタルアウトプット用タスク
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.GetDeviceInfo">
+            <summary>
+            DAQのデバイス情報を取得
+            </summary>
+            <returns>设置信息</returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_DeviceName(System.String)">
+            <summary>
+            制御用デバイス番号設定
+            </summary>
+            <param name="deviceName">DAQmxDeveicename</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AOTask(System.String,System.String,System.Double,System.Double)">
+            <summary>
+            アナログアウトプットタスクの設定
+            </summary>
+            <param name="physicalChannelName">物理ch</param>
+            <param name="nameToAssignChannel">名前</param>
+            <param name="minimumValue">最大值</param>
+            <param name="maximumValue">最小值</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AOTast_OutputVoltage(System.Double)">
+            <summary>
+            アナログアウトプットタスク電圧出力
+            </summary>
+            <param name="data">Data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.AOTask_Clear">
+            <summary>
+            アナログアウトタスク停止
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AITask(System.String,System.String,System.Double,System.Double)">
+            <summary>
+            アナログインプットタスク設定
+            </summary>
+            <param name="physicalChannelName">物理ch名</param>
+            <param name="nameToAssignChannel">名称</param>
+            <param name="minimumValue">最小值</param>
+            <param name="maximumValue">最大值</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AITask_Timming(System.Double,System.Int32)">
+            <summary>
+            ConfigureSampleClock
+            アナログインプットサンプリングタイミング設定用
+            </summary>
+            <param name="samplingRate_Hz">sampling timming</param>
+            <param name="samplesPerChannel">number of sampling </param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AITask_Start">
+            <summary>
+            Start AITask Sampling
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Waiting_for_data">
+            <summary>
+            Waiting for daq data and Sampling with multi-Task
+            </summary>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Waiting_for_data2">
+            <summary>
+            Waiting for daq data and Sampling without multi-Task
+            </summary>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.ClearReceivedBuffer">
+            <summary>
+            データバッファのクリア
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_AITask_Stop">
+            <summary>
+            AIタスクの停止
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Get_AITask_InputVoltages(System.Single[]@,System.Double[]@)">
+            <summary>
+             内部保持トリガ　DAQデータを外部へ
+             </summary>
+             <param name="trigger">trigger data array</param>
+            <param name="monitor">monitor data array</param>
+             <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.AITask_Clear">
+            <summary>
+            タスクDispose
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_DOTask(System.String,System.String)">
+            <summary>
+            デジタルアウトプットchの設定
+            </summary>
+            <param name="physicalChannelName">物理ch</param>
+            <param name="nameToAssignChannel">名前</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Set_DOTask_Output(System.Boolean,System.Byte[])">
+            <summary>
+            デジタルアウト出力の設定
+            </summary>
+            <param name="autoStart">auto_start_flag</param>
+            <param name="data">data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.DOTask_Clear">
+            <summary>
+            デジタルアウトタスクのクリア
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.DAQmx.Finalize">
+            <summary>
+            インスタンス
+            </summary>
+        </member>
+        <member name="T:Santec.Communication.FTD2XXUSBCommunication">
+            <summary>
+            FTD2XX
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.FTD2XXUSBCommunication.DeviceID">
+            <summary>
+            设备ID
+            デバイスID
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.FTD2XXUSBCommunication.DeviceName">
+            <summary>
+            设备名称
+            デバイス名
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.FTD2XXUSBCommunication.ftdiDevice">
+            <summary>
+            设备
+            FTDI通信用クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.FTD2XXUSBCommunication.Waittime">
+            <summary>
+             570パッチ用WaitTime
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.Connect">
+            <summary>
+            连接设备
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.Set_Bit_Bang_Enable(System.Boolean)">
+            <summary>
+            高速通信用設定　BMシリーズのみ対応
+            </summary>
+            <param name="enable_flag"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.DisConnect">
+            <summary>
+            断开设备
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.BaseRead(System.String@)">
+            <summary>
+            读取字符串
+            Read
+            </summary>
+            <param name="answer">字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            读取字节
+            バイトデータ読み出し
+            </summary>
+            <param name="answer">字节组数据</param>
+            <param name="length">数据长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.FTD2XXUSBCommunication.BaseWrite(System.String)">
+            <summary>
+            写入命令
+            コマンドWrite
+            </summary>
+            <param name="command">待写入命令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication">
+            <summary>
+            是德VISA通讯
+            KeysightVisaGPIB通信用クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.VisaString">
+            <summary>
+            VISA资源字符串
+            Visa文字列
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.mbSession">
+            <summary>
+            消息Session
+            VisaSession
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.io">
+            <summary>
+            IO
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.DisConnect">
+            <summary>
+            断开连接
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            字节组读取
+            ベースバイナリ読み出し
+            </summary>
+            <param name="data">读取字节数组数据</param>
+            <param name="lenght">长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.BaseRead(System.String@)">
+            <summary>
+            字符串读取
+            ベースリード
+            </summary>
+            <param name="data">读取字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.KeysightCommunication.BaseWrite(System.String)">
+            <summary>
+            写入
+            write
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication">
+            <summary>
+            NI 488.2通讯
+            NI488.2GPIB通信用クラス
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.GPIBAddressMax">
+            <summary>
+            最大GPIB地址　最大GPIBアドレス
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.device">
+            <summary>
+            设备　
+            デバイス　GPIB制御用
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.BoardId">
+            <summary>
+            板块ID
+            ボード番号
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.PrimaryAddress">
+            <summary>
+            仪器地址
+            1st Address
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.SecondaryAddress">
+            <summary>
+            仪器从地址
+            2nd Address
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.Timeout">
+            <summary>
+            超时时间
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.DisConnect">
+            <summary>
+            断开连接
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            字节组读取
+            基準バイナリ読み出し
+            </summary>
+            <param name="data">读取字节数组数据</param>
+            <param name="lenght">长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.BaseRead(System.String@)">
+            <summary>
+            字符串读取
+            ベースリード
+            </summary>
+            <param name="data">读取字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NI4882Communication.BaseWrite(System.String)">
+            <summary>
+            写入
+            Write
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication">
+            <summary>
+            NI VISA 通讯
+            NI VISA通信クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.VisaString">
+            <summary>
+            VISA字符串
+            Visa文字列
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.mbSession">
+            <summary>
+            消息会话
+            通信用セッション
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.DisConnect">
+            <summary>
+            断开连接
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            字节组读取
+            基準バイナリリード
+            </summary>
+            <param name="data">读取字节数组数据</param>
+            <param name="lenght">长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.BaseRead(System.String@)">
+            <summary>
+            字符串读取
+            基準読み出し
+            </summary>
+            <param name="data">读取字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GeneralPurposeInterfaceBus.NIVisaCommunication.BaseWrite(System.String)">
+            <summary>
+            写入
+            write
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.GPIBCommunication">
+            <summary>
+            GPIB
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GPIBCommunication.GPIBConnectTypes">
+            <summary>
+            GPIB类型定义
+            GPIBタイプの定義
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GPIBCommunication.communicate">
+            <summary>
+            通讯对象
+            通信用オブジェクト
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.GPIBConnectType">
+            <summary>
+            GPIB类型
+            GPIB通信タイプ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.VisaString">
+            <summary>
+            Vasa资源
+            Visa文字列
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.TimeOut">
+            <summary>
+            Time Out
+            </summary>            
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.BoardId">
+            <summary>
+            板卡ID
+            ボードID番号
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.PrimaryAddress">
+            <summary>
+            地址
+            アドレス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.SecondaryAddress">
+            <summary>
+            从地址
+            セカンドアドレス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.IsConnected">
+            <summary>
+            是否连接
+            接続フラグ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.GPIBCommunication.Terminator">
+            <summary>
+            终止符
+            デリミタ
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.DisConnect">
+            <summary>
+            断开
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.Echo(System.String,System.String@)">
+            <summary>
+            查询
+            クエリ
+            </summary>
+            <param name="command">命令</param>
+            <param name="answer">响应数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.Read(System.String@)">
+            <summary>
+            读取
+            Read
+            </summary>
+            <param name="answer">读取到的字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.BinaryRead(System.Int32,System.Byte[]@)">
+            <summary>
+            读取字节
+            BynalyRead
+            </summary>
+            <param name="byteLenght">读取长度</param>
+            <param name="answer">读取到的字节数组数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.GPIBCommunication.Write(System.String)">
+            <summary>
+            写入
+            write
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.GPIBConnectType">
+            <summary>
+            GPIB连接类型
+            GPIB列挙体型
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GPIBConnectType.NIVisa">
+            <summary>
+            NI Visa
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GPIBConnectType.NI4882">
+            <summary>
+            NI 488.2
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.GPIBConnectType.KeysightIO">
+            <summary>
+            安捷伦Visa
+            Keysight
+            </summary>
+        </member>
+        <member name="T:Santec.Communication.MainCommunication">
+            <summary>
+            Main communication Class
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.MainCommunication.CommunicationMethods">
+            <summary>
+            Communication Type
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.ComPort">
+            <summary>
+            RS 232C PortID
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.BaudRate">
+            <summary>
+            RS232C Baudrate
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.IPAddress">
+            <summary>
+            IP Address
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.Port">
+            <summary>
+            LAN Port number
+            </summary>　
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.ReadBufferSize">
+            <summary>
+            Read buffer size
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.Waittime">
+            <summary>
+             wait time for after write(msec)
+             </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.GPIBConnectType">
+            <summary>
+            GPIB Communication  type
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.GPIBAddress">
+            <summary>
+            GPIB Address
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.GPIBBoard">
+            <summary>
+            GPIB Board number
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.VISAString">
+            <summary>
+            VisaString 
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.DeviceID">
+            <summary>
+            USB Communication DeviceID
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.DeviceProduct">
+            <summary>
+            USB device product name
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.FT_Waittime">
+            <summary>
+            FTDI 書き込み/読み出し用Wait
+            570通信用パッチ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.TimeOut">
+            <summary>
+            Time Out
+            </summary>            
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.Terminator">
+            <summary>
+            Terminator
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.BinaryBlockReadFlag">
+            <summary>
+            バイナリデータブロック読み出しフラグ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.MainCommunication.Commnucator">
+            <summary>
+            通讯接口对象
+            通信用インターフェース
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.#ctor">
+            <summary>
+            constructor
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Get_Serial_Port">
+            <summary>
+            Get serial port ID connected to PC.
+            </summary>
+            <returns>portname</returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Get_GPIB_Resources">
+            <summary>
+            Get GPIB resource.
+            </summary>
+            <returns>visa resouce</returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Get_USB_Resouce">
+            <summary>
+             Get USB Resouce
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            Connect
+            </summary>
+            <param name="method">Communication method</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Set_Bit_Bang_Enable(System.Boolean)">
+            <summary>
+            FTDI 高速通信用
+            BMシリーズチップのみ対応可能
+            </summary>
+            <param name="enable_flag"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Set_FTWait">
+            <summary>
+             570 パッチ用FTDI　書き込み時WaitTime設定
+             MianCommunicaitonをインスタンス経由してFTDIクラスにプロパティを渡す
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Write(System.String)">
+            <summary>
+            Write
+            </summary>
+            <param name="command">待写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Read(System.String@)">
+            <summary>
+            Read
+            </summary>
+            <param name="response">读取到字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Echo(System.String,System.String@)">
+            <summary>
+            Command Query
+            </summary>
+            <param name="command">写入指令</param>
+            <param name="response">响应字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.BinaryRead(System.Int32,System.Byte[]@)">
+            <summary>
+            Binary Read
+            </summary>
+            <param name="bytecount">byte count</param>
+            <param name="response">byte data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.DisConnect">
+            <summary>
+            DisConnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.Selection(Santec.Communication.CommunicationMethod)">
+            <summary>
+            根据枚举创建类型
+            通信列挙体から通信用インスタンスを選択
+            </summary>
+            <param name="mt">连接类型</param>
+            <returns>通讯设备</returns>
+        </member>
+        <member name="M:Santec.Communication.MainCommunication.GetGPIBSetting(System.String,System.Int32@,System.Int32@)">
+            <summary>
+            VISA字符串转地址
+            </summary>
+            <param name="connectString">Visa资源字符串</param>
+            <param name="id">板卡</param>
+            <param name="adr">地址</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.SerialCommunication">
+            <summary>
+            串口通讯类
+            シリアル通信用クラス
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.SerialCommunication._serialPort">
+            <summary>
+            串口对象
+            シリアルポート
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.BaudRate">
+            <summary>
+            波特率
+            ボーレート
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.BreakState">
+            <summary>
+            获取或设置中断信号状态
+            割り込み状態
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.BytesToRead">
+            <summary>
+            获取接收缓冲区中数据的字节数
+            受信バッファ内のデータバイト数取得
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.BytesToWrite">
+            <summary>
+            获取发送缓冲区中数据的字节数
+            送信バッファのバイト数-
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.CDHolding">
+            <summary>
+            获取端口的载波检测行的状态
+            キャリア検出ラインステータス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.CtsHolding">
+            <summary>
+            获取“可以发送”行的状态。
+            送信準備完了ステータス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.DataBits">
+            <summary>
+            获取或设置每个字节的标准数据位长度
+            データビット長
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.DiscardNull">
+            <summary>
+            获取或设置一个值，该值指示 Null 字节在端口和接收缓冲区之间传输时是否被忽略。
+            nullbyteを無視するか
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.DsrHolding">
+            <summary>
+             获取数据设置就绪 (DSR) 信号的状态。
+             DSR信号設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.DtrEnable">
+            <summary>
+            获取或设置一个值，该值在串行通信过程中启用数据终端就绪 (DTR) 信号。
+            DTR信号の有効/無効
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.Encoding">
+            <summary>
+            获取或设置传输前后文本转换的字节编码。
+            エンコーディングの設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.Handshake">
+            <summary>
+            获取或设置串行端口数据传输的握手协议。
+            ハンドシェイクの設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.Parity">
+            <summary>
+            获取或设置奇偶校验检查协议
+            パリティ設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.ParityReplace">
+            <summary>
+            获取或设置一个字节，该字节在发生奇偶校验错误时替换数据流中的无效字节。
+            パリティエラー時のバイト書き換え設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.PortName">
+            <summary>
+            获取或设置通信端口。
+            ポート番号
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.ReadBufferSize">
+            <summary>
+            输入缓冲区的大小
+            読み出しバッファサイズ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.ReadTimeout">
+            <summary>
+            取或设置读取操作未完成时发生超时之前的毫秒数
+            タイムアウト
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.ReceivedBytesThreshold">
+            <summary>
+            内部输入缓冲区中的字节数
+            イベント発生前のバッファバイト数
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.RtsEnable">
+            <summary>
+            在串行通信中是否启用请求发送 (RTS) 信号
+            request to send信号の要求設定/読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.StopBits">
+            <summary>
+            获取或设置每个字节的标准停止位数
+            ストップビットの設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.SerialCommunication.WriteBufferSize">
+            <summary>
+            获取或设置串行端口输出缓冲区的大小
+            書き込みバッファサイズの指定
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.#ctor">
+            <summary>
+            构造函数
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.DisConnect">
+            <summary>
+            断开
+            切断
+            
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.BaseRead(System.String@)">
+            <summary>
+            读取字符串
+            基本読み出し
+            </summary>
+            <param name="answer">读取到字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            读取字节数组
+            基本バイナリデータ読み出し
+            
+            </summary>
+            <param name="answer">字节数组数据</param>
+            <param name="length">数据长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.SerialCommunication.BaseWrite(System.String)">
+            <summary>
+            写入
+            基本書き込み
+            </summary>
+            <param name="command">待写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.TCPIPCommunication">
+            <summary>
+            TCP/IP类
+            TCP/IP通信用クラス
+            </summary>
+        </member>
+        <member name="F:Santec.Communication.TCPIPCommunication.socket">
+            <summary>
+            套接字
+            ソケット通信用クラス
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.AddressFamily">
+            <summary>
+            地址
+            アドレスファミリー
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.Available">
+            <summary>
+            获取已经从网络接收且可供读取的数据量
+            読み取り可能なbyte数の読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.Blocking">
+            <summary>
+            获取或设置一个值
+            ブロッキングモードの設定、読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.DontFragment">
+            <summary>
+            是否允许将 Internet 协议 (IP)
+            プロトコルの断片化を許可するかの設定、読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.EnableBroadcast">
+            <summary>
+            是否可以发送或接收广播数据包
+            ブロードキャストパケット通信を許可するかどうかの設定/読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.ExclusiveAddressUse">
+            <summary>
+            是否仅允许一个进程绑定到端口
+            1つのプロセスにバインドを許可するかどうかの設定、読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.IsBound">
+            <summary>
+            是否绑定到特定本地端口
+            Sokectがローカルポイントにバインドされているかどうかの設定読み出
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.LingerState">
+            <summary>
+            在尝试发送所有挂起数据时是否延迟关闭套接字
+            すべての保留データを送信するときにソケットを遅延して閉じるかどうかの設定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.LocalEndPoint">
+            <summary>
+            获取本地终结点
+            ローカルのエンドポイントの取得
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.MulticastLoopback">
+            <summary>
+            指定传出的多路广播数据包是否传递到发送应用程序
+            発信マルチキャストが送信もとに配布されるかどうかの設定読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.NoDelay">
+            <summary>
+            是否正在使用 Nagle 算法
+            Nagleアルゴリズムを使用するかどうかの設定読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.ProtocolType">
+            <summary>
+            协议类型
+            プロトコル型の読みだし
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.ReceiveBufferSize">
+            <summary>
+            缓冲区的大小
+            受信バッファサイズの指定、読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.ReceiveTimeout">
+            <summary>
+            调用将超时的时间长度
+            受信タイムアウトの設定、読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.RemoteEndPoint">
+            <summary>
+            获取远程终结点
+            リモートエンドポイントの読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.SendBufferSize">
+            <summary>
+            发送缓冲区的大小
+            送信バッファサイズの指定
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.SendTimeout">
+            <summary>
+            调用将超时的时间长度
+            送信タイムアウトの設定読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.SocketType">
+            <summary>
+            Socket 的类
+            ソケットの型の読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.Ttl">
+            <summary>
+            发送的 Internet 协议 (IP) 数据包的生存时间 (TTL) 值
+            パケットの有効期限の設定読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.UseOnlyOverlappedIO">
+            <summary>
+            指定套接字是否应仅使用重叠 I/O 模式
+            soketの重複IOモードを指定読み出し
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.WaitTime">
+            <summary>
+            Wait time for after write    
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.#ctor">
+            <summary>
+            构造函数
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.IPAddress">
+            <summary>
+            IP Address
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.TCPIPCommunication.Port">
+            <summary>
+            LAN Port number
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.Connect">
+            <summary>
+            Connect
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.DisConnect">
+            <summary>
+            断开网络
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.BaseRead(System.String@)">
+            <summary>
+            读取字符串数据
+            基準読み出し
+            </summary>
+            <param name="answer">读取到字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.BaseBinaryRead(System.Byte[]@,System.Int32)">
+            <summary>
+            读取字节数组
+            基準バイナリ読み出し
+            </summary>
+            <param name="answer">读取到字节数据</param>
+            <param name="length">数据长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.TCPIPCommunication.BaseWrite(System.String)">
+            <summary>
+            写入
+            Write
+            </summary>
+            <param name="command">待写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Communication.ICommunicate">
+            <summary>
+            设备通讯接口
+            デバイス通信用インターフェース
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.ICommunicate.Terminator">
+            <summary>
+            命令终止符
+            デリミタ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.ICommunicate.TimeOut">
+            <summary>
+            超时时间
+            タイムアウト
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.ICommunicate.BinaryBlockReadFlag">
+            <summary>
+            バイナリデータブロック読み出しフラグ
+            </summary>
+        </member>
+        <member name="P:Santec.Communication.ICommunicate.IsConnected">
+            <summary>
+            是否连接
+            接続フラグ
+            </summary>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.Connect">
+            <summary>
+            连接
+            接続
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.DisConnect">
+            <summary>
+            断开
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.Write(System.String)">
+            <summary>
+            写入
+            Write
+            </summary>
+            <param name="command">待写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.Read(System.String@)">
+            <summary>
+            读取字符串
+            Read
+            </summary>
+            <param name="answer">读取到字符串数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.Echo(System.String,System.String@)">
+            <summary>
+            查询
+            クエリ
+            </summary>
+            <param name="command">写入指令</param>
+            <param name="answer">响应数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Communication.ICommunicate.BinaryRead(System.Int32,System.Byte[]@)">
+            <summary>
+            读取字节数组
+            バイナリリード
+            </summary>
+            <param name="byteLenght">数据长度</param>
+            <param name="answer">读取到字节数组数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.ExceptionCode">
+            <summary>
+            Error Code
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Unknown">
+            <summary>
+            Unknown Error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.InUseError">
+            <summary>
+             During acess error
+             </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.ParameterError">
+            <summary>
+            Paremeter Error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.DeviceError">
+            <summary>
+            Device Error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.CommunicationFailure">
+            <summary>
+            Communcation Error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.UnauthorizedAccess">
+            <summary>
+            Unauthorized access error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.IOException">
+            <summary>
+            Device missing error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.NotConnected">
+            <summary>
+            Not connected  error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Uninitialized">
+            <summary>
+            Initialize error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.TimeOut">
+            <summary>
+            Time out error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Failure">
+            <summary>
+            failure 
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Count_mismatch">
+            <summary>
+            Trigger count mismathc
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Succeed">
+            <summary>
+            succeed
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.AlreadyConnected">
+            <summary>
+            alrady connecter error
+            </summary>
+        </member>
+        <member name="F:Santec.ExceptionCode.Stopped">
+            <summary>
+             Stopped error
+            </summary>
+        </member>
+        <member name="T:Santec.Instruments.BaseDevice">
+            <summary>
+            设备基类
+            測定器基底クラス
+            </summary>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.SetProcessWorkingSetSize(System.IntPtr,System.Int32,System.Int32)">
+            kernel32.dllのインポート
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.Memory_Zip(System.IntPtr)">
+            <summary>
+            Memory out of rangeのエラーを解消する対策関数
+            </summary>
+        </member>
+        <member name="T:Santec.Instruments.BaseDevice.BaseInformation">
+            <summary>
+            设备基础信息
+            基本的な機器情報
+            </summary>
+        </member>
+        <member name="P:Santec.Instruments.BaseDevice.BaseInformation.ProductName">
+            <summary>
+            产品名称
+            製品名
+            </summary>
+        </member>
+        <member name="P:Santec.Instruments.BaseDevice.BaseInformation.SerialNumber">
+            <summary>
+            序列号
+            シリアル番号
+            </summary>
+        </member>
+        <member name="P:Santec.Instruments.BaseDevice.BaseInformation.FWversion">
+            <summary>
+            固件版本
+            F/WVersion
+            </summary>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.BaseInformation.FormatInformation(System.String)">
+            <summary>
+            格式化信息
+            IDN情報
+            </summary>
+            <param name="strIDN"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Santec.Instruments.BaseDevice.IsConnected">
+            <summary>
+            是否已经连接
+            接続されているかフラグ
+            </summary>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            连接到设备
+            接続
+            </summary>
+            <param name="method">连接类型</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.DisConnect">
+            <summary>
+            断开设备
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.CopyDoubleArray(System.Double[]@,System.Double[])">
+            <summary>
+            C++兼容传址数据赋值，防止外面创建空间，导致内存泄漏
+            C++用メモリリーク防止用配列コピー
+            </summary>
+            <param name="destination">目标数组</param>
+            <param name="source">源数组</param>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.CopyFlotArray(System.Single[]@,System.Single[])">
+            <summary>
+            C++兼容传址数据赋值，防止外面创建空间，导致内存泄漏
+            C++用メモリリーク防止用配列コピー
+            </summary>
+            <param name="destination">目标数组</param>
+            <param name="source">源数组</param>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.CastArrayDouble2Float(System.Single[]@,System.Double[])">
+            <summary>
+             Double型配列を一括でFloat型配列へ変換　メモリ保持
+            </summary>
+            <param name="destination">変換配列</param>
+            <param name="source">元配列</param>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.CastDouble2Flat(System.Double)">
+            <summary>
+             Double型をFloat型へキャスト
+            </summary>
+            <param name="source"></param>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.ReadIntArray4(System.Int32[]@,System.Boolean)">
+            <summary>
+            读取int类型数组
+            loggdata読み出し用 int型4byte区切り
+            </summary>
+            <param name="data">数组</param>
+            <param name="isLittleEndian">是否低位字节顺序</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.ReadDoubleArray4(System.Double[]@,System.Boolean)">
+            <summary>
+            读取double类型数组
+            Loggデータ読み出し用double型4byte区切りデータ
+            </summary>
+            <param name="data">数组</param>
+            <param name="isLittleEndian">是否低位字节顺序</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.ReadFlotArray4(System.Single[]@,System.Boolean)">
+            <summary>
+            读取double类型数组
+            Loggデータ読み出し用Flot型4byte区切りデータ
+            </summary>
+            <param name="data">数组</param>
+            <param name="isLittleEndian">是否低位字节顺序</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.BaseDevice.ReadArray``1(``0@,System.Func{System.Int32,System.Int32,System.Collections.Generic.List{System.Byte},``0})">
+            <summary>
+            读取数组
+            Loggデータ読み出し用関数
+            </summary>
+            <typeparam name="T">类型</typeparam>
+            <param name="data">数据</param>
+            <param name="converter">转换器</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.Instruments.IDevice">
+            <summary>
+            设备类接口
+            デバイスクラス用インターフェース
+            </summary>
+        </member>
+        <member name="P:Santec.Instruments.IDevice.IsConnected">
+            <summary>
+            是否连接
+            つながっているか
+            </summary>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            连接
+            接続
+            </summary>
+            <param name="method">连接类型</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.DisConnect">
+            <summary>
+            断开
+            切断
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.Write(System.String)">
+            <summary>
+            写入
+            </summary>
+            <param name="command">写入指令</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.Read(System.String@)">
+            <summary>
+            读取字符串
+            </summary>
+            <param name="answer">读取到字符串</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.Echo(System.String,System.String@)">
+            <summary>
+            查询
+            </summary>
+            <param name="command">写入指令</param>
+            <param name="answer">响应字符串</param>
+            <returns><异常代码ExceptionCode></异常代码ExceptionCode></returns>
+        </member>
+        <member name="M:Santec.Instruments.IDevice.BinaryRead(System.Int32,System.Byte[]@)">
+            <summary>
+            读取字节数组
+            </summary>
+            <param name="byteLenght">数据长度</param>
+            <param name="answer">读取到字节数组长度</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.MPM">
+            <summary>
+            MPM Control Class
+            </summary>
+        </member>
+        <member name="T:Santec.MPM.READ_Range_Mode">
+            <summary>
+            enumeration of range mode for"READ"
+            測定レンジモード（READコマンド用）
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.READ_Range_Mode.Manual">
+            <summary>
+            Manual
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.READ_Range_Mode.Auto">
+            <summary>
+            Auto
+            </summary>
+        </member>
+        <member name="T:Santec.MPM.Power_Unit">
+            <summary>
+            enumeration of power unit
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Power_Unit.dBm">
+            <summary>
+            dBm
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Power_Unit.mW">
+            <summary>
+            mW
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Power_Unit.dBmA">
+            <summary>
+            dBmA
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Power_Unit.mA">
+            <summary>
+            mA
+            </summary>
+        </member>
+        <member name="T:Santec.MPM.Measurement_Mode">
+            <summary>
+            enumeration of logging mode
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Measurement_Mode.ManualRangeConstant">
+            <summary>
+            Const1 
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Measurement_Mode.ManualRangeSweep">
+            <summary>
+            Sweep1
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Measurement_Mode.AutoRangeConstant">
+            <summary>
+            Const2
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Measurement_Mode.AutoRangeSweep">
+            <summary>
+            Sweep2
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Measurement_Mode.Freerun">
+            <summary>
+            Freerun
+            </summary>
+        </member>
+        <member name="T:Santec.MPM.Trigger_Input_Mode">
+            <summary>
+            enumeration of trigger input mode
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Trigger_Input_Mode.Internal">
+            <summary>
+            internal trigger
+            </summary>
+        </member>
+        <member name="F:Santec.MPM.Trigger_Input_Mode.Extarnal">
+            <summary>
+            Extarnal trigger
+            </summary>
+        </member>
+        <member name="T:Santec.MPM.MPMInformation">
+            <summary>
+            MPM Information class
+            </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.NumberofModule">
+            <summary>
+              Number of enable module
+            </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.ModuleEnable">
+            <summary>
+            　Module Enable
+            </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.ModuleType">
+            <summary>
+            Module Type
+            </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.ModuelSerial">
+            <summary>
+            Module Serial
+             </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.ModuleFW">
+            <summary>
+            Module Version
+             </summary>
+        </member>
+        <member name="P:Santec.MPM.MPMInformation.Unit">
+            <summary>
+            Unit
+             </summary>
+        </member>
+        <member name="F:Santec.MPM.IsLogging">
+            <summary>
+            Logging中フラグ
+             </summary>
+        </member>
+        <member name="P:Santec.MPM.Information">
+            <summary>
+            MPM Information
+            </summary>
+        </member>
+        <member name="M:Santec.MPM.#ctor">
+            <summary>
+            constructor
+            </summary>
+        </member>
+        <member name="M:Santec.MPM.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            MPM Connect
+            </summary>
+            <param name="method">Communcation method</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.DisConnect">
+            <summary>
+            Disconnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_System_Error(System.String@)">
+            <summary>
+            get mpm errorcord
+            </summary>
+            <param name="errorString">error string </param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Module_Information(System.Int32,System.String@)">
+            <summary>
+            Get module information 
+            </summary>
+            <param name="moduleNumber">module number 0~</param>
+            <param name="info">information</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Enable_Module(System.Int32[]@)">
+            <summary>
+            Get enable module 
+            </summary>
+            <param name="enableModules">enable module</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_READ_Range_Mode(Santec.MPM.READ_Range_Mode)">
+            <summary>
+            setting for range mode for "READ"
+            </summary>
+            <param name="mode">Range mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_READ_Range_Mode(Santec.MPM.READ_Range_Mode@)">
+            <summary>
+            Get range mode for "READ"
+            </summary>
+            <param name="mode">Range mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Range(System.Int32)">
+            <summary>
+            Setting for range
+            </summary>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Range(System.Int32@)">
+            <summary>
+            get range number
+            </summary>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Averaging_Time(System.Double)">
+            <summary>
+            Setting for averaging time
+            </summary>
+            <param name="time">averaging time(ms)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Averaging_Time(System.Double@)">
+            <summary>
+            get averaging time
+            </summary>
+            <param name="time">averaging time(msec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Unit(Santec.MPM.Power_Unit)">
+            <summary>
+            Setting for power unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Unit(Santec.MPM.Power_Unit@)">
+            <summary>
+            Get power unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Mode(Santec.MPM.Measurement_Mode)">
+            <summary>
+            Setting for logging mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Mode(Santec.MPM.Measurement_Mode@)">
+            <summary>
+            Get error mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Wavelength(System.Double)">
+            <summary>
+            Setting for wavelength
+            </summary>
+            <param name="wave">wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Wavelength(System.Double@)">
+            <summary>
+            get wavelength
+            </summary>
+            <param name="wave">wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Trigger_Input_Mode(Santec.MPM.Trigger_Input_Mode)">
+            <summary>
+            Setting for trigger input mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Trigger_Input_Mode(Santec.MPM.Trigger_Input_Mode@)">
+            <summary>
+            get input trigger mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Sweep_Wavelength(System.Double,System.Double,System.Double)">
+            <summary>
+            Setting for sweep wavelength range
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="stopwave">stop wavelength(nm)</param>ew
+            <param name="stepwave">step wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Sweep_Wavelength(System.Double@,System.Double@,System.Double@)">
+            <summary>
+            get sweep wavelength range
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="stopwave">stop wavelength(nm)</param>
+            <param name="stepwave">wavelength step(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Logging_Paremeter_for_STS(System.Double,System.Double,System.Double,System.Double,Santec.MPM.Measurement_Mode)">
+            <summary>
+            Set Logging parameter for STS 
+            This methode assuming to use with STS
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="stopwave">stop wavelength(nm)</param>
+            <param name="wavestep">wavelength step(nm)  Freerun: target step SME: acctuar step</param>
+            <param name="speed">sweep speed(nm/sec)</param>
+            <param name="mode">mesurment mode  without const mode</param>
+            <returns>Errorcode <see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_LoggingParam_for_Freerun(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Freerunモード時　スイープパラメータの設定
+            </summary>
+            <param name="startwave">開始波長(nm)</param>
+            <param name="stopwave">停止波長(nm)</param>
+            <param name="resstep">リスケーリングステップ(nm)</param>
+            <param name="speed">SeeepSeppd(nm/sec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_LoggingParam_for_SME(System.Double,System.Double,System.Double,System.Double,System.Boolean)">
+            <summary>
+             スイープパラメータの設定　SME用
+            </summary>
+            <param name="startwave">開始波長(nm)</param>
+            <param name="stopwave">停止波長(nm)</param>
+            <param name="wavestep">波長ステップ(nm)</param>
+            <param name="speed">SweepSpeed(nm/sec)</param>
+            <param name="auto_mode">auto mode flag  T: Auto range F:Manual range</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Logging_time_for_Freerun(System.Double@)">
+            <summary>
+            Return Logging time for Freerun 
+            This methode assuming to use with STS
+            </summary>
+            <param name="time_sec">logging time</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_READ_Power_for_Module(System.Int32,System.Double[]@)">
+            <summary>
+            Get read power for module
+            </summary>
+            <param name="moduleNumber">module number 0～</param>
+            <param name="powers">power array</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_READ_Power_Channel(System.Int32,System.Int32,System.Double@)">
+            <summary>
+            Get read power for channel
+            </summary>
+            <param name="moduleNumber">module number 0 ～</param>
+            <param name="channelNumber">channel number 1～</param>
+            <param name="power">power</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Wavelength_Senctivity_Data(System.Int32,System.Int32,System.Double[]@,System.Single[]@)">
+            <summary>
+            Get wavelengt senctivity data
+            </summary>
+            <param name="moduleNumber">module number 0～</param>
+            <param name="channelNumber">Channel number1～</param>
+            <param name="wavedata">wavelength table</param>
+            <param name="offsetpower">senctivity data</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Logging_Start">
+            <summary>
+            Logging start
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Logging_Stop">
+            <summary>
+            LoggingStop
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Logging_Status(System.Int32@,System.Int32@)">
+            <summary>
+            Get Logging status
+            </summary>
+            <param name="status">status ：-1,stopped； 0,during logging； 1,complited；</param>
+            <param name="count">count</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Logging_Data_Point(System.Int32)">
+            <summary>
+            Setting for number of logging point
+            </summary>
+            <param name="count">number of point</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Logging_Data_Point(System.Int32@)">
+            <summary>
+            Get logging data point
+            </summary>
+            <param name="count">number of point</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Each_Channel_Logdata(System.Int32,System.Int32,System.Single[]@)">
+            <summary>
+            Get Logg data for channel
+            </summary>
+            <param name="moduleNumber">module number 0~</param>
+            <param name="channelNumber">channel number 1~</param>
+            <param name="data">data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Zeroing">
+            <summary>
+            Zeroing
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Mode_Each_Module(System.Int32,Santec.MPM.Measurement_Mode)">
+            <summary>
+            setting logging moed for each module
+            </summary>
+            <param name="moduleNumber">module 0~</param>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Mode_Each_Module(System.Int32,Santec.MPM.Measurement_Mode@)">
+            <summary>
+            Get logging mode for each module
+            </summary>
+            <param name="moduleNumber">module number 0~</param>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Range_Each_Channel(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Setting for range for each module
+            </summary>
+            <param name="moduleNumber">modulenumber　0～</param>
+            <param name="channelNumber">channel number　1～</param>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Range_Each_Channel(System.Int32,System.Int32,System.Int32@)">
+            <summary>
+            get range for channel
+            </summary>
+            <param name="moduleNumber">module number 0～</param>
+            <param name="channelNumber">channel number1～</param>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Each_Module_Loggdata(System.Int32,System.Single[0:,0:]@)">
+            <summary>
+            get logging data for each module
+            </summary>
+            <param name="moduleNumber">module number　0 ～</param>
+            <param name="data">data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Set_Sweep_Speed(System.Double)">
+            <summary>
+            Setting for sweep speed
+            </summary>
+            <param name="speed">speed</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_Sweep_Speed(System.Double@)">
+            <summary>
+            Get sweep speed
+            </summary>
+            <param name="speed">speed</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.MPM.Get_IPAddress(System.String@)">
+            <summary>
+            Get MPM IPaddress
+            </summary>
+            <param name="address">IP Address</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/>ExceptionCode</returns>
+        </member>
+        <member name="M:Santec.MPM.Get_LAN_Portnumber(System.Int32@)">
+            <summary>
+            Get MPM LAN Communication Port number
+            </summary>
+            <param name="port">port number</param>
+            <returns>Errorcode <see cref="T:Santec.ExceptionCode"/>ExceptionCode</returns>
+        </member>
+        <member name="T:Santec.OSU">
+            <summary>
+            OSU control class
+            </summary>
+        </member>
+        <member name="M:Santec.OSU.Connect(System.String@)">
+            <summary>
+            Connect
+            </summary>
+            <param name="ans">device answer</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.OSU.DisConnect">
+            <summary>
+            DisConnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.OSU.Set_Switch(System.Int32)">
+            <summary>
+            Switch port
+            </summary>
+            <param name="channel">channel</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="T:Santec.PCU">
+            <summary>
+            PCU control class
+            </summary>
+        </member>
+        <member name="T:Santec.PCU.Range_Mode">
+            <summary>
+            enumation of range mode
+            </summary>
+        </member>
+        <member name="T:Santec.PCU.SOP_Stauts">
+            <summary>
+            enumation of SOP
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.LVP">
+            <summary>
+            Vertical polarization
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.LHP">
+            <summary>
+            Holizontal polarization
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.LP45">
+            <summary>
+            +45°polarization
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.RCP">
+            <summary>
+             Right handed rotation polarization
+             </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.LN45">
+            <summary>
+            -45°polarization
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.SOP_Stauts.LCP">
+            <summary>
+            Left handed rotaion polarization
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.spu">
+            <summary>
+            SPU
+            </summary>
+        </member>
+        <member name="F:Santec.PCU.defaultSOPBit">
+            <summary>
+            SOPBIT
+            偏波↔bit
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.DeviceName">
+            <summary>
+            Device number
+            </summary>
+        </member>
+        <member name="T:Santec.PCU.PCUInformation">
+            <summary>
+            SPU Information
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.PCUInformation.Band">
+            <summary>
+            Wavelength Band
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.PCUInformation.Correction_Parameter">
+            <summary>
+            correction parameter
+            </summary>
+        </member>
+        <member name="T:Santec.PCU.Correction">
+            <summary>
+            Correction parameter
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_A">
+            <summary>
+            Correction parameter A
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_B">
+            <summary>
+            Correction parameter B
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_C">
+            <summary>
+            Correction parameter C
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_D">
+            <summary>
+            Correction parameter D
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_G0">
+            <summary>
+            Correction parameter G0
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_H">
+            <summary>
+            Correction parameter H
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_Temp">
+            <summary>
+            Correction parameter Temp
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Correction.Factor_Wavelength">
+            <summary>
+            Correciton parameter wavelength
+            </summary>
+        </member>
+        <member name="P:Santec.PCU.Information">
+            <summary>
+             PCU　Information
+            </summary>
+        </member>
+        <member name="M:Santec.PCU.#ctor">
+            <summary>
+            constructor
+            </summary>
+        </member>
+        <member name="M:Santec.PCU.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            Connect
+            </summary>
+            <param name="method">Communication method</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.DisConnect">
+            <summary>
+            Disconnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Set_Range_Mode(Santec.PCU.Range_Mode)">
+            <summary>
+            setting for range mode
+            </summary>
+            <param name="range">Range mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Set_Power_Range(System.Int32)">
+            <summary>
+            Set power mode
+            </summary>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Power_Range(System.Int32@)">
+            <summary>
+            Get Range
+            </summary>
+            <param name="range">Range</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Range_Adjust">
+            <summary>
+            Range adjust
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.GetParameter(System.String,System.Double@)">
+            <summary>
+            get correction parameter
+            </summary>
+            <param name="para">parameter string</param>
+            <param name="value">value</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.GetParameter(System.String,System.Int32,System.Double[]@)">
+            <summary>
+            get parameter
+            </summary>
+            <param name="para">参数</param>
+            <param name="length">数量</param>
+            <param name="data">数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_A(System.Double[]@)">
+            <summary>
+            获取校准信息A
+            パラメータA取得
+            </summary>
+            <param name="data">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_B(System.Double[]@)">
+            <summary>
+            获取校准信息B
+            </summary>
+            <param name="data">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_C(System.Double[]@)">
+            <summary>
+            获取校准信息C
+            </summary>
+            <param name="data">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_D(System.Double[]@)">
+            <summary>
+            获取校准信息D
+            </summary>
+            <param name="data">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_G0(System.Double@)">
+            <summary>
+            获取校准信息G0
+            </summary>
+            <param name="value">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_H(System.Double[]@)">
+            <summary>
+            获取校准信息H
+            </summary>
+            <param name="data">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_Temp(System.Double@)">
+            <summary>
+            获取校准信息T0
+            </summary>
+            <param name="value">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Correction_Factor_Wavelength(System.Double@)">
+            <summary>
+            获取校准信息WC
+            </summary>
+            <param name="value">校准信息</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Set_SOP_Stauts(Santec.PCU.SOP_Stauts)">
+            <summary>
+            setting for SOP status
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Cal_SOP_Parameter(System.Double,Santec.PCU.SOP_Stauts,System.Double,System.Single[]@)">
+            <summary>
+            计算校准参数
+            補正値計算
+            </summary>
+            <param name="wavelength">波长</param>
+            <param name="status">偏振态</param>
+            <param name="t">温度係数</param>
+            <param name="result">校准数据</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Cal_All_SOP_Parametar(System.Double[],System.Single[0:,0:,0:]@)">
+            <summary>
+            Calculate for correction data
+            </summary>
+            <param name="wave">wavelength table</param>
+            <param name="result">result[waveindex,sopindex,sop position]</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.PCU.Cal_Each_SOP_Parametar(System.Double[],System.Single[0:,0:]@,System.Single[0:,0:]@,System.Single[0:,0:]@,System.Single[0:,0:]@)">
+             <summary>
+             Calculate for correction data
+             </summary>
+             <param name="wave">wavelength table</param>
+            <param name="LVP">LVP ErrorSOP</param>
+             <param name="LHP">LHP Error SOP</param> 
+             <param name="L45">L45 Error SOP</param>
+             <param name="RCP">RCP Error SOP</param>
+             <returns></returns>
+        </member>
+        <member name="M:Santec.PCU.GetRadian(System.Double)">
+            <summary>
+            Get Radian
+            </summary>
+            <param name="deg">Deg</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Inner_temp(System.Double@)">
+            <summary>
+            内部温度取得
+            </summary>
+            <param name="temp"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_Device_ID(System.String[]@)">
+            <summary>
+            Get device ID connected to PC
+            </summary>
+            <param name="id">device id array</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_IPAddress(System.String@)">
+            <summary>
+             get IP PCU IP Address
+            </summary>
+            <param name="address">IP Address</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.PCU.Get_LAN_Portnumber(System.Int32@)">
+            <summary>
+             Get Lan communication port number
+            </summary>
+            <param name="port">lan port</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="T:Santec.SPU">
+            <summary>
+            SPU Control Class
+            </summary>
+        </member>
+        <member name="F:Santec.SPU.locker">
+            <summary>
+            Locker
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.DAQmx">
+            <summary>
+            DAQmx
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.DeviceName">
+            <summary>
+            Device number
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.SamplingRate">
+            <summary>
+            サンプリングレート 100KHz
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.RisingThreshold">
+            <summary>
+            トリガ判定閾値
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.IsConnected">
+            <summary>
+            Connect flag
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.IsSampling">
+            <summary>
+            Sampling flag
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.Logging_Errorcode">
+            <summary>
+            Errorcode of during to logging 
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.AveragingTime">
+            <summary>
+            Averaging time(msec) for moving average
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.TargetTriggercount">
+            <summary>
+            内部パラメータ　トリガ判断用必要トリガ数
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.TargetTime">
+            <summary>
+            内部パラメータ　測定時間(sec)
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.MultiTask_Flag">
+            <summary>
+            内部パラメータ　マルチタスクフラグ　T:マルチタスク制御あり　F:なし
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.F_AdditonalTime">
+            <summary>
+            Additonal time of 1st sweep(sec)
+            </summary>
+        </member>
+        <member name="T:Santec.SPU.SPUInformation">
+            <summary>
+            SPU Information
+            </summary>
+        </member>
+        <member name="P:Santec.SPU.Information">
+            <summary>
+             SPU Information
+            </summary>
+        </member>
+        <member name="M:Santec.SPU.Connect(System.String@)">
+            <summary>
+            Connect
+            </summary>
+            <param name="ans">device answer</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.DisConnect">
+            <summary>
+            Disconnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.Set_Sampling_Parameter(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+             Set sampling parameter
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="stopwave">stopw wavelength(nm)</param>
+            <param name="speed">sweep speed(nm/sec)</param>
+            <param name="triggerstep">trigger step(nm)</param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.SPU.Set_Sampling_Time(System.Double)">
+            <summary>
+            Set sampling time(sec)
+            </summary>
+            <param name="time">time(sec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.SPU.Sampling_Start(System.Boolean)">
+            <summary>
+            Sampling start 
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.Waiting_for_sampling">
+            <summary>
+            Waiting for SPU sampling
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.SPU.Wait_dataAsync(System.Int32)">
+            <summary>
+            マルチタスク用　DAQデータモニター
+            </summary>
+            <param name="errorcode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.SPU.Sampling_Stop">
+            <summary>
+            Stop sampling
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="F:Santec.SPU._trigger">
+            <summary>
+            トリガデータ
+            </summary>
+        </member>
+        <member name="F:Santec.SPU._monitor">
+            <summary>
+            モニターデータ
+            </summary>
+        </member>
+        <member name="M:Santec.SPU.RescalingData">
+            <summary>
+            采样数据
+            取得したデータをリスケーリング用に処理
+            </summary>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.SearchTrigger(System.Double[])">
+            <summary>
+            トリガindex検索
+            </summary>
+            <param name="logTrigger">触发数据</param>
+            <returns>是否成功检索</returns>
+        </member>
+        <member name="M:Santec.SPU.MovingAveraging(System.Single[],System.Single[]@,System.Int32)">
+            <summary>
+            移動平均処理　窓移動
+            </summary>
+            <param name="source">original data array</param>
+            <param name="newArray">moving averag data</param>
+            <param name="count">moving averag count</param>
+            <returns>ErrorFlag</returns>
+        </member>
+        <member name="M:Santec.SPU.Get_Sampling_Data(System.Single[]@,System.Single[]@)">
+            <summary>
+            get sampling data
+            </summary>
+            <param name="trigger">trigger data</param>
+            <param name="monitor">monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.Get_Sampling_Rawdata(System.Single[]@,System.Single[]@)">
+            <summary>
+            get sampling rawdata
+            </summary>
+            <param name="trigger">trigger data</param>
+            <param name="monitor">monitor data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.SPU.Get_Device_ID(System.String[]@)">
+            <summary>
+            get device id  connecting to PC
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.SPU.Buffer_Clear">
+            <summary>
+            Buffer Clear
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="T:Santec.TSL">
+            <summary>
+            TSL Control Class
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Coh_Status">
+            <summary>
+            Enumerator of Coh control 
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Coh_Status.Coh_OFF">
+            <summary>
+            Coh Off
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Coh_Status.Coh_ON">
+            <summary>
+            Coh ON
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.LD_Status">
+            <summary>
+            Enumerator of LD status
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.LD_Status.LD_OFF">
+            <summary>
+            LD OFF
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.LD_Status.LD_ON">
+            <summary>
+            LD ON
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Shutter_Status">
+            <summary>
+             Enumerator of shutter status
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Shutter_Status.Shutter_Open">
+            <summary>
+            shutter Open
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Shutter_Status.Shutter_Close">
+            <summary>
+            shutter_Crose
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Wavelength_Unit">
+            <summary>
+            Enumerator of wavelength unit
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Wavelength_Unit.nm">
+            <summary>
+             unit nm
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Wavelength_Unit.THz">
+            <summary>
+            unit THz
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Power_Unit">
+            <summary>
+            Enumerator of power unit
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Power_Unit.dBm">
+            <summary>
+            Power unit dBm
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Power_Unit.mW">
+            <summary>
+            Power unit mW
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Power_Mode">
+            <summary>
+            Enumerator of power mode
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Power_Mode.ACC">
+            <summary>
+            Auto current control
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Power_Mode.APC">
+            <summary>
+            Auto Power control
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Sweep_Mode">
+            <summary>
+            Enumerator of sweep mode
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Mode.Step_Oneway">
+            <summary>
+            step sweep one way
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Mode.Continuous_Oneway">
+            <summary>
+            Continuous sweep one way
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Mode.Step_Twoway">
+            <summary>
+            Step sweep round trip
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Mode.Continuous_Twoway">
+            <summary>
+            Continuous sweep round trip
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Trigger_Output_Mode">
+            <summary>
+            Enumerator of Trigger output mode 
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Output_Mode.None">
+            <summary>
+            none
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Output_Mode.Stop">
+            <summary>
+            stop trigger
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Output_Mode.Start">
+            <summary>
+            start trigger
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Output_Mode.Step">
+            <summary>
+            step trigger
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Trigger_Input_Mode">
+            <summary>
+            Enumerator of trigge input mode
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Input_Mode.Disable">
+            <summary>
+            trigger input disable
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Trigger_Input_Mode.Enable">
+            <summary>
+            trigger input enable
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Sweep_Start_Mode">
+            <summary>
+            Enumerator of sweep start mode
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Start_Mode.Normal">
+            <summary>
+             Sweep start normal
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.Sweep_Start_Mode.WaitingforTrigger">
+            <summary>
+            Sweep start waiting for
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Sweep_Behavior">
+            <summary>
+            Enumerator of sweep behavior
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.Sweep_Status">
+            <summary>
+            Enumerator of sweep status
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.TriggerOut_Source">
+            <summary>
+            Enumerator of trigger Output source
+            This enumrateor supported for TSL-570
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.TriggerOut_Source.Wavelength">
+            <summary>
+            Wavelength const mode
+            </summary>
+        </member>
+        <member name="F:Santec.TSL.TriggerOut_Source.Time">
+            <summary>
+            Time const mode
+            </summary>
+        </member>
+        <member name="T:Santec.TSL.TSLInformation">
+            <summary>
+            TSL Informaiton Class
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimunWavelength">
+            <summary>
+            minimun wavelength(nm)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumWavelength">
+            <summary>
+            maximum wavelength(nm)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimunFrequency">
+            <summary>
+            minimum frequency(THz)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumFrequency">
+            <summary>
+            maximum frequency(THz)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimumAPCPower_dBm">
+            <summary>
+            minimum APC power(dBm)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumAPCPower_dBm">
+            <summary>
+            maximum APC power(dBm)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimumAPCPower_mW">
+            <summary>
+            minimum APC power(mW)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumAPCPower_mW">
+            <summary>
+            maximum APC power(mW)
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimumATTValue">
+            <summary>
+            minimum att value
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumATTValue">
+            <summary>
+            maximum att value
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MinimumSpeed">
+            <summary>
+            minimum sweep speed
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.MaximumSpeed">
+            <summary>
+            maximum sweep speed
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.TSLInformation.Type">
+            <summary>
+            Type of TSL
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.Information">
+            <summary>
+            TSL Information
+            </summary>
+        </member>
+        <member name="P:Santec.TSL.OPTFLG">
+            <summary>
+            OPTFLG
+            </summary>
+        </member>
+        <member name="M:Santec.TSL.#ctor">
+            <summary>
+            constructor
+            </summary>
+        </member>
+        <member name="M:Santec.TSL.Connect(Santec.Communication.CommunicationMethod)">
+            <summary>
+            TSL　Connect
+            </summary>
+            <param name="method">communication method</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.DisConnect">
+            <summary>
+            TSL Disconnect
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.TSL_Busy_Check(System.Int32)">
+            <summary>
+            checking busy status until wait time
+            </summary>
+            <param name="waittime">wait time (ms)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Busy_Status(System.Boolean@)">
+            <summary>
+            Get TSL busy status
+            </summary>
+            <param name="busyflag">T = busy/ F = standby</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Coh_Control_Status(Santec.TSL.Coh_Status)">
+            <summary>
+            Setting for Coh control status
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Coh_Control_Status(Santec.TSL.Coh_Status@)">
+            <summary>
+            Get Coh control status
+            </summary>
+            <param name="status">stauts</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_LD_Status(Santec.TSL.LD_Status)">
+            <summary>
+            Setting for LD Status
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_LD_Status(Santec.TSL.LD_Status@)">
+            <summary>
+            Get LD Status
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Shutter_Status(Santec.TSL.Shutter_Status)">
+            <summary>
+            Setting for shutter status
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Shutter_Status(Santec.TSL.Shutter_Status@)">
+            <summary>
+            Get shutter status
+            シャッター状態の取得
+            </summary>
+            <param name="status">status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Spec_Wavelength(System.Double@,System.Double@)">
+            <summary>
+            Get spec wavelength
+            </summary>
+            <param name="minwave">minimum wavelength(nm)</param>
+            <param name="maxwave">maximum wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Spec_Frequency(System.Double@,System.Double@)">
+            <summary>
+            Get spec frequency
+            </summary>
+            <param name="minfreq">minimum frequency(THz)</param>
+            <param name="maxfreq">maximum frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Wavelength_Unit(Santec.TSL.Wavelength_Unit)">
+            <summary>
+            Setting for wavelength unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Wavelength_Unit(Santec.TSL.Wavelength_Unit@)">
+            <summary>
+            Get wavelength unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Wavelength(System.Double)">
+            <summary>
+            Setting for wavelength 
+            </summary>
+            <param name="wav">wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Wavelength(System.Double@)">
+            <summary>
+            Get setting wavelength
+            </summary>
+            <param name="wav">wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Frequency(System.Double)">
+            <summary>
+            Setting  for frequency
+            </summary>
+            <param name="freq">ferquency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Frequency(System.Double@)">
+            <summary>
+            Get setting frequency
+            </summary>
+            <param name="freq">freqency</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Finetuning(System.Double)">
+            <summary>
+            setting for finetuning vale
+            </summary>
+            <param name="ftval">value</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Finetuning(System.Double@)">
+            <summary>
+            Get finetuning value
+            </summary>
+            <param name="ftval">value</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Power_Unit(Santec.TSL.Power_Unit)">
+            <summary>
+             Setting for Power unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Power_Unit(Santec.TSL.Power_Unit@)">
+            <summary>
+            Get power unit
+            </summary>
+            <param name="unit">unit</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_APC_Limit_Power_dBm(System.Double@,System.Double@)">
+            <summary>
+            Get APC Power limet (dBm)
+            </summary>
+            <param name="minpow">minimum power</param>
+            <param name="maxpow">maximum power</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_APC_Limit_Power_mW(System.Double@,System.Double@)">
+            <summary>
+             Get APC Power limit (mW)
+             </summary>
+             <param name="minpow">minimum power(mW)</param>
+             <param name="maxpow">maximum power(mW)</param>
+        </member>
+        <member name="M:Santec.TSL.Set_APC_Power_dBm(System.Double)">
+            <summary>
+            Setting for APC Power(dBm)
+            </summary>
+            <param name="pow">power(dBm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_APC_Power_mW(System.Double)">
+            <summary>
+             setting for APC power(mW)
+             </summary>
+             <param name="pow">power(mW)</param>
+            <returns> Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Setting_Power_dBm(System.Double@)">
+            <summary>
+            Read Setting Power(dBm)
+            </summary>
+            <param name="pow">read power(dBm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Setting_Power_mW(System.Double@)">
+            <summary>
+             Read Setting Power(mW)
+             </summary>
+             <param name="pow">read power(mw)</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Monitor_Power_dBm(System.Double@)">
+            <summary>
+            　get monitor power(dBm)
+            </summary>
+            <param name="power">power</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Monitor_Power_mW(System.Double@)">
+            <summary>
+             Get monirot power mW
+            </summary>
+            <param name="power">power</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Power_Mode(Santec.TSL.Power_Mode)">
+            <summary>
+            Setting for Power Mode
+            </summary>
+            <param name="mode">power mode</param>
+            <returns>ErrorCord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Power_Mode(Santec.TSL.Power_Mode@)">
+            <summary>
+            Get Power mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_ATT_Value(System.Double)">
+            <summary>
+            Setting for ATT
+            </summary>
+            <param name="att">attenuation</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_ATT_Value(System.Double@)">
+            <summary>
+            Get ATT 
+            </summary>
+            <param name="att">attenuation</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Wavelength(System.Double,System.Double)">
+            <summary>
+            Setting for Sweep wavelength range
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="endwave">stop wavelength(nm)</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Start_Wavelength(System.Double)">
+            <summary>
+            Setting for Sweep start wavelength
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Stop_Wavelength(System.Double)">
+            <summary>
+            Setting for Sweep stop wavelength
+            </summary>
+            <param name="endwave">stopwavelength</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Wavelength(System.Double@,System.Double@)">
+            <summary>
+            Get Sweep wavelength range
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <param name="endwave">stop wavelenght(nm)</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Start_Wavelength(System.Double@)">
+            <summary>
+            Get Sweep start wavelength
+            </summary>
+            <param name="startwave">start wavelength(nm)</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Stop_Wavelength(System.Double@)">
+            <summary>
+            Get Sweep stop wavelength
+            </summary>
+            <param name="endwave">stop wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Frequency(System.Double,System.Double)">
+            <summary>
+            Setting for Sweep frequency range
+            </summary>
+            <param name="startfreq">start frequency(THz)</param>
+            <param name="endfreq">stop frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Start_Frequency(System.Double)">
+            <summary>
+            Setting for Sweep start frequency
+            </summary>
+            <param name="startfreq">start frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Stop_Frequency(System.Double)">
+            <summary>
+            Setting for sweep stop frequency
+            </summary>
+            <param name="endfreq">stop frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Frequency(System.Double@,System.Double@)">
+            <summary>
+            Get Sweep frequency range
+            </summary>
+            <param name="startfreq">start frequency(THz)</param>
+            <param name="endfreq">stop frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Start_Frequency(System.Double@)">
+            <summary>
+            Get sweep start frequency
+            </summary>
+            <param name="startfreq">start frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Stop_Frequency(System.Double@)">
+            <summary>
+            Get sweep stop frequency
+            </summary>
+            <param name="endfreq">stop frequency(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Delay(System.Double)">
+            <summary>
+            Setting for sweep delay time
+            </summary>
+            <param name="delay">delay(sec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Delay(System.Double@)">
+            <summary>
+            Get sweep delay time
+            </summary>
+            <param name="delay">delay(sec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Cycle(System.Int32)">
+            <summary>
+            Setting for number of sweep times
+            </summary>
+            <param name="times">number of sweep times</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Cycle(System.Int32@)">
+            <summary>
+            Get number of sweep times
+            </summary>
+            <param name="times">number of sweep times</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Count(System.Int32@)">
+            <summary>
+            get actual sweep count
+            </summary>
+            <param name="count">sweep count</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Speed(System.Double)">
+            <summary>
+            Setting for sweep speed
+            </summary>
+            <param name="speed">speed nm/s</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Speed(System.Double@)">
+            <summary>
+            Get sweep speed
+            </summary>
+            <param name="speed">speed nm/s</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Wavelength_Step(System.Double)">
+            <summary>
+            Setting for wavelength step of step sweep
+            </summary>
+            <param name="wavestep">step wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Wavelength_Step(System.Double@)">
+            <summary>
+            Get wavelength step of step sweep
+            </summary>
+            <param name="wavestep">step wavelength(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Frequency_Step(System.Double)">
+            <summary>
+            Set frequency step of step sweep
+            </summary>
+            <param name="freqstep">frequency step(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Frequency_Step(System.Double@)">
+            <summary>
+            Get frequency step of step sweep
+            </summary>
+            <param name=" freqstep">freequency step(THz)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Mode(Santec.TSL.Sweep_Mode)">
+            <summary>
+            Setting for sweep mode 
+            </summary>
+            <param name="smode">sweep mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Mode(Santec.TSL.Sweep_Mode@)">
+            <summary>
+            get sweep mode
+            </summary>
+            <param name="smod">sweep mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Trigger_Output_Mode(Santec.TSL.Trigger_Output_Mode)">
+            <summary>
+            Setting for trigger output mode
+            </summary>
+            <param name="mode">trigger input mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExcepctionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Input_Trigger_Mode(Santec.TSL.Trigger_Input_Mode)">
+            <summary>
+            Setting for trgger input Eable/Disable
+            </summary>
+            <param name="mode">mode = enable/disable</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Input_Trigger_Mode(Santec.TSL.Trigger_Input_Mode@)">
+            <summary>
+            get trigger input Eable/Disable
+            </summary>
+            <param name="mode">mode = enable/disable</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Start_Mode(Santec.TSL.Sweep_Start_Mode)">
+            <summary>
+            Setting for sweep start mode 
+            </summary>
+            <param name="mode">mode = normal/waiting for trigger</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Start_Mode(Santec.TSL.Sweep_Start_Mode@)">
+            <summary>
+            get sweep start mode
+            </summary>
+            <param name="mode">mode = normal/waiting for trigger</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Trigger_Output_Mode(Santec.TSL.Trigger_Output_Mode@)">
+            <summary>
+            get trigger output mode
+            </summary>
+            <param name="mode">mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Mode_Parameters(Santec.TSL.Sweep_Mode,Santec.TSL.Trigger_Output_Mode,Santec.TSL.Trigger_Input_Mode,Santec.TSL.Sweep_Start_Mode)">
+            <summary>
+            Setting for sweep parameters
+            </summary>
+            <param name="smode">sweep mode</param>
+            <param name="toutmode">trigger output mode</param>
+            <param name="tinmode">trigger input mode</param>
+            <param name="startmode">start mode</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Trigger_Step(System.Double)">
+            <summary>
+            Setting for trigger step
+            </summary>
+            <param name="triggerstep">trigger step(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Trigger_Step(System.Double@)">
+            <summary>
+            get trigger step
+            </summary>
+            <param name="triggerstep">triggre step(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Behavior(Santec.TSL.Sweep_Behavior)">
+            <summary>
+            Setting for Sweep Behavior
+            </summary>
+            <param name="behavior">扫描动作</param>
+            <returns>异常代码<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Sweep_Start">
+            <summary>
+            Sweep start
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Sweep_Stop">
+            <summary>
+            Sweep stop
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Sweep_Pause">
+            <summary>
+            Sweep pause
+            This function support for TSL550 And TSL710
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Sweep_Restart">
+            <summary>
+            sweep restart
+            This function support for TSL550 And TSL710
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see>/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Status(Santec.TSL.Sweep_Status@)">
+            <summary>
+            get sweep status 
+            </summary>
+            <param name="status">sweep status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Waiting_For_Sweep_Status(System.Int32,Santec.TSL.Sweep_Status)">
+            <summary>
+            wait until the specified sweep status
+            </summary>
+            <param name="waitTime">wait time(msec)</param>
+            <param name="status">sweep status</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Software_Trigger">
+            <summary>
+            Issuing software trigger
+            </summary>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Logging_Data(System.Int32@,System.Double[]@)">
+            <summary>
+            Get wavelength logging data
+            </summary>
+            <param name="datapoint">number of data points</param>
+            <param name="data">logg data</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Change_Comm_Mode(System.Boolean)">
+            <summary>
+            Chang Command mode
+            </summary>
+            <param name=" f_550scpi">コマンド体系</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode">ExceptionCode</see></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Command_Mode(System.Boolean@)">
+            <summary>
+            コマンド体系の取得
+            </summary>
+            <param name="f_550scpi">コマンド体系</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="T:Santec.TSL.memory_size">
+            <summary>
+            メモリ読み出し/書き込み用列挙体
+            </summary>
+        </member>
+        <member name="M:Santec.TSL.Memory_Read(Santec.TSL.memory_size,System.String,System.String@)">
+            <summary>
+            メモリ読み出し
+            </summary>
+            <param name="size"></param>
+            <param name="address"></param>
+            <param name="ans"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Memory_Write(Santec.TSL.memory_size,System.String,System.String)">
+            <summary>
+            memory write
+            </summary>
+            <param name="size"></param>
+            <param name="address"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_System_Error(System.String@)">
+            <summary>
+            Get system Error
+            </summary>
+            <param name="error">error string</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Cal_MinimumTriggerStep_from_SweepSpeed(System.Double,System.Double@,System.Boolean)">
+            <summary>
+             Calucrate Minimum trigger step from sweep speed
+            </summary>
+            <param name="speed">speed(nm/sec)</param>
+            <param name="triggerstep">trigger step(nm)</param>
+            <param name="wave_const_flag">trigger output mode wavelength const mode flag</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Speed_table(System.Double[]@)">
+            <summary>
+            Get Sweep speed table without 550/710 
+            </summary>
+            <param name="table">speed tabel</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Sweep_Speed_Limit(System.Double@,System.Double@)">
+            <summary>
+            Get Sweep speed limit
+            </summary>
+            <param name="minspeed">minimum speed(nm/sec)</param>
+            <param name="maxspeed">maximum speed(nm/sec)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Sweep_Parameter_for_STS(System.Double,System.Double,System.Double,System.Double,System.Double@)">
+            <summary>
+            Set sweep parameter for STS 
+            This method supported to STS
+            </summary>
+            <param name="startwave">Start wavelength(nm)</param>
+            <param name="stopwave">Stop wavelength(nm)</param>
+            <param name="speed">Sweep Speed(nm/sec)</param>
+            <param name="rescalingstep">rescaling wavelength step(nm)</param>
+            <param name="acctualstep">acctual trigger step(nm)</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_InputTrigger_HiActive">
+            <summary>
+              570用関数　トリガの入力論理をHiActriveに設定
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_OutputTrigger_HiActive">
+            <summary>
+            570　用関数　トリガ出力論理をHiActiveに設定
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Trigger_PassThrough_Disable">
+            <summary>
+            Set Trigger PassThrough Disable
+            This method supported only TSL-570
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_Trigger_PassThrough_Enable">
+            <summary>
+            Set Trigger PassThrough Enable
+            This method supported only TSL-570
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Santec.TSL.Set_TriggerOutput_Source(Santec.TSL.TriggerOut_Source)">
+            <summary>
+            Set Trigger Output Source
+            This method supported only TSL-570
+            </summary>
+            <param name="mode">trigger output source</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_TriggerOutput_Source(Santec.TSL.TriggerOut_Source@)">
+            <summary>
+            Get Trigger Output Source
+            This method supported only TSL-570
+            </summary>
+            <param name="mode">trigger output source</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_IPAddress(System.String@)">
+            <summary>
+            get IP address
+            </summary>
+            <param name="address">IP address</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_LAN_Portnumber(System.Int32@)">
+            <summary>
+            get portnumber of LAN communcation
+            </summary>
+            <param name="portnum">port number</param>
+            <returns>Errorcord<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_Type(System.String@)">
+            <summary>
+            get type name of TSL
+            </summary>
+            <param name="type">type name</param>
+            <returns>Errorcode<see cref="T:Santec.ExceptionCode"/></returns>
+        </member>
+        <member name="M:Santec.TSL.Get_APC_Limit_for_Sweep(System.Double,System.Double,System.Single@)">
+            <summary>
+            Get APC Power Limit for Sweep span
+            </summary>
+            <param name="minwave">minwave(nm)</param>
+            <param name="maxwave">maxwave(nm)</param>
+            <param name="maxpower">maxpow(dBm)</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
