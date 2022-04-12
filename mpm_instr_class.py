@@ -7,6 +7,7 @@ Created on Thu Mar 17 19:48:11 2022
 
 import os
 import clr                                          # python for .net
+import time
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
@@ -279,9 +280,9 @@ class MpmDevice:
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
     
-    def logging_stop(self,errorcode = 0):
-        self._mpm.Logging_Stop()
-        if errorcode != 0:
+    def logging_stop(self, except_if_error = True):
+        errorcode = self._mpm.Logging_Stop()
+        if errorcode != 0 and except_if_error is True:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         
 
@@ -324,3 +325,35 @@ class MpmDevice:
 
     def disconnect(self):
         self._mpm.DisConnect()
+
+    def wait_log_completion(self):
+
+        #Check MPM Loging stopped
+        timeA = time.perf_counter()
+        status = 0                    #MPM Logging status  0: During logging 1: Completed, -1:stoped
+        logging_point = 0
+
+        while status == 0:
+            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0)
+            if(errorcode !=0):
+                break
+
+            #if more than 2sec have passed for sweep time
+            elaspand_time = time.perf_counter() -timeA
+            if (elaspand_time > 2000):
+                errorcode = -999
+                break
+        
+        if (status != 0):
+            raise RuntimeError("MPM status is " + status + ". Timeout error occurred")
+
+           #Logging stop
+        if (errorcode == -999):
+            errorstr = "MPM Trigger received an error! Please check trigger cable connection."
+            raise RuntimeError(errorstr)
+
+        if (errorcode != 0):
+            errorstr = func_return_InstrumentErrorStr(errorcode)
+            raise RuntimeError(errorstr)
+
+        return None

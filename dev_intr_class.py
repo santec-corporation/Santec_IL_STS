@@ -98,7 +98,8 @@ class SpuDevice:
     
     def sampling_start(self):
         errorcode = self._spu.Sampling_Start()
-        return errorcode
+        if (errorcode !=0):
+            raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         
     def disconnect(self):
         self._spu.DisConnect()

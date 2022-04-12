@@ -8,6 +8,7 @@ Created on Fri Jan 21 17:21:13 2022
 import os
 import clr
 import re
+import time
 from dev_intr_class import SpuDevice
 from mpm_instr_class import MpmDevice
 from tsl_instr_class import TslDevice                                          # python for .net
@@ -282,7 +283,7 @@ class StsProcess:
                 raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
             #Sweep handling
-            errorstr = func_STS_SweepProcess()
+            errorstr = self.sts_sweep_process()
             if (errorstr != ""):
                 return errorstr
 
@@ -358,78 +359,27 @@ class StsProcess:
 
     # STS Sweep Process
     def sts_sweep_process(self):
-        errorstr =""
         #MPM Logging Start
-        errorcode =self._mpm.logging_start()
+        self._mpm.logging_start() #if this errors, an exception is thrown
 
-        # Waiting for TSL sweep status to "Trigger Standby"
-        errorcode = self._tsl.wait_for_sweep_status()
-
-        #errorhandling  TSL error -> MPM Logging stop
-        if (errorcode != 0):
-            self._mpm.logging_stop(errorcode)
-
-        #SPU sampling start
-        errorcode = self._spu.sampling_start()
-        if(errorcode !=0):
-            self._tsl.stop_sweep()
-            self._mpm.logging_stop(errorcode)
-
-        #TSL issue software trigger
-        errorcode = _TSL.Set_Software_Trigger()
-        if (errorcode !=0):
-            _MPM.Logging_Stop()
-            _TSL.Sweep_Stop()
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
-
-        #SPU Waiting for sampling(waiting for during sweep time)
-        errorcode = _SPU.Waiting_for_sampling()
-        if (errorcode !=0):
-            _MPM.Logging_Stop()
-            _TSL.Sweep_Stop()
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
-
-        #Check MPM Loging stopped
-        timeA = time.perf_counter()
-        status = 0                    #MPM Logging status  0: During logging 1: Completed, -1:stoped
-        logging_point = 0
-
-        while status == 0:
-            errorcode,status,logging_point = _MPM.Get_Logging_Status(0,0)
-            if(errorcode !=0):
-                break
-
-            #if more than 2sec have passed for sweep time
-            elaspand_time = time.perf_counter() -timeA
-            if (elaspand_time > 2000):
-                    errorcode = -999
-                    break
-        #Logging stop
-        _MPM.Logging_Stop()
-
-        if (errorcode == -999):
-            errorstr = "MPM Trigger receive error! Please check trigger cable connection."
-            return errorstr
-
-        if (errorcode != 0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
-
-         # Waiting for TSL sweep status to "Standby"
-        errorcode = _TSL.Waiting_For_Sweep_Status(5000,TSL.Sweep_Status.Standby)
-        if (errorcode !=0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
+        try:
+            self._tsl.wait_for_sweep_status(waiting_time= 2000,sweep_status=4) #WaitingforTrigger
+            self._spu.sampling_start()
+            self._tsl.soft_trigger()
+            self._mpm.wait_log_completion()  #TODO make sure this throws a RuntimeError
+            self._mpm.logging_stop(True)
+        except RuntimeError as scan_exception:
+            self._tsl.stop_sweep(False)
+            self._mpm.logging_stop(False)
+            raise scan_exception
+        except Exception as tsl_exception:
+            self._mpm.logging_stop(False)
+            raise tsl_exception
+        self._tsl.wait_for_sweep_status(waiting_time=5000, sweep_status=1) #Standby 
 
         #TSL Wavelength set to use Sweep Start Command for next sweep
-        errorcode = _TSL.Sweep_Start()
-        if (errorcode !=0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
-
-        return errorstr
+        self._tsl.start_sweep()
+        return None
 
     # get logging data & add STSProcess Class for Reference
     def func_STS_GetReferenceData(item):

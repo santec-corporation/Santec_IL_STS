@@ -357,6 +357,10 @@ class TslDevice:
         self.tsl_busy_check()
         #return self.actual_step we dont need to return this because it ssaved in the actual_step car
         return None
+    def soft_trigger(self):
+        errorcode = self._tsl.Set_Software_Trigger()
+        if errorcode !=0:
+            raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
 
     #!!!create method to run the sweep
     def start_sweep(self):
@@ -369,9 +373,15 @@ class TslDevice:
         None.
 
         '''
-        self._tsl.Sweep_Start()
-    def stop_sweep(self):
-        self._tsl.Sweep_Stop()
+        errorcode = self._tsl.Sweep_Start()
+        if errorcode !=0 :
+            raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+
+    def stop_sweep(self, except_if_error = True):
+        errorcode = self._tsl.Sweep_Stop()
+        if errorcode !=0 and except_if_error is True:
+            raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+
 
     def tsl_busy_check(self) :
         '''
@@ -391,12 +401,18 @@ class TslDevice:
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-    def wait_for_sweep_status(self):
-        errorcode = self._tsl.Waiting_For_Sweep_Status(2000,self._tsl.Sweep_Status.WaitingforTrigger)
-        return errorcode
-
-
-
+    def wait_for_sweep_status(self, waiting_time: int, sweep_status: int):
+        _status ={
+            1:self._tsl.Sweep_Status.Standby,
+            2:self._tsl.Sweep_Status.Running,
+            3:self._tsl.Sweep_Status.Pausing,
+            4:self._tsl.Sweep_Status.WaitingforTrigger,
+            5:self._tsl.Sweep_Status.Returning
+            }
+        errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time,_status[sweep_status])
+        if errorcode !=0:
+            raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+        return None
 
     def disconnect(self):
         self._tsl.DisConnect()

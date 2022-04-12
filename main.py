@@ -81,7 +81,7 @@ if opm_address != None:
     ilsts = sts.StsProcess()
 
     selected_channels = ilsts.channel_select(opm)
-    selected_ranges = ilsts.selected_ranges(opm)
+    selected_ranges = ilsts.range_select(opm)
     ilsts.set_data_struct(selected_channels,selected_ranges)
     
     #The sts datastruct is then initialized in the sts_process.py file
