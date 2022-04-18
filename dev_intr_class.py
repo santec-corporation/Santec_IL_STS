@@ -100,6 +100,12 @@ class SpuDevice:
         errorcode = self._spu.Sampling_Start()
         if (errorcode !=0):
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
+    
+    def get_sampling_raw(self):
+        errorcode,trigger,monitor = self._spu.Get_Sampling_Rawdata(None,None)
+        if (errorcode !=0):
+            raise Exception (str(errorcode) + ": " + inst_err_str(errorcode))
+        return trigger, monitor
         
     def disconnect(self):
         self._spu.DisConnect()

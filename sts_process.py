@@ -4,11 +4,12 @@ Created on Fri Jan 21 17:21:13 2022
 
 @author: chentir
 """
-
+from array import array
 import os
 import clr
 import re
 import time
+import csv
 from dev_intr_class import SpuDevice
 from mpm_instr_class import MpmDevice
 from tsl_instr_class import TslDevice                                          # python for .net
@@ -215,9 +216,7 @@ class StsProcess:
 
     # Config each STSDatastruct from ch data And ranges
     def set_data_struct(self,selected_chans,selected_ranges):
-
         counter =1
-
         #List data clear
         self.dut_monitor = []   #Lst_MeasMonitor_st.clear()
         self.dut_data = []      #Lst_Measdata_st.clear()
@@ -288,74 +287,53 @@ class StsProcess:
                 return errorstr
 
             #get sampling data & Add in STSProcess Class
-            errorstr = func_STS_GetReferenceData(i)
-            if (errorstr != ""):
-                  return errorstr
+            errorstr = self.get_reference_data(i)
 
             # rescaling for reference data
-            errorcode = _ILSTS.Cal_RefData_Rescaling()
-            if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorstr
+            errorcode = self._ilsts.Cal_RefData_Rescaling()
+            if errorcode !=0:
+                raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
             #TSL Sweep stop
-            errorcode = _TSL.Sweep_Stop()
-            if (errorcode !=0):
-                errorstr = func_return_InstrumentErrorStr(errorcode)
-                return errorstr
-
-        return errorstr
+            self._tsl.stop_sweep()
+        return None
 
     #STS Measurement handling
-    def func_STS_Measurement():
+    def sts_measurement(self):
         errorstr = ""
 
         #TSL Sweep Start
-        errorcode = _TSL.Sweep_Start()
-        if (errorcode != 0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
+        self._tsl.start_sweep()
+
 
         #Range loop
         sweepcount = 1
-        for mpmrange in Lst_Range:
+        for mpmrange in self.range:
             #set MPM Range
-            errorstr = func_MPM_SetRange(mpmrange)
-            if (errorstr != ""):
-                return errorstr
+            errorstr = self._mpm.set_range(mpmrange)
 
             #sweep handling
-            errorstr = func_STS_SweepProcess()
-            if (errorstr != ""):
-                return errorstr
+            errorstr = self.sts_sweep_process()
 
             #Get Reference data
-            errorstr = func_STS_GetMeasurementData(sweepcount)
-            if (errorstr !=""):
-                return errorstr
+            errorstr = self.sts_get_meas_data(sweepcount)
+
             sweepcount += 1
 
         # rescaling
-        errorcode = _ILSTS.Cal_MeasData_Rescaling()
+        errorcode = self._ilsts.Cal_MeasData_Rescaling()
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         # range data merge
-        errorcode = _ILSTS.Cal_IL_Merge(Module_Type.MPM_211)
+        errorcode = self._ilsts.Cal_IL_Merge(Module_Type.MPM_211)
         if (errorcode != 0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         #TSL stop
-        errorcode = _TSL.Sweep_Stop()
-        if (errorcode !=0):
-            errorstr  = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
+        self._tsl.stop_sweep()
 
-
-        return errorstr
-
+        return None
 
     # STS Sweep Process
     def sts_sweep_process(self):
@@ -366,7 +344,7 @@ class StsProcess:
             self._tsl.wait_for_sweep_status(waiting_time= 2000,sweep_status=4) #WaitingforTrigger
             self._spu.sampling_start()
             self._tsl.soft_trigger()
-            self._mpm.wait_log_completion()  #TODO make sure this throws a RuntimeError
+            self._mpm.wait_log_completion()  #DONE but need to be checked
             self._mpm.logging_stop(True)
         except RuntimeError as scan_exception:
             self._tsl.stop_sweep(False)
@@ -382,180 +360,90 @@ class StsProcess:
         return None
 
     # get logging data & add STSProcess Class for Reference
-    def func_STS_GetReferenceData(item):
+    def get_reference_data(self, item):
         errorstr = ""
 
         # for item in Lst_Refdata_st:
         #Get MPM logging data
-        slotnumber =item.SlotNumber
-        ch = item.ChannelNumber
-        errorcode,logdata = _MPM.Get_Each_Channel_Logdata(slotnumber,ch,None)
-
-        if (errorcode !=0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
+        logdata = self._mpm.get_each_chan_logdata(item.SlotNumber, item.ChannelNumber)
 
         #Add MPM Logging data for STS Process Class
-        ary_loggdata = array('f',logdata)                       #List to Array
-        errorcode = _ILSTS.Add_Ref_MPMData_CH(ary_loggdata,item)
+        logdata = array('f',logdata)                       #List to Array
+        errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,item)
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         #Get SPU sampling data
-        errorcode,trigger,monitor = _SPU.Get_Sampling_Rawdata(None,None)
-        if (errorcode !=0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
+        trigger,monitor = self._spu.get_sampling_raw()
 
         #Add Monitor data for STS Process Class
-        errorcode = _ILSTS.Add_Ref_MonitorData(trigger,monitor,Lst_RefMonitor_st[0])
+        errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,self.ref_monitor[0])
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
-
-        return errorstr
-
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
     # get logging data & add STSProcess class for Measuerment
-    def func_STS_GetMeasurementData(sweepcount):
-        errorstr = ""
+    def sts_get_meas_data(self,sweepcount):
 
-        for item in Lst_Measdata_st:
+        for item in self.dut_data:
             if (item.SweepCount != sweepcount):
                 continue
-            slotnumber = item.SlotNumber
-            ch = item.ChannelNumber
 
             #Get MPM loggin data
-            errorcode,loggdata = _MPM.Get_Each_Channel_Logdata(slotnumber,ch,None)
-            if (errorcode !=0):
-                errorstr = func_return_InstrumentErrorStr(errorcode)
-                return errorstr
-            aryloggdata = array("f",loggdata)                           #List to Array
+            logdata = self._mpm.get_each_chan_logdata(item.SlotNumber,item.ChannelNumber)
+            logdata = array("f",logdata)                           #List to Array
 
             #Add MPM Logging data for STSPrcess Class with STSDatastruct
-            errorcode = _ILSTS.Add_Meas_MPMData_CH(aryloggdata,item)
+            errorcode = self._ilsts.Add_Meas_MPMData_CH(logdata,item)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorstr
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         # Get monitor data
-        errorcode,trigger,monitor = _SPU.Get_Sampling_Rawdata(None,None)
+        trigger,monitor = self._spu.get_sampling_raw()
 
-        if (errorcode !=0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            return errorstr
-
-        arytrigger = array("f",trigger)                             #List to Array
-        arymonitor = array("f",monitor)                             #list to Array
+        trigger = array("f",trigger)                             #List to Array
+        monitor = array("f",monitor)                             #list to Array
 
         #search place of add in
-        for item in Lst_MeasMonitor_st:
+        for item in self.dut_monitor:
             if (item.SweepCount != sweepcount):
                 continue
             #Add Monirot data for STSProcess Class  with STSDataStruct
-            errorcode = _ILSTS.Add_Meas_MonitorData(arytrigger,arymonitor,item)
+            errorcode = self._ilsts.Add_Meas_MonitorData(trigger,monitor,item)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errrorcode)
-                return errorstr
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-        return errorstr
-
-    # Config each STSDatastruct from ch data And ranges
-    def func_STS_SetDataStruct(usech,useranges):
-
-        counter =1
-
-        #List data clear
-        Lst_MeasMonitor_st.clear()
-        Lst_Measdata_st.clear()
-        Lst_Merge_st.clear()
-        Lst_RefMonitor_st.clear()
-        Lst_Refdata_st.clear()
-        Lst_Range.clear()
-
-        # config STSDatastruct for each measurment
-        for m_range in useranges:
-            for ch in usech:
-                datast = STSDataStruct()
-                slotnum = int(str(ch[4]))   #slotnumber
-                chnumber =int(str(ch[7]))   #ch number
-
-                datast.MPMNumber = 0
-                datast.SlotNumber = slotnum
-                datast.ChannelNumber = chnumber
-                datast.RangeNumber = m_range
-                datast.SweepCount = counter
-                datast.SOP = 0
-                Lst_Measdata_st.append(datast)
-
-                rangeindex =  useranges.index(m_range)
-                chindex = usech.index(ch)
-
-                #measurement monitor data need only 1ch for each range.
-                if(chindex == 0):
-                    Lst_MeasMonitor_st.append(datast)
-                    Lst_Range.append(m_range)
-
-                # reference data need only 1 range for each ch
-                if (rangeindex ==0 ):
-                    Lst_Refdata_st.append(datast)
-                # reference monitor data need only 1 data
-                if (chindex ==0) and (rangeindex == 0):
-                    Lst_RefMonitor_st.append(datast)
-
-            counter +=1
-
-         #config STSDataStruct for merge
-        for ch in usech:
-             mergest = STSDataStructForMerge()
-             slotnum = int(str(ch[4]))   #slotnumber
-             chnumber =int(str(ch[7]))   #ch number
-
-             mergest.MPMnumber = 0
-             mergest.SlotNumber = slotnum
-             mergest.ChannelNumber = chnumber
-             mergest.SOP = 0
-
-             Lst_Merge_st.append(mergest)
-
+        return None
 
     # Save Reference raw data
-    def func_STS_Save_Referance_Rawdata(filepath):
-
-        errorstr = ""
-
+    def sts_save_ref_rawdata(self,filepath):
         #wavelength data
-        errorcode,wavetable = _ILSTS.Get_Target_Wavelength_Table(None)
+        errorcode,wavetable = self._ilsts.Get_Target_Wavelength_Table(None)
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         lstpow = []
         #Pull out reference raw data of aftar rescaling
-        for item in Lst_Refdata_st:
-            errorcode,power,monitor = _ILSTS.Get_Ref_RawData(item,None,None)
+        for item in self.ref_data:
+            errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(item,None,None)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorcode
-            arypow = array("f",power)     #List to Array
-            lstpow.append(arypow)
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+            ref_pwr = array("f",ref_pwr)     #List to Array
+            ref_mon = array("f",ref_mon)
+            lstpow.append(ref_pwr)
 
         #File open and write data  for .csv
         with open(filepath,"w",newline="")as f:
             writer = csv.writer(f)
-            hedder = ["Wavelength(nm)"]
+            header = ["Wavelength(nm)"]
 
             #for hedder
-            for item in Lst_Refdata_st:
-                slotnum = item.SlotNumber
-                chnum = item.ChannelNumber
-                hedder_str  = "Slot" +str(slotnum) +"Ch" +str(chnum)
-                hedder.append(hedder_str)
-            hedder_str = "Monitor"
-            hedder.append(hedder_str)
-            writer.writerow(hedder)
+            for item in self.ref_data:
+                header_str  = "Slot" +str(item.SlotNumber) +"Ch" +str(item.ChannelNumber)
+                header.append(header_str)
+            header_str = "Monitor"
+            header.append(header_str)
+            writer.writerow(header)
 
             writest = []
             #for data
@@ -566,7 +454,7 @@ class StsProcess:
                     data = item[counter]
                     writest.append(data)
 
-                data = monitor[counter]
+                data = ref_mon[counter]
                 writest.append(data)
                 writer.writerow(writest)
                 writest.clear()
@@ -574,21 +462,20 @@ class StsProcess:
 
             f.close()
 
-        return errorstr
+        return None
 
     #Save measurement Rawdata for specific range
-    def func_STS_Save_Rawdata(fpath,mpmrange):
+    def sts_save_rawdata(self,fpath,mpmrange):
         errorstr = ""
 
         #wavelength table
-        errorcode,wavetable = _ILSTS.Get_Target_Wavelength_Table(None)
+        errorcode,wavetable = self._ilsts.Get_Target_Wavelength_Table(None)
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         lstpow = []
         #data
-        for item in Lst_Measdata_st:
+        for item in self.dut_data:
             print(item)
             if (item.RangeNumber != mpmrange):
                 print('hey')
@@ -596,30 +483,30 @@ class StsProcess:
                 input()
                 continue
             #Pull out measurement raw data of aftar rescaling
-            errorcode,power,monitor = _ILSTS.Get_Meas_RawData(item,None,None)
+            errorcode,dut_pwr,dut_mon = self._ilsts.Get_Meas_RawData(item,None,None)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorstr
-            arypow = array("f",power)         #List to Array
-            arymoni = array("f",monitor)      #List to Array
-            lstpow.append(arypow)
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+            dut_pwr = array("f",dut_pwr)      #List to Array
+            dut_mon = array("f",dut_mon)      #List to Array
+            lstpow.append(dut_pwr)
 
         #for hedder
-        hedder = ["Wavelength(nm)"]
+        header = ["Wavelength(nm)"]
 
-        for item in Lst_Measdata_st:
+        for item in self.dut_data:
             if (item.RangeNumber != mpmrange):
                 continue
-            hedder_str = "Slot" + str(item.SlotNumber) + "Ch" + str(item.ChannelNumber)
-            hedder.append(hedder_str)
+            header_str = "Slot" + str(item.SlotNumber) + "Ch" + str(item.ChannelNumber)
+            header.append(header_str)
 
-        hedder_str = "Monitor"
-        hedder.append(hedder_str)
+        header_str = "Monitor"
+        header.append(header_str)
 
         #Open file and write data for .csv
         with open(fpath,"w",newline = "") as f:
             writer = csv.writer(f)
-            writer.writerow(hedder)
+            writer.writerow(header)
 
             #for data
             write_st =[]
@@ -631,7 +518,7 @@ class StsProcess:
                     data = item[counter]
                     write_st.append(data)
                 #monitor data
-                data = arymoni[counter]
+                data = dut_mon[counter]
                 write_st.append(data)
                 writer.writerow(write_st)
                 write_st.clear()
@@ -641,48 +528,44 @@ class StsProcess:
         return errorstr
 
     # save measunrement data
-    def func_STS_Save_Measurement_data(filepath):
+    def sts_save_meas_data(self,filepath):
         wavelengthtable =[]
-        ILdata = []
-        LstILdata = []
-
-        errorstr = ""
+        self.il_data= []
+        il_data_array = []
 
         #Get rescaling wavelength table
-        errorcode,wavelengthtable = _ILSTS.Get_Target_Wavelength_Table(None)
+        errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(None)
         if (errorcode !=0):
-            errorstr = func_return_STSProcessErrorStr(errorcode)
-            return errorstr
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-        for item in Lst_Merge_st:
+        for item in self.merge_data:
             #Pull out IL data of aftar merge
-            errocode,ILdata = _ILSTS.Get_IL_Merge_Data(None,item)
+            errorcode,self.il_data = self._ilsts.Get_IL_Merge_Data(None,item)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorstr
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-            aryIL = array("f",ILdata)               #List to Array
-            LstILdata.append(aryIL)
+            self.il_data = array("f",self.il_data)               #List to Array
+            il_data_array.append(self.il_data)
 
 
         #Open file And write data for .csv
         with open(filepath,"w",newline ="") as f:
             writer = csv.writer(f)
 
-            hedder =["Wavelength(nm)"]
+            header =["Wavelength(nm)"]
             writestr =[]
 
             #hedder
-            for item in Lst_Merge_st:
+            for item in self.merge_data:
                 ch = "Slot" + str(item.SlotNumber) +"Ch" + str(item.ChannelNumber)
-                hedder.append(ch)
+                header.append(ch)
 
-            writer.writerow(hedder)
+            writer.writerow(header)
             counter = 0
             for wave in wavelengthtable:
                 writestr.append(str(wave))
 
-                for item in LstILdata:
+                for item in il_data_array:
                      data = item[counter]
                      writestr.append(data)
                 writer.writerow(writestr)
@@ -690,23 +573,22 @@ class StsProcess:
                 counter +=1
 
         f.close()
-        return errorstr
+        return None
 
     #Load Reference Raw data
-    def func_STS_Load_ReferenceRawData(lstchdata,lstmonitor):
+    def sts_load_ref_data(self,lstchdata,lstmonitor):
 
         errorstr = ""
         counter = 0
-        for item in Lst_Refdata_st:
+        for item in self.ref_data:
 
             chdata = lstchdata[counter]
             arychdata = array("f",chdata)       #List to Array
             arymonitor = array("f",lstmonitor)
 
             #Add in Reference Raw data
-            errorcode = _ILSTS.Add_Ref_Rawdata(arychdata,arymonitor,item)
+            errorcode = self._ilsts.Add_Ref_Rawdata(arychdata,arymonitor,item)
             if (errorcode !=0):
-                errorstr = func_return_STSProcessErrorStr(errorcode)
-                return errorstr
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
             counter +=1
         return errorstr

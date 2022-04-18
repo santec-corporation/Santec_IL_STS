@@ -285,6 +285,11 @@ class MpmDevice:
         if errorcode != 0 and except_if_error is True:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         
+    def get_each_chan_logdata(self,slot_num,chan_num):
+        errorcode,logdata = self._mpm.Get_Each_Channel_Logdata(slot_num,chan_num,None)
+        if (errorcode !=0):
+            raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+        return logdata
 
     def set_logging_parameters(self,startwave,stopwave,step,speed):
         '''
@@ -334,7 +339,7 @@ class MpmDevice:
         logging_point = 0
 
         while status == 0:
-            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0)
+            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0) #WHAT'S THE POINT OF logging_point variable???
             if(errorcode !=0):
                 break
 
@@ -353,7 +358,6 @@ class MpmDevice:
             raise RuntimeError(errorstr)
 
         if (errorcode != 0):
-            errorstr = func_return_InstrumentErrorStr(errorcode)
-            raise RuntimeError(errorstr)
-
+            raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
+        
