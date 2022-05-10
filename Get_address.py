@@ -40,6 +40,11 @@ def Get_Dev_Address():
     return _cached_Dev_Address
 
 def Initialize_Device_Addresses():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     '''
 
     #each device needs to prompt for a different connection type
@@ -88,4 +93,4 @@ def Initialize_Device_Addresses():
     _cached_Dev_Address = Dev
 
     return None
-    #return TSL, OPM, Dev
+    

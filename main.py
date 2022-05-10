@@ -4,7 +4,7 @@ Created on Fri Jan 21 17:17:26 2022
 
 @author: chentir
 """
-#%% import packages
+# %% import packages
 import datetime
 import os
 import csv
@@ -17,97 +17,121 @@ from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
 from dev_intr_class import SpuDevice
 
+
 def setting_tsl_sweep_params(connected_tsl: TslDevice):
+    """
+    Setting sweep parameters. Will ask for:
+
+        startwave:  Starting wavelength (nm)
+        stopwave:   Stopping wavelength (nm)
+        step:       Sweep step (pm)
+        speed:      Sweep speed (nm/sec). 
+                    In case of TSL-570, the code will prompt 
+                    invite to select a speed from a list.
+        power:      Output power (dBm)
+    
+    These arguments will be passed to the connected_tsl object.
+
+    Args:
+        connected_tsl (TslDevice): Instanciated TSL class.
+
+    Returns:
+        None
+    """
     print('Input Start Wavelength (nm):')
     startwave = float(input())
     print('Input Stop Wavelength (nm):')
     stopwave = float(input())
     print('Input Sweep Step (pm):')
     step = float(input())/1000
-    if tsl.get_550_flag() is True:
+    if connected_tsl.get_550_flag() is True:
         print('Input Sweep Speed (nm/sec):')
         speed = float(input())
-    else :
+    else:
         print('Select sweep speed (nm/sec):')
         num = 1
-        for i in tsl.get_sweep_speed_table():
+        for i in connected_tsl.get_sweep_speed_table():
             print(str(num)+'- '+str(i))
-            num +=1
-        speed = tsl.get_sweep_speed_table()[int(input())-1]
+            num += 1
+        speed = connected_tsl.get_sweep_speed_table()[int(input())-1]
 
     print('Input Output Power (dBm):')
     power = float(input())
-    while power>10:
+    while power > 10:
         print('Invalid value of Output Power (<=10 dBm)')
         print('Input Output Power (dBm):')
         power = float(input())
 
-    #TSL Power setting
-    errorstr = tsl.set_power(power)
-    
-    errorstr = tsl.set_sweep_parameters(startwave, stopwave, step, speed)
+    # TSL Power setting
+    connected_tsl.set_power(power)
 
-#%% Initiallization
-#TODO: put this in a try/catch
+    connected_tsl.set_sweep_parameters(startwave, stopwave, step, speed)
+
+    return None
+
+
+# %% Initiallization
+# TODO: Rework to include GPIB, USB and LAN connection #WARNING: TSL-550/710 do not accept LAN and USB connection
 Initialize_Device_Addresses()
-tsl_address = Get_Tsl_Address() #this prompts the user for interface and other stuff
-opm_address = Get_Mpm_Address()
+
+tsl_address = Get_Tsl_Address()
+mpm_address = Get_Mpm_Address()
 dev_address = Get_Dev_Address()
 
-#only connect to the devices that the user wants to connect to
+interface = 'GPIB'
+# only connect to the devices that the user wants to connect to
 if tsl_address != None:
     tsl = TslDevice(interface, tsl_address)
     tsl.connect_tsl()
 else:
-    raise Exception ("There must be a TSL connected") #Shouldn't this exception be in TSL class?
+    # Shouldn't this exception be in TSL class?
+    raise Exception("There must be a TSL connected")
 
-if opm_address != None:
-    opm = MpmDevice(interface, opm_address) #for now, just do one MPM only
-    opm.connect_opm()
+if mpm_address != None:
+    mpm = MpmDevice(interface, mpm_address)  # for now, just do one MPM only
+    mpm.connect_mpm()
 
 if dev_address != None:
     dev = SpuDevice(dev_address)
-    dev.connect_dev()
+    dev.connect_spu()
 
-#If there is a TSL an MPM, then the max power should be 10. Otherwise, no limit. #DONE @ Line 38
+# If there is a TSL an MPM, then the max power should be 10. Otherwise, no limit. #DONE @ Line 38
 
-#Set the TSL properties
+# Set the TSL properties
 setting_tsl_sweep_params(tsl)
 
 
-#If there is an MPM, then ask for the ranges and channels
-if opm_address != None:
-    #prompt user for channels and ranges.THese two methods will be in sts_process.py
-    ilsts = sts.StsProcess()
+# If there is an MPM, then ask for the ranges and channels
+if mpm_address != None:
+    # prompt user for channels and ranges.THese two methods will be in sts_process.py
+    ilsts = sts.StsProcess(tsl,mpm,dev)
 
-    selected_channels = ilsts.channel_select(opm)
-    selected_ranges = ilsts.range_select(opm)
-    ilsts.set_data_struct(selected_channels,selected_ranges)
-    
-    #The sts datastruct is then initialized in the sts_process.py file
-    #prompt user to take a reference from the sts_process.py
+    ilsts.set_selected_channels(mpm)
+    ilsts.set_selected_ranges(mpm)
 
-    PromptUserToTakeReferenceAndCreateDataStructure
-
-
-
-
-
-def PromptUserToTakeReferenceAndCreateDataStructure():
-    #prompt user about how to get reference data.
-        #1. take new reference,
-        #2. load previous reference,
-        #3. prompt user to cancel
-        #3. take no reference? maybe ignore this entirely and force user to do 1 or 2
-    #prompt user to get channels
-    #prompt user to get ranges
-
-    #create data structure
-    #do ref scan
+    ilsts.set_data_struct()
+    ilsts.set_parameters()
+    print('Reference process:')
+    ilsts.sts_reference(mpm)
+    print('DUT measurement:')
+    ilsts.sts_measurement()
+    ilsts.sts_save_meas_data('Z:\\Santec_IL_STS\\test.csv')
 
 
+# def PromptUserToTakeReferenceAndCreateDataStructure():
+    # prompt user about how to get reference data.
+    # 1. take new reference,
+    # 2. load previous reference,
+    # 3. prompt user to cancel
+    # 3. take no reference? maybe ignore this entirely and force user to do 1 or 2
+    # prompt user to get channels
+    # prompt user to get ranges
 
-newDevice = TSL_Device()
-newDevice.setWaveLength(1600)
-newDevice._wavelength = 333 #cant do this
-newVar = newDevice._wavelength
+    # create data structure
+    # do ref scan
+
+
+# newDevice = TSL_Device()
+# newDevice.setWaveLength(1600)
+# newDevice._wavelength = 333 #cant do this
+# newVar = newDevice._wavelength

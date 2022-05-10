@@ -37,7 +37,7 @@ def inst_err_str(errorcode):
         '11' : "AlreadyConnected",
         '10' : "Stopped"
         }
-    if errorcode in inst_error.keys():
+    if str(errorcode) in inst_error.keys():
         return inst_error[str(errorcode)]
     else:
         return 'Unknown Error'
@@ -70,7 +70,7 @@ def stsprocess_err_str(errorcode):
         '-1' : "Failure",
         '0' : "Success"
         }
-    if errorcode in process_error.keys():
+    if str(errorcode) in process_error.keys():
         return process_error[str(errorcode)]
     else:
         return 'Unknown Error'

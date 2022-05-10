@@ -5,21 +5,21 @@ Created on Thu Mar 24 20:04:16 2022
 @author: chentir
 """
 
+from error_handing_class import inst_err_str
 import os
 import clr                                          # python for .net
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
 
-PATH1 ='InstrumentDLL'
-PATH2 ='STSProcess'
+PATH1 = 'InstrumentDLL'
+PATH2 = 'STSProcess'
 #Add in santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
+from Santec import SPU  # 　name space of instrument DLL
 
-print (ans)
-from Santec import SPU                  #　name space of instrument DLL
+print(ans)
 
-from error_handing_class import inst_err_str
 
 class SpuDevice:
     '''DAQ board device class'''
@@ -28,7 +28,7 @@ class SpuDevice:
         self._spu = SPU()
         self.devicename = devicename
 
-    def connect_spu(self,devicename):
+    def connect_spu(self):
         '''
         Connects the DAQ board (SPU Connect).
 
@@ -48,18 +48,18 @@ class SpuDevice:
             DESCRIPTION.
 
         '''
-        self._spu.DeviceName = str(devicename)
+        self._spu.DeviceName = str(self.devicename)
 
-        errorcode,ans = self._spu.Connect("")
-        if (errorcode !=0):
+        errorcode, ans = self._spu.Connect("")
+        if (errorcode != 0):
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return inst_err_str(errorcode)
 
     # SPU Set logging paramter
     def set_logging_parameters(self, startwave,
-                                      stopwave,speed,
-                                      tsl_actual_step):
+                               stopwave, speed,
+                               tsl_actual_step):
         '''
 
 
@@ -91,21 +91,27 @@ class SpuDevice:
                                                      speed,
                                                      tsl_actual_step)
 
-        if (errorcode !=0):
+        if (errorcode != 0):
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return inst_err_str(errorcode)
-    
+
     def sampling_start(self):
         errorcode = self._spu.Sampling_Start()
-        if (errorcode !=0):
+        if (errorcode != 0):
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
-    
+
+    def sampling_wait(self):
+        errorcode = self._spu.Waiting_for_sampling()
+        if (errorcode != 0):
+            raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
+
     def get_sampling_raw(self):
-        errorcode,trigger,monitor = self._spu.Get_Sampling_Rawdata(None,None)
-        if (errorcode !=0):
-            raise Exception (str(errorcode) + ": " + inst_err_str(errorcode))
+        errorcode, trigger, monitor = self._spu.Get_Sampling_Rawdata(
+            None, None)
+        if (errorcode != 0):
+            raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return trigger, monitor
-        
+
     def disconnect(self):
         self._spu.DisConnect()

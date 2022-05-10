@@ -9,6 +9,8 @@ import os
 import clr                                          # python for .net
 import time
 
+from numpy import array
+
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
 
@@ -30,23 +32,15 @@ class MpmDevice:
     def __init__(self, interface: str, address: str, port: int = None):
         self._mpm = MPM()
         self.interface = interface
-        self.address = address
+        self.address = address.split('::')[1]
         self.port = port
 
     def connect_mpm(self):
-        '''
-        Method handling the connection protocol of the MPM.
+        """Method handling the connection protocol of the MPM.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        '''
+        Raises:
+            Exception: In case failed to connect to the MPM.
+        """
         if self.interface == "GPIB":
             mpm_commincation_method = CommunicationMethod.GPIB
             self._mpm.GPIBAddress = int(self.address)
@@ -57,73 +51,52 @@ class MpmDevice:
             self._mpm.IPAddress = self.address
             self._mpm.port = self.port #port = 5000
 
-        self._mpm.TimeOut = 2000             # time out value for MPM
+        self._mpm.TimeOut = 2000             # timeout value for MPM
 
         errorcode = self._mpm.Connect(mpm_commincation_method)
         if errorcode !=0:
             self._mpm.DisConnect()
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        return inst_err_str(errorcode)
+        return None
 
     def get_mods_chans(self):
-        '''
-        Gets channels to be measured.
+        """Detects all the modules that are mounted on the MPM (looping on the 5 possible slots).
+        If the detected module is an MPM-212, then the possible optical channels are numbered 1 and 2
+        Else, then the possible optical channels are numbered from 1 to 4.
+        If no module is detected then the method returns an empty array.
 
-        Returns
-        -------
-        List of lists
-            Item 0 from the returned list corresponds to the modules that are mounted.
-            All remaining items are the number of channels of each module.
-            ex:
-            [[0,1],[1,2,3,4],[1,2]]
-            Slot 0 and 1 have mounted MPM modules.
-            The module at slot 0 has 4 available optical channels (either MPM-211 or MPM-215)
-            The module at slot 1 has only 2 available optical channels (MPM-212).
-        '''
+        Raises:
+            Exception: In case no modules were detected on the MPM.
 
-        self.mods_and_chans = [[]] #todo: use me!
-
+        Returns:
+            array: array of arrays (example: [[1,2,3,4],[1,2],[],[],[]]) 
+            Where the item index is the slot number (in the example above slots 0 and 1 contain modules),
+            and the items in these sub-arrays are channel numbers.
+        """
+        self.mods_and_chans = []
         for slotcount in range(5):
             if self._mpm.Information.ModuleEnable[slotcount] is True:
-                self.mods_and_chans[0].append(slotcount)
                 if self.check_mpm_212(slotcount) is True:
                     self.mods_and_chans.append([1,2])
                 else :
                     self.mods_and_chans.append([1,2,3,4])
-        if len(self.mods_and_chans[0]) == 0 or len(self.mods_and_chans)==1:
+            else:
+                self.mods_and_chans.append([])
+        if len(self.mods_and_chans) == 0:
             raise Exception('No modules/channels were detected')
         return self.mods_and_chans
 
-    #no more needed
-    # def get_enabled_slots(self):
-
-    #     enabled_slots = []
-    #     for slotcount in range(5):
-    #         if self._mpm.Information.ModuleEnable[slotcount] is True:
-    #             enabled_slots.append(slotcount)
-
-    #     return enabled_slots
-
-
     def check_module_type(self):
-        '''
-        Checks MPM modules type.
+        """Checks the type of modules that are mounted on the MPM.
+        This method calls check_mpm_215 and check_mpm_213 methods.
 
-        Raises
-        ------
-        Exception
-            MPM-215 can't be used with other MPM modules.
+        Raises:
+            Exception: MPM-215 can't be used with other MPM modules.
 
-        Returns
-        -------
-        flag_215 : bool
-            DESCRIPTION.
-        flag_213 : bool
-            DESCRIPTION.
-
-        '''
-
+        Returns:
+            bool: flag_215, flag_213 True if these modules are detected.
+        """
         flag_215 = False
         flag_213 = False
         slot = 0
@@ -142,61 +115,49 @@ class MpmDevice:
 
         return flag_215,flag_213
 
-    def check_mpm_215(self, slotcount):
-        '''
-        Checks if the mounted module is MPM-215.
+    def check_mpm_215(self, slotnum: int)-> bool:
+        """Checks if the mounted module at slot number slotnum is a MPM-215.
 
-        Parameters
-        ----------
-        slotcount : TYPE
-            DESCRIPTION.
+        Args:
+            slotnum (int): The module number (0~4).
 
-        Returns
-        -------
-        bool
-            DESCRIPTION.
+        Returns:
+            bool: True if a MPM-215 is detected.
+        """
+        return bool(self._mpm.Information.ModuleType[slotnum] == "MPM-215")
 
-        '''
+    def check_mpm_213(self,slotnum: int)-> bool:
+        """Checks if the mounted module at slot number slotnum is a MPM-213.
 
-        return bool(self._mpm.Information.ModuleType[slotcount] == "MPM-215")
+        Args:
+            slotnum (int): The module number (0~4).
 
-    def check_mpm_213(self,slotcount):
-        '''
-        Checks if the mounted module is MPM-213.
+        Returns:
+            bool: True if a MPM-213 is detected.
+        """
+        return bool( self._mpm.Information.ModuleType[slotnum] == "MPM-213")
 
-        Parameters
-        ----------
-        slotcount : TYPE
-            DESCRIPTION.
+    def check_mpm_212(self, slotnum: int)-> bool:
+        """Checks if the mounted module at slot number slotnum is a MPM-212.
 
-        Returns
-        -------
-        bool
-            DESCRIPTION.
+        Args:
+            slotnum (int): The module number (0~4).
 
-        '''
+        Returns:
+            bool: True if a MPM-212 is detected.
+        """
+        return bool(self._mpm.Information.ModuleType[slotnum]== "MPM-212")
 
-        return bool( self._mpm.Information.ModuleType[slotcount] == "MPM-213")
-
-    def check_mpm_212(self, slotcount):
-        '''
-        Checks if the mounted module is MPM-212.
-
-        Parameters
-        ----------
-        slotcount : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        bool
-            DESCRIPTION.
-
-        '''
-
-        return bool(self._mpm.Information.ModuleType[slotcount]== "MPM-212")
-
-    def get_range(self):
+    def get_range(self)->array:
+        """Gets the measurment dynamic range of the MPM module.
+        Depending on the module type, the dynamic range varies.
+        This method calls check_mpm_215 and check_mpm_213 methods. 
+        
+        Returns:
+            array:  MPM-215: [1]
+                    MPM-213: [1,2,3,4]
+                    Others:  [1,2,3,4,5]
+        """
         self.rangedata = []
         if self.check_mpm_215 is True:
             self.rangedata = [1]
@@ -205,46 +166,40 @@ class MpmDevice:
             self.rangedata = [1,2,3,4]
         else:
             self.rangedata = [1,2,3,4,5]
+        return None
 
     def set_range(self, powerrange):
-        '''
-        Sets the dynamic range of the MPM.
+        """Sets the dynamic range of the MPM.
 
-        Parameters
-        ----------
-        powerrange : TYPE
-            DESCRIPTION.
+        Args:
+            powerrange (int): check get_range method for 
+            available dyanmic ranges.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        '''
-
+        Raises:
+            Exception:  In case the MPM is busy. 
+                        In case wrong value for powerrange is entered
+        """
         errorcode = self._mpm.Set_Range(powerrange)
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        return inst_err_str(errorcode)
+        return None
 
     def  zeroing(self):
-        '''
-        Performs a Zeroing on all MPM channels.
+        """Performs a Zeroing on all MPM channels.
         All the channels must be closed with respective balck caps before
         performing this operation.
 
-        Returns
-        -------
-        errorstr : TYPE
-            DESCRIPTION.
+        Raises:
+            Exception:  In case the MPM is busy;
+                        In case wrong value for powerrange is entered;
+                        In case the MPM  returns an error.
 
-        '''
+
+        Returns:
+            str: Success.
+        """
         errorcode = self._mpm.Zeroing()
 
         if errorcode !=0:
@@ -253,21 +208,15 @@ class MpmDevice:
         return inst_err_str(errorcode)
 
     def get_averaging_time(self):
-        '''
-        Gets the averaging time of the MPM.
+        """Gets the averaging time of the MPM.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
+        Raises:
+            Exception:  In case the MPM is busy;
+                        In case of communication failure.
 
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        '''
-
+        Returns:
+            float: averaging time
+        """
         errorcode,self.averaging_time = self._mpm.Get_Averaging_Time(0)
 
         if errorcode != 0:
@@ -276,16 +225,44 @@ class MpmDevice:
         return self.averaging_time
 
     def logging_start(self):
+        """MPM starts logging.
+
+        Raises:
+            Exception:  In case the MPM is busy.
+        """
         errorcode = self._mpm.Logging_Start()
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
-    
+
     def logging_stop(self, except_if_error = True):
+        """MPM stops logging.
+
+        Args:
+            except_if_error (bool, optional): Set True if raising exception is 
+            needed within this method. Else, i.e. if this method is inserted within STS
+            then set False so the exception  will be raised from STS method.
+            Defaults to True.
+
+        Raises:
+            Exception: In case the MPM is busy.
+        """
         errorcode = self._mpm.Logging_Stop()
         if errorcode != 0 and except_if_error is True:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
-        
-    def get_each_chan_logdata(self,slot_num,chan_num):
+
+    def get_each_chan_logdata(self,slot_num: int,chan_num: int) -> array:
+        """Gets log data for specified slot and channel.
+
+        Args:
+            slot_num (int): Module number (0~4).
+            chan_num (int): Channel number (1~4).
+
+        Raises:
+            Exception: In case wrong arguments are passed.
+
+        Returns:
+            array: array of logged data.
+        """
         errorcode,logdata = self._mpm.Get_Each_Channel_Logdata(slot_num,chan_num,None)
         if (errorcode !=0):
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
@@ -348,9 +325,10 @@ class MpmDevice:
             if (elaspand_time > 2000):
                 errorcode = -999
                 break
-        
-        if (status != 0):
-            raise RuntimeError("MPM status is " + status + ". Timeout error occurred")
+
+        # if (status != 0):
+        #     status_dic = {-1:'stopped', 0:'during logging', 1:'completed'}
+        #     raise RuntimeError("MPM status is "+status_dic[status]+". Timeout error occurred")
 
            #Logging stop
         if (errorcode == -999):
@@ -360,4 +338,3 @@ class MpmDevice:
         if (errorcode != 0):
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
-        

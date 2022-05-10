@@ -130,7 +130,7 @@ class StsProcess:
 
         return stsprocess_err_str(sts_error) #errorstr
 
-    def channel_select(self,_mpm):
+    def set_selected_channels(self,_mpm):
         '''This method to select channels to be measured.
         It offers the user to choose between different ways to select MPM channels.
         For this purpose, method calls the following methods:
@@ -148,47 +148,57 @@ class StsProcess:
         #        - Its possible that neither exist. Think about also saving this to a file?
         # this option was removed... need to check some error handling (presence or not of the file, the file being or not in the desired format etc.)
         print(
-        '''Select channels to be measured:
+        '''
+Select channels to be measured:
             1. All channels
             2. Even channels
             3. Odd channels
             4. Specific channels
             5. Cancel
+
+Available modules/channels:
+
         ''')
-        for mod in self.all_channels[0]:
-            print ('''Available modules/channels:
-                        Module {}: Channels {}'''.format(mod,self.all_channels[mod+1]))
-        choices = {'1': self.all_chans,
-                   '2': self.even_chans,
-                   '3': self.odd_chans,
-                   '4': self.special,
+        for i in range(len(self.all_channels)):
+            if len(self.all_channels[i]) == 0:
+                continue
+            print ('''
+            Module {}: Channels {}'''.format(i,self.all_channels[i]))
+
+        choices = {'1': self.set_all_chans,
+                   '2': self.set_even_chans,
+                   '3': self.set_odd_chans,
+                   '4': self.set_special,
                    '5': self.cancel}
 
         selection = input()
         choices[selection]()
+        return None
 
-    def all_chans(self):
+    def set_all_chans(self):
         '''Selects all modules and all channels that are connected to MPM.'''
-        for i in self.all_channels[0]:
-            for j in self.all_channels[i+1]:
+        for i in range(len(self.all_channels)):
+            for j in self.all_channels[i]:
                 self.selected_chans.append([i,j])
-        return self.selected_chans
+        return None
 
-    def even_chans(self):
+    def set_even_chans(self):
         '''Selects only even channels on the MPM.'''
-        for i in self.all_channels[0]:
-            for j in self.all_channels[i+1]:
-                if j%2 !=0:
-                    self.selected_chans.append([i,j])
-
-    def odd_chans(self):
-        '''Selects only odd channels on the MPM.'''
-        for i in self.all_channels[0]:
-            for j in self.all_channels[i+1]:
+        for i in range(len(self.all_channels)):
+            for j in self.all_channels[i]:
                 if j%2 ==0:
                     self.selected_chans.append([i,j])
+        return None
 
-    def special(self,num_of_chan):
+    def set_odd_chans(self):
+        '''Selects only odd channels on the MPM.'''
+        for i in range(len(self.all_channels)):
+            for j in self.all_channels[i]:
+                if j%2 !=0:
+                    self.selected_chans.append([i,j])
+        return None
+
+    def set_special(self):
         '''Manually enter/select the channels to be measured'''
         #TODO: raising exception if entered module/channel doesn't exist
         print('Input (module,channel) to be tested [ex: (0,1); (1,1)]')
@@ -196,26 +206,30 @@ class StsProcess:
         selection = re.findall(r"[\w']+",selection)
         i=0
         while i<= len(selection)-1:
-            self.selected_chans.append([i,i+1])
-    
+            self.selected_chans.append([selection[i],selection[i+1]])
+            i+=2
+        return None
+
     def cancel(self):
         self._tsl.disconnect()
         self._mpm.disconnect()
         self._spu.disconnect()
 
-    def range_select(self,_mpm):
+    def set_selected_ranges(self,_mpm):
         self.selected_ranges = []
         print('Select the dynamic range. ex: 1, 3, 5')
         print('Available dynamic ranges:')
         i=1
-        for range in self._mpm.get_range():
+        self._mpm.get_range()
+        for range in self._mpm.rangedata:
             print('{}- {}'.format(i,range))
             i +=1
         selection = input()
         self.selected_ranges = re.findall(r"[\w']+",selection)
+        return None
 
     # Config each STSDatastruct from ch data And ranges
-    def set_data_struct(self,selected_chans,selected_ranges):
+    def set_data_struct(self):#,selected_chans,selected_ranges):
         counter =1
         #List data clear
         self.dut_monitor = []   #Lst_MeasMonitor_st.clear()
@@ -226,13 +240,14 @@ class StsProcess:
         self.range = []         #Lst_Range.clear()
 
         # config STSDatastruct for each measurment
+        #TODO determine if this should be looped the other way around, first channels, and then ranges
         for m_range in self.selected_ranges:
             for ch in self.selected_chans:
                 data_st = STSDataStruct()
                 data_st.MPMNumber = 0           #TODO need to find a way to implement multi-MPM protocol
                 data_st.SlotNumber = ch[0]      #slot number
                 data_st.ChannelNumber = ch[1]   #channel number
-                data_st.RangeNumber = m_range
+                data_st.RangeNumber = m_range   #array of MPM ranges
                 data_st.SweepCount = counter
                 data_st.SOP = 0
                 self.dut_data.append(data_st)
@@ -244,7 +259,7 @@ class StsProcess:
                 if(chindex == 0):
                     self.dut_monitor.append(data_st)
                     self.range.append(m_range)
-                    
+
                 # reference data need only 1 range for each ch
                 if (rangeindex ==0 ):
                     self.ref_data.append(data_st)
@@ -257,7 +272,6 @@ class StsProcess:
         #config STSDataStruct for merge
         for ch in self.selected_chans:
             mergest = STSDataStructForMerge()
-
             mergest.MPMnumber = 0           #TODO need to find a way to implement multi-MPM protocol
             mergest.SlotNumber = ch[0]      #slot number
             mergest.ChannelNumber = ch[1]   #channel number
@@ -268,26 +282,22 @@ class StsProcess:
     # STS Reference handling
     def sts_reference(self, _mpm):
 
-        errorstr = ""
         for i in self.ref_data:
-            print('Connect Slot{}Ch{}, then press any key'.format(i.SlotNumber,i.ChannelNumber))
+            print('Connect Slot{}Ch{}, then press ENTER'.format(i.SlotNumber,i.ChannelNumber))
             input()
             #set MPM range for 1st setting renge
             self._mpm.set_range(self.range[0]) #No need to raise exception as it is done@ mpm_instr_class
 
 
             #TSL Wavelength set to use Sweep Start Command
-            errorcode = self._tsl.Sweep_Start()
-            if errorcode !=0:
-                raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+            self._tsl.start_sweep()
 
             #Sweep handling
-            errorstr = self.sts_sweep_process()
-            if (errorstr != ""):
-                return errorstr
+            self.sts_sweep_process()
+
 
             #get sampling data & Add in STSProcess Class
-            errorstr = self.get_reference_data(i)
+            self.get_reference_data(i)
 
             # rescaling for reference data
             errorcode = self._ilsts.Cal_RefData_Rescaling()
@@ -296,15 +306,14 @@ class StsProcess:
 
             #TSL Sweep stop
             self._tsl.stop_sweep()
+
         return None
 
     #STS Measurement handling
     def sts_measurement(self):
-        errorstr = ""
 
         #TSL Sweep Start
         self._tsl.start_sweep()
-
 
         #Range loop
         sweepcount = 1
@@ -339,11 +348,11 @@ class StsProcess:
     def sts_sweep_process(self):
         #MPM Logging Start
         self._mpm.logging_start() #if this errors, an exception is thrown
-
         try:
             self._tsl.wait_for_sweep_status(waiting_time= 2000,sweep_status=4) #WaitingforTrigger
             self._spu.sampling_start()
             self._tsl.soft_trigger()
+            self._spu.sampling_wait()
             self._mpm.wait_log_completion()  #DONE but need to be checked
             self._mpm.logging_stop(True)
         except RuntimeError as scan_exception:
@@ -353,10 +362,10 @@ class StsProcess:
         except Exception as tsl_exception:
             self._mpm.logging_stop(False)
             raise tsl_exception
-        self._tsl.wait_for_sweep_status(waiting_time=5000, sweep_status=1) #Standby 
+        self._tsl.wait_for_sweep_status(waiting_time=5000, sweep_status=1) #Standby
 
         #TSL Wavelength set to use Sweep Start Command for next sweep
-        self._tsl.start_sweep()
+        # self._tsl.start_sweep() #TODO why here!?
         return None
 
     # get logging data & add STSProcess Class for Reference
@@ -368,7 +377,7 @@ class StsProcess:
         logdata = self._mpm.get_each_chan_logdata(item.SlotNumber, item.ChannelNumber)
 
         #Add MPM Logging data for STS Process Class
-        logdata = array('f',logdata)                       #List to Array
+        self.logdata = array('f',logdata)                       #List to Array
         errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
@@ -380,6 +389,7 @@ class StsProcess:
         errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,self.ref_monitor[0])
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+        return None
 
     # get logging data & add STSProcess class for Measuerment
     def sts_get_meas_data(self,sweepcount):

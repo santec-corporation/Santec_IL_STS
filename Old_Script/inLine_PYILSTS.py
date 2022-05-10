@@ -8,7 +8,7 @@ Created on Mon Dec 20 15:23:43 2021
 
 from decimal import Decimal, ROUND_HALF_UP   # for rounding
 import IL_STS as STS
-from Get_address import Get_address_IL
+from Get_address import *
 import pandas as pd
 from datetime import datetime
 import os
@@ -17,8 +17,12 @@ import glob
 from matplotlib.pyplot import plot
 
 #%% Initialization
-TSL, OPM, Dev = Get_address_IL()
-
+# TSL, OPM, Dev = Get_address_IL()
+Initialize_Device_Addresses()
+# this prompts the user for interface and other stuff
+TSL = Get_Tsl_Address()
+OPM = Get_Mpm_Address()
+Dev = Get_Dev_Address()
 errorcode = STS.func_init_TSL('GPIB',TSL.split('::')[1])
 
 if errorcode != "":

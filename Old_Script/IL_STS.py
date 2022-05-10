@@ -8,7 +8,9 @@ import clr                                          # python for .net
 import os
 # santec DLL import-----------------------------
 
-root = str(os.path.dirname(__file__))+'\\DLL\\'
+root = 'Z:\Santec_IL_STS'+'\\DLL\\'
+print(root)
+# root = str(os.path.dirname(__file__))+'\\DLL\\'
 print(root)
 
 path1 ='InstrumentDLL'
@@ -113,7 +115,7 @@ def func_TSL_Get550Flag():
 
     tsl_name = _TSL.Information.ProductName
 
-    if(tsl_name == "TLS-550") or (tsl_name == "TSL-710"):
+    if(tsl_name == "TSL-550") or (tsl_name == "TSL-710"):
         return True
     else:
         return False
@@ -746,7 +748,7 @@ def func_STS_SetDataStruct(usech,useranges):
             if(chindex == 0):
                 Lst_MeasMonitor_st.append(datast)
                 Lst_Range.append(m_range)
-                
+
             # reference data need only 1 range for each ch
             if (rangeindex ==0 ):
                 Lst_Refdata_st.append(datast)

@@ -41,7 +41,7 @@ class TslDevice:
     def __init__(self, interface: str, address: str, port: int = None):
         self._tsl = TSL()
         self.interface = interface
-        self.address = address
+        self.address = address.split('::')[1]
         self.port = port
 
         if interface not in ("GPIB", "LAN", "USB"):
@@ -49,22 +49,12 @@ class TslDevice:
 
     # TSL Connect
     def connect_tsl(self):
-        '''
-        Method handling the connection protocol of the TSL.
-        It also gets TSL specs: Min and Max wavelength, Max output power and,
-        if applicable, Sweep Speed Table (TSL-570 case).
+        """Method handling the connection protocol of the TSL.
+        It also gets TSL specs: Min and Max wavelength and Max output power.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        '''
-
+        Raises:
+            Exception: In case failed to connect to the TSL.
+        """
         # ---Property setting befor "Connect"------------
 
         # GPIB Terminater can set by TSL Front panel.
@@ -110,87 +100,64 @@ class TslDevice:
 
         #Now that we are connected, get the flags and wavelengths and limits etc
         #TSL handling
-        flag_550 = self.get_550_flag()                                #550/710 or not
-        self.spec_min_wav, self.spec_max_wav = self.get_spec_wavelenth() #get spec wavelength(nm)
 
-        if errorcode !=0:
-            self._tsl.DisConnect()
-            raise Exception("Could not get the TSL wavelength limits: " +
-                            str(errorcode) + ": " + inst_err_str(errorcode))
+        #No need as self.get_550_flag() will be called from main.py
+        # flag_550 = self.get_550_flag()                                #550/710 or not
+        self.get_spec_wavelenth() #get spec wavelength(nm)
 
+        #no need as main.py will call self.get_sweep_speed_table() method
+        # if flag_550 is True:
+        #     self.sweep_table = None #this should be configued after connecting, in the STS class
+        #     self.maxpow = 10 #this should be configued after connecting, in the STS class
+        # else:
+        #     # this handling only support for TSL-570
+        #     self.sweep_table =self.get_sweep_speed_table()        #get Sweep speed tabel
 
-        if flag_550 is True:
-            self.sweep_table = None #this should be configued after connecting, in the STS class
-            self.maxpow = 10 #this should be configued after connecting, in the STS class
-        else:
-            # this handling only support for TSL-570
-            self.sweep_table =self.get_sweep_speed_table()        #get Sweep speed tabel
-
-            if errorcode !="":
-                print("IL_STS",errorcode)
+        #     if errorcode !="":
+        #         print("IL_STS",errorcode)
             #get APC limit power for wavelength range:
-            errorcode,self.maxpow = self.get_max_power(self.spec_min_wav, self.spec_max_wav)#this should be called elsewhere, like in the STS class
+        self.maxpow = self.get_max_power(self.spec_min_wav, self.spec_max_wav)#TODO this should be called elsewhere, like in the STS class
             #also make this throw an exception if needed
-            if errorcode != "":
-                print("IL_STS",errorcode)
+            # if errorcode != "":
+            #     print("IL_STS",errorcode)
 
-        return inst_err_str(errorcode)
+        return None
 
     # retunr TSL-550 or not  True: TSL-550/710  False: TSL-570
     def get_550_flag(self):
-        '''
-        Checks if the connected TSL is TSL-550/TSL-710
+        """Checks if the connected TSL is TSL-550/TSL-710
 
-        Returns
-        -------
-        bool
-            DESCRIPTION.
-
-        '''
+        Returns:
+            bool: True if TSL-550/TSL-710; else False.
+        """
 
         tsl_name = self._tsl.Information.ProductName
 
-        return tsl_name in ("TLS-550" ,"TSL-710")
+        return tsl_name in ("TSL-550" ,"TSL-710")
 
     def get_spec_wavelenth(self):
-        '''
-        Gets Min and Max wavelengths supported by the connected TSL.
+        """Gets Min and Max wavelengths supported by the connected TSL.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-        TYPE
-            DESCRIPTION.
-
-        '''
+        Raises:
+            Exception: In case couldn't get spec min and max wavleengths from the TSL.
+        """
 
         errorcode,self.spec_min_wav,self.spec_max_wav = self._tsl.Get_Spec_Wavelength(0,0)
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
-        return self.spec_min_wav,self.spec_max_wav
+        return None
 
     def get_sweep_speed_table(self):
-        '''
-        Returns Sweep speed table of TSL-570
+        """Returns sweep speed table of TSL-570:
+        [1,2,5,10,20,50,100,200] (nm/sec)
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
+        Raises:
+            Exception: "DeviceError" when othre TSL is connected.
 
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        '''
+        Returns:
+            array: Sweep speeds allowed by the TSL-570.
+        """
 
         errorcode,table = self._tsl.Get_Sweep_Speed_table(None)
         self.return_table = []
@@ -208,32 +175,18 @@ class TslDevice:
 
         return self.return_table
 
-    def get_max_power(self, spec_min_wav, spec_max_wav):
-        '''
+    def get_max_power(self):
+        """This method is used when TSL-570 is connected.
         Returns the max output power that can be delivered by the connected
-        TSL.
-        This method is used when TSL-570 is connected.
-        Otherwise, errorcode return "DeviceError".
-        Parameters
-        ----------
-        spec_min_wav : TYPE
-            Min wavelength supported by the connected TSL. This value is passed
-            from get_spec_wavelenth method.
-        spec_max_wav : TYPE
-            Max wavelength supported by the connected TSL. This value is passed
-            from get_spec_wavelenth method.
+        TSL. 
+        The method will call TSL object properties:min and max wavelentgh
+        (spec_min_wav; spec_max_wav resp.)
+        
+        Otherwise, DeviceError errorcode is returned.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        '''
+        Raises:
+            Exception: In case TSL doesn't return the value.
+        """
 
         errorcode,self.maxpower = self._tsl.Get_APC_Limit_for_Sweep(self.spec_min_wav,
                                                                     self.spec_max_wav,
@@ -246,29 +199,19 @@ class TslDevice:
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        return self.maxpower
+        return None
 
     def set_power(self, power):
-        '''
-        Sets the output power of the TSL
+        """Sets the output power of the TSL.
 
-        Parameters
-        ----------
-        power : TYPE
-            Input the output power value.
+        Args:
+            power (float): Setting output power.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        errorcode : TYPE
-            DESCRIPTION.
-
-        '''
-
+        Raises:
+            Exception: In case setting the output power is failed.
+            Exception: In case TS is busy.
+        """
+        self.power = power
         errorcode = self._tsl.Set_APC_Power_dBm(self.power)
 
         if errorcode != 0:
@@ -278,28 +221,18 @@ class TslDevice:
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        return inst_err_str(errorcode)
+        return None
 
     def set_wavelength(self, wavelength):
-        '''
-        Sets the TSL at a wavelength.
+        """Sets the TSL at a specific wavelength.
 
-        Parameters
-        ----------
-        wavelength : TYPE
-            Input the wavelength value.
+        Args:
+            wavelength (float): setting wavelength.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        errorcode : TYPE
-            DESCRIPTION.
-
-        '''
+        Raises:
+            Exception: In case setting the wavelength is failed.
+            Exception: In case TS is busy.
+        """
 
         errorcode = self._tsl.Set_Wavelength(wavelength)
 
@@ -309,36 +242,23 @@ class TslDevice:
         errorcode = self._tsl.TSL_Busy_Check(3000)
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
-        return inst_err_str(errorcode)
+        return None
 
 
     #
     def set_sweep_parameters(self, startwave,stopwave,step,speed):
-        '''
-        Sets the sweep parameter TSL
+        """Setting the sweep parameters and pass them in the TSL object.
 
-        Parameters
-        ----------
-        startwave : TYPE
-            Input the start wavelength value.
-        stopwave : TYPE
-            Input the stop wavelength value.
-        step : TYPE
-            Input the sweep step wavelength value.
-        speed : TYPE
-            Input the sweep speed value.
+        Args:
+            startwave (float): Input the start wavelength value.
+            stopwave (float): Input the stop wavelength value.
+            step (float): Input the sweep step wavelength value.
+            speed (float): Input the sweep speed value.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        '''
+        Raises:
+            Exception: In case the pass method fails
+        """
+        
         self.startwave = startwave
         self.stopwave = stopwave
         self.step = step
@@ -357,51 +277,77 @@ class TslDevice:
         self.tsl_busy_check()
         #return self.actual_step we dont need to return this because it ssaved in the actual_step car
         return None
+
     def soft_trigger(self):
+        """Issues a soft trigger to start TSL sweep.
+
+        Raises:
+            RuntimeError: In case TSL is not in Standby mode, or if TSL cannot start the sweep.
+        """
         errorcode = self._tsl.Set_Software_Trigger()
         if errorcode !=0:
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
+        return None
 
     #!!!create method to run the sweep
     def start_sweep(self):
-        '''
-        Runs the wavelength sweep. Method to be used when TSL is not connected
+        """Runs the wavelength sweep. Method to be used when TSL is not connected
         to STS.
 
-        Returns
-        -------
-        None.
-
-        '''
+        Raises:
+            Exception: In case TSL doesn't start the sweep.
+        """
         errorcode = self._tsl.Sweep_Start()
         if errorcode !=0 :
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+        return None
 
     def stop_sweep(self, except_if_error = True):
+        """Stops the sweep.
+
+        Args:
+            except_if_error (bool, optional): Set True if raising exception is 
+            needed within this method. Else, i.e. if this method is inserted within STS
+            then set False so the exception  will be raised from STS method.
+            Defaults to True.
+
+        Raises:
+            Exception: In case failure in stopping the TSL.
+        """
         errorcode = self._tsl.Sweep_Stop()
         if errorcode !=0 and except_if_error is True:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+        return None
 
 
     def tsl_busy_check(self) :
-        '''
-        Checks if the TSL is busy with other tasks.
+        """Checks if the TSL is busy with other tasks. 
+        Default timeout = 3000 ms
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        '''
+        Raises:
+            Exception: In case no response from TSL after timeout.
+        """
         errorcode = self._tsl.TSL_Busy_Check(3000)
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
+        return None
 
     def wait_for_sweep_status(self, waiting_time: int, sweep_status: int):
+        """Wait until the TSL is set to a specified status prior the sweeping process.
+
+
+        Args:
+            waiting_time (int): Waiting time (milliseconds)
+            sweep_status (int): Key value (1~5) of the _status dictionnary.
+                                1: Standby
+                                2: Running
+                                3: Pause
+                                4: Waiting for trigger
+                                5:  Return
+
+        Raises:
+            Exception: In case TSL is not set to the specified status after timeout.
+        """
         _status ={
             1:self._tsl.Sweep_Status.Standby,
             2:self._tsl.Sweep_Status.Running,
@@ -409,10 +355,13 @@ class TslDevice:
             4:self._tsl.Sweep_Status.WaitingforTrigger,
             5:self._tsl.Sweep_Status.Returning
             }
-        errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time,_status[sweep_status])
+        errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
     def disconnect(self):
+        """Disconnets the TSL.
+        """
         self._tsl.DisConnect()
+        return None
