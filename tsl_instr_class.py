@@ -38,14 +38,17 @@ from error_handing_class import inst_err_str
 class TslDevice:
     '''TSL device class'''
 
-    def __init__(self, interface: str, address: str, port: int = None):
+    def __init__(self, interface: str, address: str, port: int = 5000):
         self._tsl = TSL()
         self.interface = interface
-        self.address = address.split('::')[1]
+        self.address = address.split('::')[1] #TODO; this is GPIB only. We should fix this...
         self.port = port
 
         if interface not in ("GPIB", "LAN", "USB"):
             raise Exception ('This interface is not supported')
+
+    def __str__(self):
+        return "TslDevice"
 
     # TSL Connect
     def connect_tsl(self):
@@ -103,7 +106,7 @@ class TslDevice:
 
         #No need as self.get_550_flag() will be called from main.py
         # flag_550 = self.get_550_flag()                                #550/710 or not
-        self.get_spec_wavelenth() #get spec wavelength(nm)
+        self.get_spec_wavelength() #get spec wavelength(nm)
 
         #no need as main.py will call self.get_sweep_speed_table() method
         # if flag_550 is True:
@@ -135,7 +138,7 @@ class TslDevice:
 
         return tsl_name in ("TSL-550" ,"TSL-710")
 
-    def get_spec_wavelenth(self):
+    def get_spec_wavelength(self):
         """Gets Min and Max wavelengths supported by the connected TSL.
 
         Raises:
@@ -209,7 +212,7 @@ class TslDevice:
 
         Raises:
             Exception: In case setting the output power is failed.
-            Exception: In case TS is busy.
+            Exception: In case TSL is busy.
         """
         self.power = power
         errorcode = self._tsl.Set_APC_Power_dBm(self.power)
