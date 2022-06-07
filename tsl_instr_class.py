@@ -41,7 +41,11 @@ class TslDevice:
     def __init__(self, interface: str, address: str, port: int = 5000):
         self._tsl = TSL()
         self.interface = interface
-        self.address = address.split('::')[1] #TODO; this is GPIB only. We should fix this...
+        if (interface == "GPIB"):
+            self.address = address.split('::')[1]
+        else:
+            self.address = address
+        #TOOD: check on USB?
         self.port = port
 
         if interface not in ("GPIB", "LAN", "USB"):
@@ -119,7 +123,7 @@ class TslDevice:
         #     if errorcode !="":
         #         print("IL_STS",errorcode)
             #get APC limit power for wavelength range:
-        self.maxpow = self.get_max_power(self.spec_min_wav, self.spec_max_wav)#TODO this should be called elsewhere, like in the STS class
+        self.maxpow = self.get_max_power()#TODO this should be called elsewhere, like in the STS class
             #also make this throw an exception if needed
             # if errorcode != "":
             #     print("IL_STS",errorcode)

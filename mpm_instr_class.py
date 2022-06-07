@@ -32,7 +32,10 @@ class MpmDevice:
     def __init__(self, interface: str, address: str, port: int = None):
         self._mpm = MPM()
         self.interface = interface
-        self.address = address.split('::')[1]
+        if (interface == "GPIB"):
+            self.address = address.split('::')[1]
+        else:
+            self.address = address
         self.port = port
 
     def connect_mpm(self):

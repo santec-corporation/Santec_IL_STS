@@ -11,7 +11,7 @@ Created on Fri Jan 21 17:17:26 2022
 #import glob
 #import pandas as pd
 #from matplotlib.pyplot import plot
-from Get_address import Initialize_And_Get_Device, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
+from Get_address import Initialize_And_Get_Device
 import sts_process as sts
 from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
@@ -99,11 +99,12 @@ def main():
     """
 
     tsl = Initialize_And_Get_Device(str(TslDevice))
-    tsl.connect_tsl()
-
+  
     if tsl is None:
         return None #quit the app 
     
+    #connect the TSL
+    tsl.connect_tsl()
 
     #prompt if we need an MPM
     print("Would you like to connect an MPM? [Y]es [N]o")
@@ -112,8 +113,16 @@ def main():
         mpm = Initialize_And_Get_Device(str(MpmDevice))
         mpm.connect_mpm()
 
+        if mpm is None:
+            return None #quit the app 
+        
         dev = Initialize_And_Get_Device(str(SpuDevice))
         dev.connect_spu()
+    
+        if dev is None:
+            #TODO: in the future, make this work for SME mode?
+            return None #quit the app 
+
 
     # If there is a TSL an MPM, then the max power should be 10. Otherwise, no limit. #DONE @ Line 38
 
@@ -122,7 +131,7 @@ def main():
 
 
     # If there is an MPM, then ask for the ranges and channels
-    if mpm_address != None:
+    if mpm != None:
         # prompt user for channels and ranges.THese two methods will be in sts_process.py
         ilsts = sts.StsProcess(tsl,mpm,dev)
 
