@@ -245,10 +245,10 @@ Available modules/channels:
             for ch in self.selected_chans:
                 data_st = STSDataStruct()
                 data_st.MPMNumber = 0           #TODO need to find a way to implement multi-MPM protocol
-                data_st.SlotNumber = ch[0]      #slot number
-                data_st.ChannelNumber = ch[1]   #channel number
-                data_st.RangeNumber = m_range   #array of MPM ranges
-                data_st.SweepCount = counter
+                data_st.SlotNumber = int(ch[0])      #slot number
+                data_st.ChannelNumber = int(ch[1])   #channel number
+                data_st.RangeNumber = int(m_range)   #array of MPM ranges
+                data_st.SweepCount = int(counter)
                 data_st.SOP = 0
                 self.dut_data.append(data_st)
 
@@ -273,8 +273,8 @@ Available modules/channels:
         for ch in self.selected_chans:
             mergest = STSDataStructForMerge()
             mergest.MPMnumber = 0           #TODO need to find a way to implement multi-MPM protocol
-            mergest.SlotNumber = ch[0]      #slot number
-            mergest.ChannelNumber = ch[1]   #channel number
+            mergest.SlotNumber = int(ch[0])      #slot number
+            mergest.ChannelNumber = int(ch[1])   #channel number
             mergest.SOP = 0
 
             self.merge_data.append(mergest)

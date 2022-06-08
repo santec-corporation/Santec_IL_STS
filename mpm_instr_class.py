@@ -182,7 +182,7 @@ class MpmDevice:
             Exception:  In case the MPM is busy. 
                         In case wrong value for powerrange is entered
         """
-        errorcode = self._mpm.Set_Range(powerrange)
+        errorcode = self._mpm.Set_Range(int(powerrange))
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
