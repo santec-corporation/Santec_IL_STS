@@ -7,16 +7,15 @@ Created on Thu Mar 24 20:04:16 2022
 
 from error_handing_class import inst_err_str
 import os
-import clr                                          # python for .net
+import clr # python for .net
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
 
 PATH1 = 'InstrumentDLL'
-PATH2 = 'STSProcess'
 #Add in santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
-from Santec import SPU  # 　name space of instrument DLL
+from Santec import SPU  # 　namespace of instrument DLL
 
 print(ans)
 

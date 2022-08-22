@@ -6,7 +6,7 @@ Created on Thu Mar 17 19:48:11 2022
 """
 
 import os
-import clr                                          # python for .net
+import clr # python for .net
 import time
 
 from numpy import array
@@ -15,14 +15,13 @@ ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
 
 PATH1 ='InstrumentDLL'
-PATH2 ='STSProcess'
 #Add in santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
 
 print (ans)
-from Santec import MPM                  #　name space of instrument DLL
-from Santec.Communication import CommunicationMethod   # import CommunicationMethod Enumration Class
-from Santec.Communication import GPIBConnectType       # import GPIBConnectType Enumration Class
+from Santec import MPM #　namespace of instrument DLL
+from Santec.Communication import CommunicationMethod   # Enumration Class
+from Santec.Communication import GPIBConnectType       # Enumration Class
 
 from error_handing_class import inst_err_str
 
@@ -32,10 +31,7 @@ class MpmDevice:
     def __init__(self, interface: str, address: str, port: int = None):
         self._mpm = MPM()
         self.interface = interface
-        if (interface == "GPIB"):
-            self.address = address.split('::')[1]
-        else:
-            self.address = address
+        self.address = address.split('::')[1]
         self.port = port
 
     def connect_mpm(self):
@@ -54,7 +50,7 @@ class MpmDevice:
             self._mpm.IPAddress = self.address
             self._mpm.port = self.port #port = 5000
 
-        self._mpm.TimeOut = 2000             # timeout value for MPM
+        self._mpm.TimeOut = 2000 # timeout value for MPM
 
         errorcode = self._mpm.Connect(mpm_commincation_method)
         if errorcode !=0:
@@ -73,7 +69,7 @@ class MpmDevice:
             Exception: In case no modules were detected on the MPM.
 
         Returns:
-            array: array of arrays (example: [[1,2,3,4],[1,2],[],[],[]]) 
+            array: array of arrays (example: [[1,2,3,4],[1,2],[],[],[]])
             Where the item index is the slot number (in the example above slots 0 and 1 contain modules),
             and the items in these sub-arrays are channel numbers.
         """
@@ -154,8 +150,8 @@ class MpmDevice:
     def get_range(self)->array:
         """Gets the measurment dynamic range of the MPM module.
         Depending on the module type, the dynamic range varies.
-        This method calls check_mpm_215 and check_mpm_213 methods. 
-        
+        This method calls check_mpm_215 and check_mpm_213 methods.
+
         Returns:
             array:  MPM-215: [1]
                     MPM-213: [1,2,3,4]
@@ -175,14 +171,14 @@ class MpmDevice:
         """Sets the dynamic range of the MPM.
 
         Args:
-            powerrange (int): check get_range method for 
+            powerrange (int): check get_range method for
             available dyanmic ranges.
 
         Raises:
-            Exception:  In case the MPM is busy. 
+            Exception:  In case the MPM is busy.
                         In case wrong value for powerrange is entered
         """
-        errorcode = self._mpm.Set_Range(int(powerrange))
+        errorcode = self._mpm.Set_Range(powerrange)
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
@@ -241,7 +237,7 @@ class MpmDevice:
         """MPM stops logging.
 
         Args:
-            except_if_error (bool, optional): Set True if raising exception is 
+            except_if_error (bool, optional): Set True if raising exception is
             needed within this method. Else, i.e. if this method is inserted within STS
             then set False so the exception  will be raised from STS method.
             Defaults to True.
@@ -311,33 +307,26 @@ class MpmDevice:
     def disconnect(self):
         self._mpm.DisConnect()
 
-    def wait_log_completion(self):
+    def wait_log_completion(self, sweepcount:int):
 
         #Check MPM Loging stopped
-        timeA = time.perf_counter()
-        status = 0                    #MPM Logging status  0: During logging 1: Completed, -1:stoped
+        status = 0 #MPM Logging status  0: During logging 1: Completed, -1:stopped, 10:stopped
         logging_point = 0
 
+        #constantly get the status in a loop. Increase the MPM timeout for this process, 
+        # just in case 2 seconds is not enough. 
+        intial_timeout = self._mpm.TimeOut
+        self._mpm.TimeOut += 3000
         while status == 0:
-            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0) #WHAT'S THE POINT OF logging_point variable???
-            if(errorcode !=0):
-                break
+            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0)
+            break
 
-            #if more than 2sec have passed for sweep time
-            elaspand_time = time.perf_counter() -timeA
-            if (elaspand_time > 2000):
-                errorcode = -999
-                break
+        self._mpm.TimeOut = intial_timeout #set the timeout back to the initial value.
 
-        # if (status != 0):
-        #     status_dic = {-1:'stopped', 0:'during logging', 1:'completed'}
-        #     raise RuntimeError("MPM status is "+status_dic[status]+". Timeout error occurred")
-
-           #Logging stop
         if (errorcode == -999):
             errorstr = "MPM Trigger received an error! Please check trigger cable connection."
             raise RuntimeError(errorstr)
 
-        if (errorcode != 0):
+        if (errorcode != 0 and status != -1 ): #TODO: test me and make sure the logic is correct based on the DLL return value
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None

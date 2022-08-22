@@ -7,33 +7,22 @@ Created on Thu Mar 17 11:33:52 2022
 
 import os
 import numpy
-import clr                                          # python for .net
+import clr # python for .net
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
 
 PATH1 ='InstrumentDLL'
-PATH2 ='STSProcess'
-#Add in santec.Instrument.DLL
+#Add  santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
 
 print (ans)
-from Santec import TSL, ExceptionCode                  #　name space of instrument DLL
-from Santec import CommunicationTerminator             # import CommunicationTerminator Enumration Class
-from Santec.Communication import CommunicationMethod   # import CommunicationMethod Enumration Class
-from Santec.Communication import GPIBConnectType       # import GPIBConnectType Enumration Class
-from Santec.Communication import MainCommunication     # import MainCommuncation Class
+from Santec import TSL, ExceptionCode                  #　namespace of instrument DLL
+from Santec import CommunicationTerminator
+from Santec.Communication import CommunicationMethod
+from Santec.Communication import GPIBConnectType
 
 from error_handing_class import inst_err_str
-
-# ans = clr.AddReference(root+path2)
-# print(ans)
-
-# from Santec.STSProcess import*                         # name space of  STSProcess DLL
-# from Santec.STSProcess import STSDataStruct            # import STSDataStruct structuer Class
-# from Santec.STSProcess import STSDataStructForMerge    # import STSDataStructForMerge structure class
-# from Santec.STSProcess import Module_Type              # import Module_Type Enumration Class
-# from Santec.STSProcess import RescalingMode            #import RescalingMode Enumration Class
 
 class TslDevice:
     '''TSL device class'''
@@ -41,12 +30,9 @@ class TslDevice:
     def __init__(self, interface: str, address: str, port: int = 5000):
         self._tsl = TSL()
         self.interface = interface
-        if (interface == "GPIB"):
-            self.address = address.split('::')[1]
-        else:
-            self.address = address
-        #TOOD: check on USB?
+        self.address = address
         self.port = port
+        self.temp_counter = 0 #TODO: delete me after misc bugs are fixed.
 
         if interface not in ("GPIB", "LAN", "USB"):
             raise Exception ('This interface is not supported')
@@ -74,7 +60,7 @@ class TslDevice:
         if self.interface =="GPIB":
             self._tsl.Terminator = CommunicationTerminator.CrLf
             print(self._tsl.Terminator)
-            self._tsl.GPIBAddress = int(self.address)
+            self._tsl.GPIBAddress = int(self.address.split('::')[1])
             print(self._tsl.GPIBAddress)
             self._tsl.Bordnumber = 0
             self._tsl.GPIBConnectType = GPIBConnectType.NI4882
@@ -94,7 +80,7 @@ class TslDevice:
             #USB DeviceID is defined uint32, So must be change variable type to unit32
             # this code typechange with numpy array
             ar_address = numpy.array([self.address],dtype ="uint32")
-            self._tsl.DeviceID = ar_address[0]
+            self._tsl.DeviceID = ar_address[0]#self.address
             self._tsl.Terminator = CommunicationTerminator.Cr
             errorcode = self._tsl.Connect(CommunicationMethod.USB)
         else:
@@ -105,32 +91,12 @@ class TslDevice:
             self._tsl.DisConnect()
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        #Now that we are connected, get the flags and wavelengths and limits etc
-        #TSL handling
-
-        #No need as self.get_550_flag() will be called from main.py
-        # flag_550 = self.get_550_flag()                                #550/710 or not
         self.get_spec_wavelength() #get spec wavelength(nm)
 
-        #no need as main.py will call self.get_sweep_speed_table() method
-        # if flag_550 is True:
-        #     self.sweep_table = None #this should be configued after connecting, in the STS class
-        #     self.maxpow = 10 #this should be configued after connecting, in the STS class
-        # else:
-        #     # this handling only support for TSL-570
-        #     self.sweep_table =self.get_sweep_speed_table()        #get Sweep speed tabel
-
-        #     if errorcode !="":
-        #         print("IL_STS",errorcode)
-            #get APC limit power for wavelength range:
-        self.maxpow = self.get_max_power()#TODO this should be called elsewhere, like in the STS class
-            #also make this throw an exception if needed
-            # if errorcode != "":
-            #     print("IL_STS",errorcode)
+        self.maxpow = self.get_max_power()
 
         return None
 
-    # retunr TSL-550 or not  True: TSL-550/710  False: TSL-570
     def get_550_flag(self):
         """Checks if the connected TSL is TSL-550/TSL-710
 
@@ -178,17 +144,16 @@ class TslDevice:
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
-            # errstr = inst_err_str(errorcode)
 
         return self.return_table
 
     def get_max_power(self):
         """This method is used when TSL-570 is connected.
         Returns the max output power that can be delivered by the connected
-        TSL. 
+        TSL.
         The method will call TSL object properties:min and max wavelentgh
         (spec_min_wav; spec_max_wav resp.)
-        
+
         Otherwise, DeviceError errorcode is returned.
 
         Raises:
@@ -199,8 +164,8 @@ class TslDevice:
                                                                     self.spec_max_wav,
                                                                     0.0)
 
-        if errorcode == ExceptionCode.DeviceError:
-            self.maxpower = 999 #!!! this is dangerous and needs to be experimentally checked
+        if errorcode == ExceptionCode.DeviceError.value__:
+            self.maxpower = 999
             errorcode = 0
 
         if errorcode !=0:
@@ -265,7 +230,7 @@ class TslDevice:
         Raises:
             Exception: In case the pass method fails
         """
-        
+
         self.startwave = startwave
         self.stopwave = stopwave
         self.step = step
@@ -282,7 +247,7 @@ class TslDevice:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         self.tsl_busy_check()
-        #return self.actual_step we dont need to return this because it ssaved in the actual_step car
+
         return None
 
     def soft_trigger(self):
@@ -296,7 +261,6 @@ class TslDevice:
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
-    #!!!create method to run the sweep
     def start_sweep(self):
         """Runs the wavelength sweep. Method to be used when TSL is not connected
         to STS.
@@ -313,7 +277,7 @@ class TslDevice:
         """Stops the sweep.
 
         Args:
-            except_if_error (bool, optional): Set True if raising exception is 
+            except_if_error (bool, optional): Set True if raising exception is
             needed within this method. Else, i.e. if this method is inserted within STS
             then set False so the exception  will be raised from STS method.
             Defaults to True.
@@ -328,7 +292,7 @@ class TslDevice:
 
 
     def tsl_busy_check(self) :
-        """Checks if the TSL is busy with other tasks. 
+        """Checks if the TSL is busy with other tasks.
         Default timeout = 3000 ms
 
         Raises:
@@ -363,6 +327,17 @@ class TslDevice:
             5:self._tsl.Sweep_Status.Returning
             }
         errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
+
+        #debug stuff to get the current status
+        current_enum = self._tsl.Sweep_Status.WaitingforTrigger #empty enum for now
+        test_num = -9999
+        test_num,current_enum = self._tsl.Get_Sweep_Status(current_enum)
+        str_currentVal = current_enum.value__
+        
+        self.temp_counter += 1
+        print("current counter = {} status = {}".format(self.temp_counter, str_currentVal) )
+
+
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None

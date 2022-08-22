@@ -6,13 +6,13 @@ Created on Fri Jan 21 17:21:13 2022
 """
 from array import array
 import os
-import clr
+import clr # python for .net
 import re
 import time
 import csv
 from dev_intr_class import SpuDevice
 from mpm_instr_class import MpmDevice
-from tsl_instr_class import TslDevice                                          # python for .net
+from tsl_instr_class import TslDevice
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
 print(ROOT)
@@ -22,12 +22,12 @@ PATH2 ='STSProcess'
 ans = clr.AddReference(ROOT+PATH2)
 print(ans)
 
-from Santec.STSProcess import *                        # name space of  STSProcess DLL
+from Santec.STSProcess import * # namespace of  STSProcess DLL
 from Santec.STSProcess import ILSTS
-from Santec.STSProcess import STSDataStruct            # import STSDataStruct structuer Class
-from Santec.STSProcess import STSDataStructForMerge    # import STSDataStructForMerge structure class
-from Santec.STSProcess import Module_Type              # import Module_Type Enumration Class
-from Santec.STSProcess import RescalingMode            #import RescalingMode Enumration Class
+from Santec.STSProcess import STSDataStruct            # import structure Class
+from Santec.STSProcess import STSDataStructForMerge    # import structure Class
+from Santec.STSProcess import Module_Type              # import  Enumration Class
+from Santec.STSProcess import RescalingMode            #import  Enumration Class
 
 from error_handing_class import stsprocess_err_str
 
@@ -44,7 +44,6 @@ class StsProcess:
         self._spu = _spu
         self._ilsts = ILSTS()
 
-    #def set_parameters(self,minwave,maxwave,wavestep,speed):
     def set_parameters(self):
         '''
         Sets parameters for STS process.
@@ -72,17 +71,12 @@ class StsProcess:
 
         '''
 
-        #do not set the sweep params for TSL, because we did that already in the TSL portion
-        ##self._tsl.set_sweep_parameters(self._tsl.minwave, self._tsl.maxwave, self._tsl.wavestep, self._tsl.speed)
-        #actual_step = self._tsl.actual_step
 
         #Logging parameters for MPM
         self._mpm.set_logging_parameters(self._tsl.startwave,
                                          self._tsl.stopwave,
                                          self._tsl.step,
                                          self._tsl.speed)
-
-        #averaging_time = self._mpm.get_averaging_time() #not needed anymore
 
         #Logging parameter for SPU(DAQ)
         self._spu.set_logging_parameters(self._tsl.startwave,
@@ -128,7 +122,7 @@ class StsProcess:
         if (sts_error !=0):
             raise Exception(str(sts_error) + ": " + stsprocess_err_str(sts_error))
 
-        return stsprocess_err_str(sts_error) #errorstr
+        return stsprocess_err_str(sts_error)
 
     def set_selected_channels(self,_mpm):
         '''This method to select channels to be measured.
@@ -140,13 +134,10 @@ class StsProcess:
         - special
         - cancel'''
         self.selected_chans = []
-        self.all_channels = self._mpm.get_mods_chans()  #array of arrays: array 0  displays the connected modules
-                                                        #the following arrays contain ints of available channels of each module
+        #array of arrays: array 0  displays the connected modules
+        #the following arrays contain ints of available channels of each module
+        self.all_channels = self._mpm.get_mods_chans()
 
-        #do some error handling to make sure we have at least 1 channel <- Done@ mpm class get_mods_chans line 93
-        #            0. last chosen settings, chosen from either memory or from the reference data.
-        #        - Its possible that neither exist. Think about also saving this to a file?
-        # this option was removed... need to check some error handling (presence or not of the file, the file being or not in the desired format etc.)
         print(
         '''
 Select channels to be measured:
@@ -200,10 +191,11 @@ Available modules/channels:
 
     def set_special(self):
         '''Manually enter/select the channels to be measured'''
-        #TODO: raising exception if entered module/channel doesn't exist
         print('Input (module,channel) to be tested [ex: (0,1); (1,1)]')
         selection = input()
         selection = re.findall(r"[\w']+",selection)
+
+        
         i=0
         while i<= len(selection)-1:
             self.selected_chans.append([selection[i],selection[i+1]])
@@ -226,29 +218,30 @@ Available modules/channels:
             i +=1
         selection = input()
         self.selected_ranges = re.findall(r"[\w']+",selection)
+        #convert the string ranges to ints, because that is what the DLL is expecting. 
+        self.selected_ranges = [int(i) for i in self.selected_ranges] 
         return None
 
     # Config each STSDatastruct from ch data And ranges
-    def set_data_struct(self):#,selected_chans,selected_ranges):
+    def set_data_struct(self):
         counter =1
         #List data clear
-        self.dut_monitor = []   #Lst_MeasMonitor_st.clear()
-        self.dut_data = []      #Lst_Measdata_st.clear()
-        self.merge_data = []    #Lst_Merge_st.clear()
-        self.ref_monitor = []   #Lst_RefMonitor_st.clear()
-        self.ref_data = []      #Lst_Refdata_st.clear()
-        self.range = []         #Lst_Range.clear()
+        self.dut_monitor = []
+        self.dut_data = []
+        self.merge_data = []
+        self.ref_monitor = []
+        self.ref_data = []
+        self.range = []
 
         # config STSDatastruct for each measurment
-        #TODO determine if this should be looped the other way around, first channels, and then ranges
         for m_range in self.selected_ranges:
             for ch in self.selected_chans:
                 data_st = STSDataStruct()
-                data_st.MPMNumber = 0           #TODO need to find a way to implement multi-MPM protocol
+                data_st.MPMNumber = 0
                 data_st.SlotNumber = int(ch[0])      #slot number
                 data_st.ChannelNumber = int(ch[1])   #channel number
-                data_st.RangeNumber = int(m_range)   #array of MPM ranges
-                data_st.SweepCount = int(counter)
+                data_st.RangeNumber = m_range   #array of MPM ranges
+                data_st.SweepCount = counter
                 data_st.SOP = 0
                 self.dut_data.append(data_st)
 
@@ -272,7 +265,7 @@ Available modules/channels:
         #config STSDataStruct for merge
         for ch in self.selected_chans:
             mergest = STSDataStructForMerge()
-            mergest.MPMnumber = 0           #TODO need to find a way to implement multi-MPM protocol
+            mergest.MPMnumber = 0
             mergest.SlotNumber = int(ch[0])      #slot number
             mergest.ChannelNumber = int(ch[1])   #channel number
             mergest.SOP = 0
@@ -286,15 +279,13 @@ Available modules/channels:
             print('Connect Slot{}Ch{}, then press ENTER'.format(i.SlotNumber,i.ChannelNumber))
             input()
             #set MPM range for 1st setting renge
-            self._mpm.set_range(self.range[0]) #No need to raise exception as it is done@ mpm_instr_class
-
+            self._mpm.set_range(self.range[0])
 
             #TSL Wavelength set to use Sweep Start Command
             self._tsl.start_sweep()
 
             #Sweep handling
-            self.sts_sweep_process()
-
+            self.sts_sweep_process(0)
 
             #get sampling data & Add in STSProcess Class
             self.get_reference_data(i)
@@ -313,7 +304,7 @@ Available modules/channels:
     def sts_measurement(self):
 
         #TSL Sweep Start
-        self._tsl.start_sweep()
+        #self._tsl.start_sweep() #moved to within the sts_sweep_process method, so that repeat scans properly work, 2022.08.22.
 
         #Range loop
         sweepcount = 1
@@ -322,7 +313,7 @@ Available modules/channels:
             errorstr = self._mpm.set_range(mpmrange)
 
             #sweep handling
-            errorstr = self.sts_sweep_process()
+            errorstr = self.sts_sweep_process(sweepcount)
 
             #Get Reference data
             errorstr = self.sts_get_meas_data(sweepcount)
@@ -342,18 +333,48 @@ Available modules/channels:
         #TSL stop
         self._tsl.stop_sweep()
 
+        #####################################################################!!!
+        #This portion of the code just to get wavelengths and IL data at the end of the scan
+        #It can be commented out if needed
+        self.wavelengthtable =[]
+        self.il_data= []
+        self.il_data_array = []
+
+        #Get rescaling wavelength table
+        for wav in list(self._ilsts.Get_Target_Wavelength_Table(None)[1]):
+            self.wavelengthtable.append(wav)
+        if (errorcode !=0):
+            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+        for item in self.merge_data:
+            #Pull out IL data of aftar merge
+            errorcode,self.il_data = self._ilsts.Get_IL_Merge_Data(None,item)
+            if (errorcode !=0):
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+            self.il_data = array("f",self.il_data)               #List to Array
+            self.il_data_array.append(self.il_data)
+        self.il = []
+        for i in self.il_data_array[0]:
+            self.il.append(i)
+        #####################################################################
+
         return None
 
     # STS Sweep Process
-    def sts_sweep_process(self):
+    def sts_sweep_process(self, sweepcount:int):
+        
+        #TSL Sweep Start
+        self._tsl.start_sweep()
+        
         #MPM Logging Start
-        self._mpm.logging_start() #if this errors, an exception is thrown
+        self._mpm.logging_start()
         try:
-            self._tsl.wait_for_sweep_status(waiting_time= 2000,sweep_status=4) #WaitingforTrigger
+            self._tsl.wait_for_sweep_status(waiting_time=3000, sweep_status=4) #WaitingforTrigger
             self._spu.sampling_start()
             self._tsl.soft_trigger()
             self._spu.sampling_wait()
-            self._mpm.wait_log_completion()  #DONE but need to be checked
+            self._mpm.wait_log_completion(sweepcount)
             self._mpm.logging_stop(True)
         except RuntimeError as scan_exception:
             self._tsl.stop_sweep(False)
@@ -364,15 +385,12 @@ Available modules/channels:
             raise tsl_exception
         self._tsl.wait_for_sweep_status(waiting_time=5000, sweep_status=1) #Standby
 
-        #TSL Wavelength set to use Sweep Start Command for next sweep
-        # self._tsl.start_sweep() #TODO why here!?
         return None
 
     # get logging data & add STSProcess Class for Reference
     def get_reference_data(self, item):
         errorstr = ""
 
-        # for item in Lst_Refdata_st:
         #Get MPM logging data
         logdata = self._mpm.get_each_chan_logdata(item.SlotNumber, item.ChannelNumber)
 

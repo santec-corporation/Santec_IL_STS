@@ -4,14 +4,14 @@ Created on Fri Jan 21 17:17:26 2022
 
 @author: chentir
 """
-# %% import packages
 #import datetime
 #import os
 #import csv
 #import glob
 #import pandas as pd
-#from matplotlib.pyplot import plot
-from Get_address import Initialize_And_Get_Device
+from matplotlib.pyplot import plot
+from matplotlib.pyplot import show
+from Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
 import sts_process as sts
 from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
@@ -25,11 +25,11 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice):
         startwave:  Starting wavelength (nm)
         stopwave:   Stopping wavelength (nm)
         step:       Sweep step (pm)
-        speed:      Sweep speed (nm/sec). 
-                    In case of TSL-570, the code will prompt 
+        speed:      Sweep speed (nm/sec).
+                    In case of TSL-570, the code will prompt
                     invite to select a speed from a list.
         power:      Output power (dBm)
-    
+
     These arguments will be passed to the connected_tsl object.
 
     Args:
@@ -44,6 +44,7 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice):
     stopwave = float(input())
     print('Input Sweep Step (pm):')
     step = float(input())/1000
+
     if connected_tsl.get_550_flag() is True:
         print('Input Sweep Speed (nm/sec):')
         speed = float(input())
@@ -70,10 +71,6 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice):
     return None
 
 def main():
-    # %% Initiallization
-    # TODO: Rework to include GPIB, USB and LAN connection #WARNING: TSL-550/710 do not accept LAN and USB connection
-    #Initialize_Device_Addresses()
-
     """
     tsl_address = Get_Tsl_Address()
     mpm_address = Get_Mpm_Address()
@@ -98,41 +95,34 @@ def main():
 
     """
 
-    tsl = Initialize_And_Get_Device(str(TslDevice))
-  
-    if tsl is None:
-        return None #quit the app 
-    
-    #connect the TSL
-    tsl.connect_tsl()
+    global tsl, mpm, dev, ilsts
 
-    #prompt if we need an MPM
-    print("Would you like to connect an MPM? [Y]es [N]o")
-    answer = input()
-    if answer in "Yy":
-        mpm = Initialize_And_Get_Device(str(MpmDevice))
+    Initialize_Device_Addresses()
+    tsl_address = Get_Tsl_Address()
+    mpm_address = Get_Mpm_Address()
+    dev_address = Get_Dev_Address()
+    interface = 'GPIB'
+    #only connect to the devices that the user wants to connect to
+    if tsl_address != None:
+        tsl = TslDevice(interface, tsl_address)
+        tsl.connect_tsl()
+    else:
+        raise Exception ("There must be a TSL connected")
+
+    if mpm_address != None:
+        mpm = MpmDevice(interface, mpm_address)
         mpm.connect_mpm()
 
-        if mpm is None:
-            return None #quit the app 
-        
-        dev = Initialize_And_Get_Device(str(SpuDevice))
+    if dev_address != None:
+        dev = SpuDevice(dev_address)
         dev.connect_spu()
-    
-        if dev is None:
-            #TODO: in the future, make this work for SME mode?
-            return None #quit the app 
-
-
-    # If there is a TSL an MPM, then the max power should be 10. Otherwise, no limit. #DONE @ Line 38
 
     # Set the TSL properties
     setting_tsl_sweep_params(tsl)
 
 
-    # If there is an MPM, then ask for the ranges and channels
-    if mpm != None:
-        # prompt user for channels and ranges.THese two methods will be in sts_process.py
+    # If there is an MPM, then create instance of ILSTS
+    if mpm.address != None:
         ilsts = sts.StsProcess(tsl,mpm,dev)
 
         ilsts.set_selected_channels(mpm)
@@ -140,30 +130,23 @@ def main():
 
         ilsts.set_data_struct()
         ilsts.set_parameters()
+        print('Connect for Reference measurement and press ENTER')
         print('Reference process:')
         ilsts.sts_reference(mpm)
-        print('DUT measurement:')
-        ilsts.sts_measurement()
-        ilsts.sts_save_meas_data('Z:\\Santec_IL_STS\\test.csv')
+        ans = 'y'
+        while ans in 'yY':
+            print('DUT measurement:')
+            print('Input repeat count:')
+            reps = int(input())
+            print('Connect DUT and press ENTER')
+            input()
+            for _ in range(reps):
+                ilsts.sts_measurement()
+                #plot(ilsts.wavelengthtable,ilsts.il)
+                #show()
+            print ('Redo? (y/n)')
+            ans = input()
 
-
-    # def PromptUserToTakeReferenceAndCreateDataStructure():
-        # prompt user about how to get reference data.
-        # 1. take new reference,
-        # 2. load previous reference,
-        # 3. prompt user to cancel
-        # 3. take no reference? maybe ignore this entirely and force user to do 1 or 2
-        # prompt user to get channels
-        # prompt user to get ranges
-
-        # create data structure
-        # do ref scan
-
-
-    # newDevice = TSL_Device()
-    # newDevice.setWaveLength(1600)
-    # newDevice._wavelength = 333 #cant do this
-    # newVar = newDevice._wavelength
-
+        ilsts.sts_save_meas_data('test.csv')
 
 main()
