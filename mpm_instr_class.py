@@ -318,15 +318,14 @@ class MpmDevice:
         intial_timeout = self._mpm.TimeOut
         self._mpm.TimeOut += 3000
         while status == 0:
-            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0)
+            errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0) #Updates status, which should break us out of the loop.
             break
 
         self._mpm.TimeOut = intial_timeout #set the timeout back to the initial value.
-
         if (errorcode == -999):
             errorstr = "MPM Trigger received an error! Please check trigger cable connection."
             raise RuntimeError(errorstr)
 
-        if (errorcode != 0 and status != -1 ): #TODO: test me and make sure the logic is correct based on the DLL return value
+        if (errorcode != 0 and status != -1): #its a success if either the error code is 0, or the status is -1. Otherwise throw.
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None

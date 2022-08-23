@@ -17,6 +17,8 @@ from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
 from dev_intr_class import SpuDevice
 
+file_last_scan_params = "last_scan_params.json" 
+file_measurement_data_results = "test.csv" 
 
 def setting_tsl_sweep_params(connected_tsl: TslDevice):
     """
@@ -125,21 +127,31 @@ def main():
     if mpm.address != None:
         ilsts = sts.StsProcess(tsl,mpm,dev)
 
+        #TODO: determine if we should load the prevous settings.
+        #ilsts.check_and_load_previous_param_data(file_last_scan_params)
+
         ilsts.set_selected_channels(mpm)
         ilsts.set_selected_ranges(mpm)
 
         ilsts.set_data_struct()
         ilsts.set_parameters()
+
+        #Determine if we should load reference data
+
         print('Connect for Reference measurement and press ENTER')
         print('Reference process:')
         ilsts.sts_reference(mpm)
+
+        print ("Saving parameter file " + file_last_scan_params)
+        ilsts.sts_save_param_data(file_last_scan_params)
+
         ans = 'y'
         while ans in 'yY':
             print('DUT measurement:')
             print('Input repeat count:')
             reps = int(input())
             print('Connect DUT and press ENTER')
-            input()
+            input() 
             for _ in range(reps):
                 ilsts.sts_measurement()
                 #plot(ilsts.wavelengthtable,ilsts.il)
@@ -147,6 +159,7 @@ def main():
             print ('Redo? (y/n)')
             ans = input()
 
-        ilsts.sts_save_meas_data('test.csv')
+        
+        ilsts.sts_save_meas_data(file_measurement_data_results)
 
 main()

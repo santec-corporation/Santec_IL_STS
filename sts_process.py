@@ -6,9 +6,12 @@ Created on Fri Jan 21 17:21:13 2022
 """
 from array import array
 import os
+from tokenize import Name
 import clr # python for .net
 import re
 import time
+from datetime import datetime
+import json
 import csv
 from dev_intr_class import SpuDevice
 from mpm_instr_class import MpmDevice
@@ -224,6 +227,7 @@ Available modules/channels:
 
     # Config each STSDatastruct from ch data And ranges
     def set_data_struct(self):
+        '''Create the data structures, which includes the potentially saveable reference data'''
         counter =1
         #List data clear
         self.dut_monitor = []
@@ -256,9 +260,11 @@ Available modules/channels:
                 # reference data need only 1 range for each ch
                 if (rangeindex ==0 ):
                     self.ref_data.append(data_st)
-                # reference monitor data need only 1 data
-                if (chindex ==0) and (rangeindex == 0):
                     self.ref_monitor.append(data_st)
+
+                # reference monitor data need only 1 data
+                #if (chindex ==0) and (rangeindex == 0):
+                #    self.ref_monitor.append(data_st)
 
             counter +=1
 
@@ -388,15 +394,15 @@ Available modules/channels:
         return None
 
     # get logging data & add STSProcess Class for Reference
-    def get_reference_data(self, item):
+    def get_reference_data(self, data_struct_item):
         errorstr = ""
 
         #Get MPM logging data
-        logdata = self._mpm.get_each_chan_logdata(item.SlotNumber, item.ChannelNumber)
+        logdata = self._mpm.get_each_chan_logdata(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
 
         #Add MPM Logging data for STS Process Class
         self.logdata = array('f',logdata)                       #List to Array
-        errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,item)
+        errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,data_struct_item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
@@ -404,9 +410,10 @@ Available modules/channels:
         trigger,monitor = self._spu.get_sampling_raw()
 
         #Add Monitor data for STS Process Class
-        errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,self.ref_monitor[0])
+        errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,data_struct_item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+    
         return None
 
     # get logging data & add STSProcess class for Measuerment
@@ -620,3 +627,60 @@ Available modules/channels:
                 raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
             counter +=1
         return errorstr
+
+    def check_and_load_previous_param_data(self, file_last_scan_params):
+        '''If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels, etc.'''
+        if (os.path.exists(file_last_scan_params) == False):
+            return 
+        
+        #load the previous settings
+        raise Exception ("not yet implemented")
+
+    def sts_save_param_data(self, file_last_scan_params:str):
+        self.sts_rename_old_file(file_last_scan_params)
+
+        #create a psuedo object for our array of STSDataStruct (self.ref_data)
+
+        arrayofdatastructures = []
+        index = 0
+        for this_datastruct in self.ref_data:
+            
+            #create a new hash table with this data
+            thisHashOfDataStructProps = {
+                "MPMNumber" : this_datastruct.MPMNumber,
+                "SlotNumber" : this_datastruct.SlotNumber,
+                "ChannelNumber" : this_datastruct.ChannelNumber,
+                "RangeNumber" : this_datastruct.RangeNumber,
+                "SweepCount" : this_datastruct.SweepCount,
+                "SOP" : this_datastruct.SOP,
+            }
+            arrayofdatastructures.append(thisHashOfDataStructProps)
+            index += 1
+            
+        jsondata = {
+            "selected_chans" : self.selected_chans,
+            "selected_ranges" :self.selected_ranges,
+            "startwave" :self._tsl.startwave,
+            "stopwave" :self._tsl.stopwave,
+            "step" :self._tsl.step,
+            "speed" :self._tsl.speed,
+            "actual_step" :self._tsl.actual_step,
+            "data_structures" : arrayofdatastructures,
+
+        }
+
+
+        #save several of our data structure properties. 
+        with open(file_last_scan_params, 'w') as exportfile:
+            json.dump(jsondata, exportfile) #an array
+        
+        return None
+
+    
+
+    def sts_rename_old_file(self, filename: str):
+        if (os.path.exists(filename)):
+            timenow = datetime.now()
+            os.rename(filename, timenow.strftime("%Y%m%d_%H%M%S") + "_" + filename )
+        
+        return None
