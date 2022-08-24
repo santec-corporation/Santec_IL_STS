@@ -185,7 +185,7 @@ class MpmDevice:
 
         return None
 
-    def  zeroing(self):
+    def zeroing(self):
         """Performs a Zeroing on all MPM channels.
         All the channels must be closed with respective balck caps before
         performing this operation.

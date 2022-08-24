@@ -5,11 +5,11 @@ Created on Fri Jan 21 17:21:13 2022
 @author: chentir
 """
 from array import array
+from ast import Raise
 import os
 from tokenize import Name
 import clr # python for .net
 import re
-import time
 from datetime import datetime
 import json
 import csv
@@ -40,12 +40,15 @@ class StsProcess:
     _tsl: TslDevice
     _mpm: MpmDevice
     _spu: SpuDevice
+    #_reference_data_array : array
 
-    def __init__(self, _tsl, _mpm, _spu):
+    def __init__(self, _tsl, _mpm, _spu ):
         self._tsl = _tsl
         self._mpm = _mpm
         self._spu = _spu
         self._ilsts = ILSTS()
+        #self._reference_data_array = _reference_data_array
+        self._reference_data_array = []
 
     def set_parameters(self):
         '''
@@ -127,7 +130,7 @@ class StsProcess:
 
         return stsprocess_err_str(sts_error)
 
-    def set_selected_channels(self,_mpm):
+    def set_selected_channels(self,previous_param_data):
         '''This method to select channels to be measured.
         It offers the user to choose between different ways to select MPM channels.
         For this purpose, method calls the following methods:
@@ -135,14 +138,24 @@ class StsProcess:
         - even_chans
         - odd_chans
         - special
-        - cancel'''
+        - cancel
+        '''
+        if (previous_param_data is not None):
+            self.selected_chans = previous_param_data["selected_chans"] #an array, like [1,3,5]
+            allModChans = ""
+            for thismodchan in self.selected_chans:
+                allModChans += ",".join([str(elem) for elem in thismodchan]) + "; " #contains numbers so do a converstion
+
+            print("Loaded the selected channels: " + allModChans.strip())
+            return None
+
+
         self.selected_chans = []
         #array of arrays: array 0  displays the connected modules
         #the following arrays contain ints of available channels of each module
         self.all_channels = self._mpm.get_mods_chans()
 
-        print(
-        '''
+        print('''
 Select channels to be measured:
             1. All channels
             2. Even channels
@@ -151,13 +164,11 @@ Select channels to be measured:
             5. Cancel
 
 Available modules/channels:
-
         ''')
         for i in range(len(self.all_channels)):
             if len(self.all_channels[i]) == 0:
                 continue
-            print ('''
-            Module {}: Channels {}'''.format(i,self.all_channels[i]))
+            print ("\r\n" + "Module {}: Channels {}".format(i,self.all_channels[i]))
 
         choices = {'1': self.set_all_chans,
                    '2': self.set_even_chans,
@@ -210,17 +221,26 @@ Available modules/channels:
         self._mpm.disconnect()
         self._spu.disconnect()
 
-    def set_selected_ranges(self,_mpm):
-        self.selected_ranges = []
-        print('Select the dynamic range. ex: 1, 3, 5')
-        print('Available dynamic ranges:')
-        i=1
-        self._mpm.get_range()
-        for range in self._mpm.rangedata:
-            print('{}- {}'.format(i,range))
-            i +=1
-        selection = input()
-        self.selected_ranges = re.findall(r"[\w']+",selection)
+    def set_selected_ranges(self,previous_param_data):
+        
+        if (previous_param_data is not None):
+            self.selected_ranges = previous_param_data["selected_ranges"] #an array, like [1,3,5]
+            str_all_ranges = ""
+            str_all_ranges += ",".join([str(elem) for elem in self.selected_ranges])  #contains numbers so do a converstion
+            print("Using the loaded dynamic ranges: " + str_all_ranges)
+
+        else:
+            self.selected_ranges = []
+            print('Select the dynamic range. ex: 1, 3, 5')
+            print('Available dynamic ranges:')
+            i=1
+            self._mpm.get_range()
+            for range in self._mpm.rangedata:
+                print('{}- {}'.format(i,range))
+                i +=1
+            selection = input()
+            self.selected_ranges = re.findall(r"[\w']+",selection)
+        
         #convert the string ranges to ints, because that is what the DLL is expecting. 
         self.selected_ranges = [int(i) for i in self.selected_ranges] 
         return None
@@ -258,7 +278,7 @@ Available modules/channels:
                     self.range.append(m_range)
 
                 # reference data need only 1 range for each ch
-                if (rangeindex ==0 ):
+                if (rangeindex == 0 ):
                     self.ref_data.append(data_st)
                     self.ref_monitor.append(data_st)
 
@@ -279,10 +299,10 @@ Available modules/channels:
             self.merge_data.append(mergest)
 
     # STS Reference handling
-    def sts_reference(self, _mpm):
+    def sts_reference(self):
 
         for i in self.ref_data:
-            print('Connect Slot{}Ch{}, then press ENTER'.format(i.SlotNumber,i.ChannelNumber))
+            print('Connect Slot{} Ch{}, then press ENTER'.format(i.SlotNumber,i.ChannelNumber))
             input()
             #set MPM range for 1st setting renge
             self._mpm.set_range(self.range[0])
@@ -305,6 +325,52 @@ Available modules/channels:
             self._tsl.stop_sweep()
 
         return None
+
+    def sts_reference_from_saved_file(self):
+        if (self._reference_data_array is None or len(self._reference_data_array) == 0):
+            raise Exception ("The reference data array cannot be null or empty when loading reference data from files." )
+        
+        if (len(self._reference_data_array) != len(self.ref_data)):
+            raise Exception("The length is difference between the saved reference array and the newly-obtained reference array")
+
+        for cached_ref_object in self._reference_data_array:
+            
+            #self.ref_data is an array of data structures. We need to get that exact data structure because the object is special.
+            #Find the matching data structure between ref_data and reference_data_array.
+
+            for i in [
+                x for x in self.ref_data 
+                if x.MPMNumber == cached_ref_object["MPMNumber"]
+                and x.SlotNumber == cached_ref_object["SlotNumber"]
+                and x.ChannelNumber == cached_ref_object["ChannelNumber"]
+            ]:
+                matched_data_structure = i
+
+            print('Loading reference data for Slot{} Ch{}...'.format(matched_data_structure.SlotNumber,matched_data_structure.ChannelNumber))
+
+            #Get MPM logging data
+            #logdata = self._mpm.get_each_chan_logdata(matched_data_structure.SlotNumber, matched_data_structure.ChannelNumber)
+            #self.logdata = cached_ref_object.logdata #self.logdata = array('f',logdata) #list to array
+
+            errorcode = self._ilsts.Add_Ref_MPMData_CH(cached_ref_object["logdata"], matched_data_structure)
+            if (errorcode !=0):
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+            #Get SPU sampling data
+            #trigger,monitor = self._spu.get_sampling_raw()
+
+            #Add Monitor data for STS Process Class
+            #errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,data_struct_item)
+            errorcode = self._ilsts.Add_Ref_MonitorData(cached_ref_object["trigger"], cached_ref_object["monitor"], matched_data_structure)
+            if (errorcode !=0):
+                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+            # rescaling for reference data
+            errorcode = self._ilsts.Cal_RefData_Rescaling()
+            if errorcode !=0:
+                raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+
 
     #STS Measurement handling
     def sts_measurement(self):
@@ -395,13 +461,14 @@ Available modules/channels:
 
     # get logging data & add STSProcess Class for Reference
     def get_reference_data(self, data_struct_item):
-        errorstr = ""
+        '''Get the reference data by using the parameter data structure, as well as the trigger points, and monitor data.'''
 
         #Get MPM logging data
         logdata = self._mpm.get_each_chan_logdata(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
 
         #Add MPM Logging data for STS Process Class
-        self.logdata = array('f',logdata)                       #List to Array
+        self.logdata = array('f',logdata) #List to Array
+
         errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,data_struct_item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
@@ -413,8 +480,24 @@ Available modules/channels:
         errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,data_struct_item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-    
+
+        #save all desired reference data into the reference array of this StsProcess class.
+        ref_object = {
+            "MPMNumber" : data_struct_item.MPMNumber,
+            "SlotNumber" : data_struct_item.SlotNumber,
+            "ChannelNumber" : data_struct_item.ChannelNumber,
+            #"logdata" : self.logdata,
+            "logdata" : list(self.logdata),
+            "trigger" : list(array('f',trigger)),
+            "monitor" : list(array('f',monitor)),
+        }
+
+        self._reference_data_array.append(ref_object)
+
         return None
+
+   
+
 
     # get logging data & add STSProcess class for Measuerment
     def sts_get_meas_data(self,sweepcount):
@@ -590,7 +673,7 @@ Available modules/channels:
             header =["Wavelength(nm)"]
             writestr =[]
 
-            #hedder
+            #header
             for item in self.merge_data:
                 ch = "Slot" + str(item.SlotNumber) +"Ch" + str(item.ChannelNumber)
                 header.append(ch)
@@ -628,25 +711,18 @@ Available modules/channels:
             counter +=1
         return errorstr
 
-    def check_and_load_previous_param_data(self, file_last_scan_params):
-        '''If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels, etc.'''
-        if (os.path.exists(file_last_scan_params) == False):
-            return 
-        
-        #load the previous settings
-        raise Exception ("not yet implemented")
 
-    def sts_save_param_data(self, file_last_scan_params:str):
-        self.sts_rename_old_file(file_last_scan_params)
+    def sts_save_param_data_unused(self, file_last_scan_params): #TODO: delete this method from this class. It was moved to main.
 
         #create a psuedo object for our array of STSDataStruct (self.ref_data)
 
         arrayofdatastructures = []
         index = 0
+        
         for this_datastruct in self.ref_data:
             
             #create a new hash table with this data
-            thisHashOfDataStructProps = {
+            thisHashOfDataStructProps = { #TODO: once confirmed that we dont need this, then delete this dictionary.
                 "MPMNumber" : this_datastruct.MPMNumber,
                 "SlotNumber" : this_datastruct.SlotNumber,
                 "ChannelNumber" : this_datastruct.ChannelNumber,
@@ -664,23 +740,14 @@ Available modules/channels:
             "stopwave" :self._tsl.stopwave,
             "step" :self._tsl.step,
             "speed" :self._tsl.speed,
+            "power" :self._tsl.power, #only really used on the TSL, and not on the mpm or spu.
             "actual_step" :self._tsl.actual_step,
-            "data_structures" : arrayofdatastructures,
-
+            #"data_structures" : arrayofdatastructures,
         }
 
 
         #save several of our data structure properties. 
         with open(file_last_scan_params, 'w') as exportfile:
             json.dump(jsondata, exportfile) #an array
-        
-        return None
-
-    
-
-    def sts_rename_old_file(self, filename: str):
-        if (os.path.exists(filename)):
-            timenow = datetime.now()
-            os.rename(filename, timenow.strftime("%Y%m%d_%H%M%S") + "_" + filename )
         
         return None
