@@ -6,6 +6,7 @@ Created on Fri Jan 21 17:21:13 2022
 """
 from array import array
 from ast import Raise
+from operator import ilshift
 import os
 from tokenize import Name
 import clr # python for .net
@@ -308,7 +309,7 @@ Available modules/channels:
             self._mpm.set_range(self.range[0])
 
             #TSL Wavelength set to use Sweep Start Command
-            self._tsl.start_sweep()
+            #self._tsl.start_sweep() #redundant, also exists within sts_sweep_process
 
             #Sweep handling
             self.sts_sweep_process(0)
@@ -467,7 +468,7 @@ Available modules/channels:
         logdata = self._mpm.get_each_chan_logdata(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
 
         #Add MPM Logging data for STS Process Class
-        self.logdata = array('f',logdata) #List to Array
+        self.logdata = array('d',logdata) #List to Array
 
         errorcode = self._ilsts.Add_Ref_MPMData_CH(logdata,data_struct_item)
         if (errorcode !=0):
@@ -475,28 +476,53 @@ Available modules/channels:
 
         #Get SPU sampling data
         trigger,monitor = self._spu.get_sampling_raw()
-
+ 
         #Add Monitor data for STS Process Class
         errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,data_struct_item)
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+        #wavelengtharray = self.get_wavelengths(data_struct_item, len(trigger)) #wrong, and too slow
+
 
         #save all desired reference data into the reference array of this StsProcess class.
         ref_object = {
             "MPMNumber" : data_struct_item.MPMNumber,
             "SlotNumber" : data_struct_item.SlotNumber,
             "ChannelNumber" : data_struct_item.ChannelNumber,
-            #"logdata" : self.logdata,
             "logdata" : list(self.logdata),
-            "trigger" : list(array('f',trigger)),
-            "monitor" : list(array('f',monitor)),
+            "trigger" : list(array('d',trigger)),
+            #"wavelength" : list(array('d',wavelengtharray)), #these wavelengths are only for triggers. we need to grab the sts wavelengths.
+            "monitor" : list(array('d',monitor))
         }
 
         self._reference_data_array.append(ref_object)
 
         return None
 
-   
+    def get_wavelengths(self, data_struct_item: STSDataStruct, triggerlength: int):
+        '''Get the list of wavelengths from the most recent scan.'''
+        datapointcount = 0
+        wavelengtharray = []
+        
+        #errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item,None,None) #testing 2...
+        #errorcode,wavelengtharray = self._ilsts.Get_Target_Wavelength_Table(wavelengtharray) #TODO; testing.....
+        
+
+        errorcode,datapointcount,wavelengtharray = self._tsl._tsl.Get_Logging_Data(datapointcount, wavelengtharray) #I take 3 seconds??
+
+
+        
+        #errorcode,wavelengtharray = self._ilsts.Get_Target_Wavelength_Table(None)
+        #if (errorcode !=0):
+        #    raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode) + ". Failed to get wavelengths from TSL.")
+
+        if (len(wavelengtharray) != triggerlength):
+            raise Exception ( "The length of the wavelength array is {} but the length of the trigger array is {}. They should have been the same. ".format(
+                len(wavelengtharray), triggerlength
+            ))
+
+        return wavelengtharray
 
 
     # get logging data & add STSProcess class for Measuerment
@@ -596,7 +622,6 @@ Available modules/channels:
         for item in self.dut_data:
             print(item)
             if (item.RangeNumber != mpmrange):
-                print('hey')
                 print(item.RangeNumber)
                 input()
                 continue
@@ -645,54 +670,7 @@ Available modules/channels:
 
         return errorstr
 
-    # save measunrement data
-    def sts_save_meas_data(self,filepath):
-        wavelengthtable =[]
-        self.il_data= []
-        il_data_array = []
-
-        #Get rescaling wavelength table
-        errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(None)
-        if (errorcode !=0):
-            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-        for item in self.merge_data:
-            #Pull out IL data of aftar merge
-            errorcode,self.il_data = self._ilsts.Get_IL_Merge_Data(None,item)
-            if (errorcode !=0):
-                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-            self.il_data = array("f",self.il_data)               #List to Array
-            il_data_array.append(self.il_data)
-
-
-        #Open file And write data for .csv
-        with open(filepath,"w",newline ="") as f:
-            writer = csv.writer(f)
-
-            header =["Wavelength(nm)"]
-            writestr =[]
-
-            #header
-            for item in self.merge_data:
-                ch = "Slot" + str(item.SlotNumber) +"Ch" + str(item.ChannelNumber)
-                header.append(ch)
-
-            writer.writerow(header)
-            counter = 0
-            for wave in wavelengthtable:
-                writestr.append(str(wave))
-
-                for item in il_data_array:
-                     data = item[counter]
-                     writestr.append(data)
-                writer.writerow(writestr)
-                writestr.clear()
-                counter +=1
-
-        f.close()
-        return None
-
+    
     #Load Reference Raw data
     def sts_load_ref_data(self,lstchdata,lstmonitor):
 

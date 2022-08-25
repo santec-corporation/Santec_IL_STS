@@ -16,15 +16,12 @@ from tkinter import N
 #from matplotlib.pyplot import show
 from Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
 import sts_process as sts
+import file_logging as file_logging
 from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
 from dev_intr_class import SpuDevice
 
 
-file_last_scan_params = "last_scan_params.json" 
-file_last_scan_reference_json = "last_scan_reference_data.json" 
-file_measurement_data_results = "data_measurement.csv" 
-file_reference_data_results = "data_reference.csv" 
 
 def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     """
@@ -112,38 +109,6 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
     return previous_settings
 
 
-def sts_save_param_data(file_last_scan_params: str, tsl: TslDevice, ilsts: sts.StsProcess):
-    sts_rename_old_file(file_last_scan_params)
-
-    #create a psuedo object for our array of STSDataStruct (self.ref_data)
-    jsondata = {
-        "selected_chans" : ilsts.selected_chans,
-        "selected_ranges" : ilsts.selected_ranges,
-        "startwave" :tsl.startwave,
-        "stopwave" :tsl.stopwave,
-        "step" :tsl.step,
-        "speed" :tsl.speed,
-        "power" :tsl.power, #only really used on the TSL, and not on the mpm or spu.
-        "actual_step" :tsl.actual_step,
-    }
-
-    if (ilsts is not None):
-        jsondata['selected_chans'] = ilsts.selected_chans
-        jsondata['selected_ranges'] = ilsts.selected_ranges
-
-    #save several of our data structure properties. 
-    with open(file_last_scan_params, 'w') as exportfile:
-        json.dump(jsondata, exportfile) #an array
-    
-    return None
-
-def sts_save_reference_json_data(file_last_scan_reference_json):
-    sts_rename_old_file(file_last_scan_reference_json)
-
-    with open(file_last_scan_reference_json, 'w') as exportfile:
-        json.dump(ilsts._reference_data_array, exportfile) #an array
-    
-    return None
 
 
 #def rename_previous_log_files():
@@ -151,28 +116,22 @@ def sts_save_reference_json_data(file_last_scan_reference_json):
 #    for thisfilename in filearray:
 #        sts_rename_old_file(thisfilename)
 
-def sts_rename_old_file(filename: str):
-    if (os.path.exists(filename)):
-        timenow = datetime.now()
-        os.rename(filename, timenow.strftime("%Y%m%d_%H%M%S") + "_" + filename )
-    
-    return None
 
 
 
 def prompt_and_get_previous_reference_data():
     '''Ask the user if they want to use the previous reference data (if it exists). If so, then load it. '''
 
-    if (os.path.exists(file_last_scan_reference_json) == False):
+    if (os.path.exists(file_logging.file_last_scan_reference_json) == False):
         return None
 
-    print("Would you like to use the most recent reference data from file '{}'? [y|n]".format(file_last_scan_reference_json))
+    print("Would you like to use the most recent reference data from file '{}'? [y|n]".format(file_logging.file_last_scan_reference_json))
     ans = input()
     if ans not in 'Yy':
         return None
 
-        #load the json data.
-    with open(file_last_scan_reference_json) as json_file:
+    #load the json data.
+    with open(file_logging.file_last_scan_reference_json) as json_file:
         previous_reference = json.load(json_file)
 
     return previous_reference
@@ -225,7 +184,7 @@ def main():
         dev.connect_spu()
 
     # Set the TSL properties
-    previous_param_data = prompt_and_get_previous_param_data(file_last_scan_params) #might be empty, if there is no data, or if the user chose to not load it.
+    previous_param_data = prompt_and_get_previous_param_data(file_logging.file_last_scan_params) #might be empty, if there is no data, or if the user chose to not load it.
     setting_tsl_sweep_params(tsl, previous_param_data) #previous_param_data might be none
 
     # If there is an MPM, then create instance of ILSTS
@@ -272,19 +231,27 @@ def main():
             ans = input()
 
         
-        print ("Saving measurement data file '" + file_measurement_data_results + "'...")
-        ilsts.sts_save_meas_data(file_measurement_data_results)
+        print ("Saving measurement data file '" + file_logging.file_measurement_data_results + "'...")
+        file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
-        print ("Saving reference json file '" + file_last_scan_reference_json + "'...")
-        sts_save_reference_json_data(file_last_scan_reference_json)
+        print ("Saving reference json file '" + file_logging.file_last_scan_reference_json + "'...")
+        file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 
-        print ("Saving reference csv data file '" + file_reference_data_results + "'...")
-        print ("(not implemented yet...")
-        #ilsts.sts_save_meas_data(file_measurement_data_results)
+        print ("Saving reference csv data file '" + file_logging.file_reference_data_results + "'...")
+        file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
+        
+
+        print ("Saving reference csv data file 'sts_save_ref_rawdata'...")
+        ilsts.sts_save_ref_rawdata("sts_save_ref_rawdata.csv")
+        
+        
+
+
+     
 
     #Save the parameters, whether we have an MPM or not. But only if there is no save file, or the user just set new settings.
     if (previous_param_data is None):
-        print ("Saving parameter file '" + file_last_scan_params + "'...")
-        sts_save_param_data(file_last_scan_params, tsl, ilsts) #ilsts might be None
+        print ("Saving parameter file '" + file_logging.file_last_scan_params + "'...")
+        file_logging.sts_save_param_data(file_logging.file_last_scan_params, tsl, ilsts) #ilsts might be None
 
 main()
