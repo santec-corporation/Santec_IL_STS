@@ -5,26 +5,21 @@ Created on Fri Jan 21 17:21:13 2022
 @author: chentir
 """
 from array import array
-from ast import Raise
-from operator import ilshift
 import os
-from tokenize import Name
 import clr # python for .net
 import re
 from datetime import datetime
-import json
-import csv
 from dev_intr_class import SpuDevice
 from mpm_instr_class import MpmDevice
 from tsl_instr_class import TslDevice
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-print(ROOT)
+#print(ROOT) #<-- comment in to check if the root was selected properly
 
 PATH2 ='STSProcess'
 #Add in santec.STSProcess.DLL
 ans = clr.AddReference(ROOT+PATH2)
-print(ans)
+# print(ans) #<-- comment in to check if the DLL was added properly
 
 from Santec.STSProcess import * # namespace of  STSProcess DLL
 from Santec.STSProcess import ILSTS
@@ -41,35 +36,28 @@ class StsProcess:
     _tsl: TslDevice
     _mpm: MpmDevice
     _spu: SpuDevice
-    #_reference_data_array : array
 
     def __init__(self, _tsl, _mpm, _spu ):
         self._tsl = _tsl
         self._mpm = _mpm
         self._spu = _spu
         self._ilsts = ILSTS()
-        #self._reference_data_array = _reference_data_array
         self._reference_data_array = []
 
     def set_parameters(self):
         '''
         Sets parameters for STS process.
+        Args:
+            startwave (float): Input the start wavelength value.
+            stopwave (float): Input the stop wavelength value.
+            step (float): Input the sweep step wavelength value.
+            speed (float): Input the sweep speed value.
 
-        Parameters
-        ----------
-        minwave : TYPE
-            DESCRIPTION.
-        maxwave : TYPE
-            DESCRIPTION.
-        wavestep : TYPE
-            DESCRIPTION.
-        speed : TYPE
-            DESCRIPTION.
 
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
+        Raises:
+            Exception:  When Reference/DUT data couldn't been erased.
+                        When Wavelength table couldn't be created
+                        Error with rescaling
 
         Returns
         -------
@@ -223,14 +211,15 @@ Available modules/channels:
         self._spu.disconnect()
 
     def set_selected_ranges(self,previous_param_data):
-        
-        if (previous_param_data is not None):
+        '''Sets the optical dynamic range of the MPM.'''
+
+        if (previous_param_data is not None): #Display previously used optical dynamic ranges
             self.selected_ranges = previous_param_data["selected_ranges"] #an array, like [1,3,5]
             str_all_ranges = ""
             str_all_ranges += ",".join([str(elem) for elem in self.selected_ranges])  #contains numbers so do a converstion
             print("Using the loaded dynamic ranges: " + str_all_ranges)
 
-        else:
+        else: #select new optical dynamic ranges
             self.selected_ranges = []
             print('Select the dynamic range. ex: 1, 3, 5')
             print('Available dynamic ranges:')
@@ -283,10 +272,6 @@ Available modules/channels:
                     self.ref_data.append(data_st)
                     self.ref_monitor.append(data_st)
 
-                # reference monitor data need only 1 data
-                #if (chindex ==0) and (rangeindex == 0):
-                #    self.ref_monitor.append(data_st)
-
             counter +=1
 
         #config STSDataStruct for merge
@@ -301,7 +286,7 @@ Available modules/channels:
 
     # STS Reference handling
     def sts_reference(self):
-
+        '''Take reference data for each module/channel selected by the user.'''
         for i in self.ref_data:
             print('Connect Slot{} Ch{}, then press ENTER'.format(i.SlotNumber,i.ChannelNumber))
             input()
@@ -318,17 +303,13 @@ Available modules/channels:
             #get sampling data & Add in STSProcess Class
             self.get_reference_data(i)
 
-            # rescaling for reference data.. This is called within get_reference_data, so that we can get rescaled power data in the same method.
-            #errorcode = self._ilsts.Cal_RefData_Rescaling()
-            #if errorcode !=0:
-            #    raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
             #TSL Sweep stop
             self._tsl.stop_sweep()
 
         return None
 
     def sts_reference_from_saved_file(self):
+        '''Loading reference data from saved file.'''
         if (self._reference_data_array is None or len(self._reference_data_array) == 0):
             raise Exception ("The reference data array cannot be null or empty when loading reference data from files." )
         
@@ -350,19 +331,10 @@ Available modules/channels:
 
             print('Loading reference data for Slot{} Ch{}...'.format(matched_data_structure.SlotNumber,matched_data_structure.ChannelNumber))
 
-            #Get MPM logging data
-            #logdata = self._mpm.get_each_chan_logdata(matched_data_structure.SlotNumber, matched_data_structure.ChannelNumber)
-            #self.logdata = cached_ref_object.logdata #self.logdata = array('f',logdata) #list to array
-
             errorcode = self._ilsts.Add_Ref_MPMData_CH(cached_ref_object["logdata"], matched_data_structure)
             if (errorcode !=0):
                 raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-            #Get SPU sampling data
-            #trigger,monitor = self._spu.get_sampling_raw()
-
-            #Add Monitor data for STS Process Class
-            #errorcode = self._ilsts.Add_Ref_MonitorData(trigger,monitor,data_struct_item)
             errorcode = self._ilsts.Add_Ref_MonitorData(cached_ref_object["trigger"], cached_ref_object["monitor"], matched_data_structure)
             if (errorcode !=0):
                 raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
@@ -376,10 +348,7 @@ Available modules/channels:
 
     #STS Measurement handling
     def sts_measurement(self):
-
-        #TSL Sweep Start
-        #self._tsl.start_sweep() #moved to within the sts_sweep_process method, so that repeat scans properly work, 2022.08.22.
-
+        '''DUT measurement'''
         #Range loop
         sweepcount = 1
         for mpmrange in self.range:
@@ -437,7 +406,15 @@ Available modules/channels:
 
     # STS Sweep Process
     def sts_sweep_process(self, sweepcount:int):
+        '''Configures TSL/MPM and Daq card to performe the sweep process.
         
+        Args:
+            sweepcount (int)
+        
+        Raises:
+            RuntimeError: If TSL/MPM and Daq card are not synchronized (TSL or MPM times out or issues with the Daq card.
+            Exception: If there is an issue with TSL sweep process.
+            '''
         #TSL Sweep Start
         self._tsl.start_sweep()
         
@@ -463,7 +440,15 @@ Available modules/channels:
 
     # get logging data & add STSProcess Class for Reference
     def get_reference_data(self, data_struct_item):
-        '''Get the reference data by using the parameter data structure, as well as the trigger points, and monitor data.'''
+        '''Get the reference data by using the parameter data structure, as well as the trigger points, and monitor data.
+        Args:
+            data_struct_item (Data structure): contains all information of tested module/channel.
+        
+        Raises:
+            Exception: If power monitr/MPM data were not added to the data structure.
+            Exception: Issues with the rescalling process.
+            Exception: Mismatch between the length of the power monitor data and the length of the MPM data
+            '''
 
         #Get MPM logging data
         logdata = self._mpm.get_each_chan_logdata(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
@@ -533,15 +518,6 @@ Available modules/channels:
         errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item,None,None) #testing 2...
         errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(None)
         #errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(wavelengtharray) #TODO; testing.....
-        
-
-        #errorcode,datapointcount,wavelengthtable = self._tsl._tsl.Get_Logging_Data(datapointcount, wavelengtharray) #I take 3 seconds??
-
-
-        
-        #errorcode,wavelengtharray = self._ilsts.Get_Target_Wavelength_Table(None)
-        #if (errorcode !=0):
-        #    raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode) + ". Failed to get wavelengths from TSL.")
 
         if (len(wavelengthtable) != triggerlength):
             raise Exception ( "The length of the wavelength array is {} but the length of the trigger array is {}. They should have been the same. ".format(
@@ -553,7 +529,12 @@ Available modules/channels:
 
     # get logging data & add STSProcess class for Measuerment
     def sts_get_meas_data(self,sweepcount):
-
+        '''Gets logged data during DUT measurement.
+        Args:
+            sweepcount (int)
+        
+        Raises:
+            Exception: if power monitor/MPM data couldn't be added to the data structure'''
         for item in self.dut_data:
             if (item.SweepCount != sweepcount):
                 continue

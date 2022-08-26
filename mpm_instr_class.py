@@ -12,13 +12,14 @@ import time
 from numpy import array
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-print(ROOT)
+#print(ROOT) #<-- comment in to check if the root was selected properly
 
 PATH1 ='InstrumentDLL'
 #Add in santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
 
-print (ans)
+#print(ans) #<-- comment in to check if the DLL was added properly
+
 from Santec import MPM #　namespace of instrument DLL
 from Santec.Communication import CommunicationMethod   # Enumration Class
 from Santec.Communication import GPIBConnectType       # Enumration Class
@@ -271,27 +272,15 @@ class MpmDevice:
         '''
         Sets the logging parameter for MPM integrated in STS
 
+        Args:
+            startwave (float): Input the start wavelength value.
+            stopwave (float): Input the stop wavelength value.
+            step (float): Input the sweep step wavelength value.
+            speed (float): Input the sweep speed value.
 
-        Parameters
-        ----------
-        startwave : TYPE
-            DESCRIPTION.
-        stopwave : TYPE
-            DESCRIPTION.
-        step : TYPE
-            DESCRIPTION.
-        speed : TYPE
-            DESCRIPTION.
-
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
+        Raises:
+            RuntimeError: When trigger signal is not detected
+            RuntimeError: if the MPM didn't record data
         '''
         errorcode = self._mpm.Set_Logging_Paremeter_for_STS(startwave,
                                                            stopwave,
@@ -314,7 +303,7 @@ class MpmDevice:
         logging_point = 0
 
         #constantly get the status in a loop. Increase the MPM timeout for this process, 
-        # just in case 2 seconds is not enough. 
+ 
         while status == 0:
             errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0) #Updates status, which should break us out of the loop.
             break

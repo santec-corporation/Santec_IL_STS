@@ -4,24 +4,15 @@ Created on Fri Jan 21 17:17:26 2022
 
 @author: chentir
 """
-#import datetime
 import os
-from datetime import datetime
 import json
-from tkinter import N
-#import csv
-#import glob
-#import pandas as pd
-#from matplotlib.pyplot import plot
-#from matplotlib.pyplot import show
+from matplotlib.pyplot import plot, show
 from Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
 import sts_process as sts
 import file_logging as file_logging
 from tsl_instr_class import TslDevice
 from mpm_instr_class import MpmDevice
 from dev_intr_class import SpuDevice
-
-
 
 def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     """
@@ -47,7 +38,6 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     if (previous_param_data is not None):
         startwave = float(previous_param_data["startwave"])
         stopwave = float(previous_param_data["stopwave"])
-        #step = float(previous_param_data["actual_step"])
         step = float(previous_param_data["step"]) #step is .001, but step is .1. we need the nm value.
         speed = float(previous_param_data["speed"])
         power = float(previous_param_data["power"])
@@ -92,12 +82,11 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
 
     return None
 
-
 def prompt_and_get_previous_param_data(file_last_scan_params):
     '''If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,  previous reference data etc.'''
     if (os.path.exists(file_last_scan_params) == False):
         return None
-    
+
     print('Would you like to load the most recent parameter settings from {}? [y|n]'.format(file_last_scan_params))
     ans = input()
     if ans not in 'Yy':
@@ -108,17 +97,6 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
         previous_settings = json.load(json_file)
 
     return previous_settings
-
-
-
-
-#def rename_previous_log_files():
-#    filearray = [file_last_scan_params, file_last_scan_reference_json, file_measurement_data_results, file_reference_data_results ]
-#    for thisfilename in filearray:
-#        sts_rename_old_file(thisfilename)
-
-
-
 
 def prompt_and_get_previous_reference_data():
     '''Ask the user if they want to use the previous reference data (if it exists). If so, then load it. '''
@@ -138,7 +116,6 @@ def prompt_and_get_previous_reference_data():
     else:
         strfilesize = str(int(intfilesize / 1000)) + " KB"
 
-
     print ("Opening " + strfilesize + " file '" + file_logging.file_last_scan_reference_json + "'...")
     #load the json data.
     with open(file_logging.file_last_scan_reference_json) as json_file:
@@ -147,29 +124,7 @@ def prompt_and_get_previous_reference_data():
     return previous_reference
 
 def main():
-    """
-    tsl_address = Get_Tsl_Address()
-    mpm_address = Get_Mpm_Address()
-    dev_address = Get_Dev_Address()
-
-    interface = 'GPIB'
-    # only connect to the devices that the user wants to connect to
-    if tsl_address != None:
-        tsl = TslDevice(interface, tsl_address)
-        tsl.connect_tsl()
-    else:
-        # Shouldn't this exception be in TSL class?
-        raise Exception("There must be a TSL connected")
-
-    if mpm_address != None:
-        mpm = MpmDevice(interface, mpm_address)  # for now, just do one MPM only
-        mpm.connect_mpm()
-
-    if dev_address != None:
-        dev = SpuDevice(dev_address)
-        dev.connect_spu()
-
-    """
+    """Main method of this project"""
 
     global tsl, mpm, dev, ilsts
 
@@ -178,6 +133,7 @@ def main():
     mpm_address = Get_Mpm_Address()
     dev_address = Get_Dev_Address()
     interface = 'GPIB'
+
     #only connect to the devices that the user wants to connect to
     if tsl_address != None:
         tsl = TslDevice(interface, tsl_address)
@@ -211,46 +167,46 @@ def main():
         previous_ref_data_array = prompt_and_get_previous_reference_data() #trigger, monitor, and logdata. Might be null if the user said no, or the file didn't exist.
         if (previous_ref_data_array is not None):
             ilsts._reference_data_array = previous_ref_data_array #ensures that we always have an array, empty or otherwise.
-        
+
         if (len(ilsts._reference_data_array) == 0):
-            
+
             print('Connect for Reference measurement and press ENTER')
             print('Reference process:')
             ilsts.sts_reference()
 
         else:
-            #Load the reference data from file. 
+            #Load the reference data from file.
             print("Loading reference data...")
             ilsts.sts_reference_from_saved_file() #loads from the cached array reference_data_array which is a property of ilsts
 
-        
+
         #Perform the sweeps
         ans = 'y'
         while ans in 'yY':
             print('DUT measurement:')
             reps = ""
-            
+
             while reps.isnumeric() == False:
                 print('Input repeat count, and connect the DUT and press ENTER:')
                 reps = input()
                 if reps.isnumeric() == False:
                     print('Invalid repeat count, enter a number.')
-                
+
             for _ in range(int(reps)):
                 print("Scan {} of {}...".format(str(_ + 1), reps))
                 ilsts.sts_measurement()
-                #plot(ilsts.wavelengthtable,ilsts.il)
-                #show()
+                plot(ilsts.wavelengthtable,ilsts.il)
+                show()
             print ('Redo? (y/n)')
             ans = input()
 
-        
+
         print ("Saving measurement data file '" + file_logging.file_measurement_data_results + "'...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
         print ("Saving reference csv data file '" + file_logging.file_reference_data_results + "'...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
-        
+
         print ("Saving reference json file '" + file_logging.file_last_scan_reference_json + "'...")
         file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 

@@ -10,14 +10,14 @@ import os
 import clr # python for .net
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-print(ROOT)
+#print(ROOT) #<-- comment in to check if the root was selected properly
 
 PATH1 = 'InstrumentDLL'
 #Add in santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
 from Santec import SPU  # 　namespace of instrument DLL
 
-print(ans)
+#print(ans) #<-- comment in to check if the DLL was added properly
 
 
 class SpuDevice:
@@ -61,28 +61,14 @@ class SpuDevice:
                                tsl_actual_step):
         '''
 
+        Args:
+            startwave (float): Input the start wavelength value.
+            stopwave (float): Input the stop wavelength value.
+            speed (float): Input the sweep speed value.
+            tsl_actual_step (float): Input the sweep step wavelength value.
 
-        Parameters
-        ----------
-        startwave : TYPE
-            DESCRIPTION.
-        stopwave : TYPE
-            DESCRIPTION.
-        speed : TYPE
-            DESCRIPTION.
-        tsl_acctualste : TYPE
-            DESCRIPTION.
-
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
+        Raises:
+            Exception
         '''
 
         errorcode = self._spu.Set_Sampling_Parameter(startwave,

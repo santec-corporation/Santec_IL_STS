@@ -10,13 +10,14 @@ import numpy
 import clr # python for .net
 
 ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-print(ROOT)
+#print(ROOT) #<-- comment in to check if the root was selected properly
 
 PATH1 ='InstrumentDLL'
 #Add  santec.Instrument.DLL
 ans = clr.AddReference(ROOT+PATH1)
 
-print (ans)
+#print(ans) #<-- comment in to check if the DLL was added properly
+
 from Santec import TSL, ExceptionCode                  #　namespace of instrument DLL
 from Santec import CommunicationTerminator
 from Santec.Communication import CommunicationMethod
@@ -32,7 +33,6 @@ class TslDevice:
         self.interface = interface
         self.address = address
         self.port = port
-        #self.temp_counter = 0 #a temp counter for displaying debug info during each sweep.
 
         if interface not in ("GPIB", "LAN", "USB"):
             raise Exception ('This interface is not supported')
@@ -59,14 +59,10 @@ class TslDevice:
         # When GPIB communication
         if self.interface =="GPIB":
             self._tsl.Terminator = CommunicationTerminator.CrLf
-            print(self._tsl.Terminator)
             self._tsl.GPIBAddress = int(self.address.split('::')[1])
-            print(self._tsl.GPIBAddress)
             self._tsl.Bordnumber = 0
             self._tsl.GPIBConnectType = GPIBConnectType.NI4882
-            print(self._tsl.GPIBConnectType)
             errorcode = self._tsl.Connect(CommunicationMethod.GPIB)
-            print(errorcode)
          # When LAN Communication
         elif self.interface == "LAN":
             self._tsl.Terminator = CommunicationTerminator.Cr
@@ -164,7 +160,7 @@ class TslDevice:
                                                                     self.spec_max_wav,
                                                                     0.0)
 
-        if errorcode == ExceptionCode.DeviceError.value__:
+        if errorcode == ExceptionCode.DeviceError:
             self.maxpower = 999
             errorcode = 0
 
@@ -327,16 +323,6 @@ class TslDevice:
             5:self._tsl.Sweep_Status.Returning
             }
         errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
-
-        #debug stuff to get the current status
-        #current_enum = self._tsl.Sweep_Status.WaitingforTrigger #empty enum for now
-        #test_num = -9999
-        #test_num,current_enum = self._tsl.Get_Sweep_Status(current_enum)
-        #str_currentVal = current_enum.value__
-        
-        #self.temp_counter += 1
-        #print("current counter = {} status = {}".format(self.temp_counter, str_currentVal) )
-
 
         if errorcode !=0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))

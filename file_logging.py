@@ -50,11 +50,11 @@ def save_reference_json_data(ilsts: sts.StsProcess, strfilename: str):
 
 
 def rename_old_file(filename: str):
-    if (os.path.exists(filename)):
+    if (os.path.exists(filename)== True):
         
         #Create a new subfolder, if it doesn't already exist.
         str_previous_folder = "previous"
-        if (os.path.exists("/" + str_previous_folder)):
+        if (os.path.exists("/" + str_previous_folder) == False):
             os.mkdir(str_previous_folder)
 
         timenow = datetime.now()
