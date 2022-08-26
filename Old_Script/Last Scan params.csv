@@ -1,2 +1,0 @@
-Start Wavelength (nm),Stop Wavelength (nm),Step (pm),Speed (nm/sec),Power (dBm),Channel list,Power range list
-1500.0,1510.0,1.0,10.0,2.0,['Slot1Ch4'],[1]

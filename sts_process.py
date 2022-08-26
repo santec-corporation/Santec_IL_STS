@@ -312,15 +312,16 @@ Available modules/channels:
             #self._tsl.start_sweep() #redundant, also exists within sts_sweep_process
 
             #Sweep handling
+            print ("Scanning...")
             self.sts_sweep_process(0)
 
             #get sampling data & Add in STSProcess Class
             self.get_reference_data(i)
 
-            # rescaling for reference data
-            errorcode = self._ilsts.Cal_RefData_Rescaling()
-            if errorcode !=0:
-                raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+            # rescaling for reference data.. This is called within get_reference_data, so that we can get rescaled power data in the same method.
+            #errorcode = self._ilsts.Cal_RefData_Rescaling()
+            #if errorcode !=0:
+            #    raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
             #TSL Sweep stop
             self._tsl.stop_sweep()
@@ -366,7 +367,7 @@ Available modules/channels:
             if (errorcode !=0):
                 raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-            # rescaling for reference data
+            # rescaling for reference data. 
             errorcode = self._ilsts.Cal_RefData_Rescaling()
             if errorcode !=0:
                 raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
@@ -393,7 +394,7 @@ Available modules/channels:
 
             sweepcount += 1
 
-        # rescaling
+        # rescaling,
         errorcode = self._ilsts.Cal_MeasData_Rescaling()
         if (errorcode !=0):
             raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
@@ -425,7 +426,7 @@ Available modules/channels:
             if (errorcode !=0):
                 raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-            self.il_data = array("f",self.il_data)               #List to Array
+            self.il_data = array("d",self.il_data)               #List to Array
             self.il_data_array.append(self.il_data)
         self.il = []
         for i in self.il_data_array[0]:
@@ -482,7 +483,24 @@ Available modules/channels:
         if (errorcode !=0):
             raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
-        #wavelengtharray = self.get_wavelengths(data_struct_item, len(trigger)) #wrong, and too slow
+        # rescaling for reference data. We must rescale before we get the reference data. Otherwise we end up with way too many monitor and logging points.
+        errorcode = self._ilsts.Cal_RefData_Rescaling()
+        if errorcode !=0:
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+        #after rescaling is done, get the raw reference data.
+        errorcode,rescaled_ref_pwr,rescaled_ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item,None,None)
+        if errorcode !=0:
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+        errorcode,wavelengtharray = self._ilsts.Get_Target_Wavelength_Table(None)
+        if errorcode !=0:
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+        
+        if (len(wavelengtharray) == 0 or len(wavelengtharray) != len(rescaled_ref_pwr) or len(wavelengtharray) != len(rescaled_ref_mon)):
+            raise Exception("The length of the wavelength array is {}, the length of the reference power array is {}, and the length of the reference monitor is {}. They must all be the same length.".format(
+                len(wavelengtharray), len(rescaled_ref_pwr), len(rescaled_ref_mon))
+            )
 
 
         #save all desired reference data into the reference array of this StsProcess class.
@@ -490,10 +508,12 @@ Available modules/channels:
             "MPMNumber" : data_struct_item.MPMNumber,
             "SlotNumber" : data_struct_item.SlotNumber,
             "ChannelNumber" : data_struct_item.ChannelNumber,
-            "logdata" : list(self.logdata),
-            "trigger" : list(array('d',trigger)),
-            #"wavelength" : list(array('d',wavelengtharray)), #these wavelengths are only for triggers. we need to grab the sts wavelengths.
-            "monitor" : list(array('d',monitor))
+            "logdata" : list(self.logdata), #unscaled logdata data is required if we want to load the reference data later.
+            "trigger" : list(array('d',trigger)), #motor positions that correspond to wavelengths. required if we want to load the reference data later.
+            "monitor" : list(array('d',monitor)), #unscaled monitor data is required if we want to load the reference data later.
+            "rescaled_monitor" : list(array('d',rescaled_ref_mon)), #rescaled monitor data
+            "rescaled_wavelength" : list(array('d',wavelengtharray)), #all wavelengths, including triggers inbetween. 
+            "rescaled_referencepower" : list(array('d',rescaled_ref_pwr)), #rescaled reference power
         }
 
         self._reference_data_array.append(ref_object)
@@ -505,11 +525,17 @@ Available modules/channels:
         datapointcount = 0
         wavelengtharray = []
         
-        #errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item,None,None) #testing 2...
-        #errorcode,wavelengtharray = self._ilsts.Get_Target_Wavelength_Table(wavelengtharray) #TODO; testing.....
+        # rescaling for reference data
+        errorcode = self._ilsts.Cal_RefData_Rescaling()
+        if errorcode !=0:
+            raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
+
+        errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item,None,None) #testing 2...
+        errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(None)
+        #errorcode,wavelengthtable = self._ilsts.Get_Target_Wavelength_Table(wavelengtharray) #TODO; testing.....
         
 
-        errorcode,datapointcount,wavelengtharray = self._tsl._tsl.Get_Logging_Data(datapointcount, wavelengtharray) #I take 3 seconds??
+        #errorcode,datapointcount,wavelengthtable = self._tsl._tsl.Get_Logging_Data(datapointcount, wavelengtharray) #I take 3 seconds??
 
 
         
@@ -517,12 +543,12 @@ Available modules/channels:
         #if (errorcode !=0):
         #    raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode) + ". Failed to get wavelengths from TSL.")
 
-        if (len(wavelengtharray) != triggerlength):
+        if (len(wavelengthtable) != triggerlength):
             raise Exception ( "The length of the wavelength array is {} but the length of the trigger array is {}. They should have been the same. ".format(
-                len(wavelengtharray), triggerlength
+                len(wavelengthtable), triggerlength
             ))
 
-        return wavelengtharray
+        return wavelengthtable
 
 
     # get logging data & add STSProcess class for Measuerment
@@ -534,7 +560,7 @@ Available modules/channels:
 
             #Get MPM loggin data
             logdata = self._mpm.get_each_chan_logdata(item.SlotNumber,item.ChannelNumber)
-            logdata = array("f",logdata)                           #List to Array
+            logdata = array("d",logdata)                           #List to Array
 
             #Add MPM Logging data for STSPrcess Class with STSDatastruct
             errorcode = self._ilsts.Add_Meas_MPMData_CH(logdata,item)
@@ -544,8 +570,8 @@ Available modules/channels:
         # Get monitor data
         trigger,monitor = self._spu.get_sampling_raw()
 
-        trigger = array("f",trigger)                             #List to Array
-        monitor = array("f",monitor)                             #list to Array
+        trigger = array("d",trigger)                             #List to Array
+        monitor = array("d",monitor)                             #list to Array
 
         #search place of add in
         for item in self.dut_monitor:
@@ -558,174 +584,3 @@ Available modules/channels:
 
         return None
 
-    # Save Reference raw data
-    def sts_save_ref_rawdata(self,filepath):
-        #wavelength data
-        errorcode,wavetable = self._ilsts.Get_Target_Wavelength_Table(None)
-        if (errorcode !=0):
-            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-        lstpow = []
-        #Pull out reference raw data of aftar rescaling
-        for item in self.ref_data:
-            errorcode,ref_pwr,ref_mon = self._ilsts.Get_Ref_RawData(item,None,None)
-            if (errorcode !=0):
-                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-            ref_pwr = array("f",ref_pwr)     #List to Array
-            ref_mon = array("f",ref_mon)
-            lstpow.append(ref_pwr)
-
-        #File open and write data  for .csv
-        with open(filepath,"w",newline="")as f:
-            writer = csv.writer(f)
-            header = ["Wavelength(nm)"]
-
-            #for hedder
-            for item in self.ref_data:
-                header_str  = "Slot" +str(item.SlotNumber) +"Ch" +str(item.ChannelNumber)
-                header.append(header_str)
-            header_str = "Monitor"
-            header.append(header_str)
-            writer.writerow(header)
-
-            writest = []
-            #for data
-            counter = 0
-            for wave in wavetable:
-                writest.append(wave)
-                for item in lstpow:
-                    data = item[counter]
-                    writest.append(data)
-
-                data = ref_mon[counter]
-                writest.append(data)
-                writer.writerow(writest)
-                writest.clear()
-                counter +=1
-
-            f.close()
-
-        return None
-
-    #Save measurement Rawdata for specific range
-    def sts_save_rawdata(self,fpath,mpmrange):
-        errorstr = ""
-
-        #wavelength table
-        errorcode,wavetable = self._ilsts.Get_Target_Wavelength_Table(None)
-        if (errorcode !=0):
-            raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-        lstpow = []
-        #data
-        for item in self.dut_data:
-            print(item)
-            if (item.RangeNumber != mpmrange):
-                print(item.RangeNumber)
-                input()
-                continue
-            #Pull out measurement raw data of aftar rescaling
-            errorcode,dut_pwr,dut_mon = self._ilsts.Get_Meas_RawData(item,None,None)
-            if (errorcode !=0):
-                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-
-            dut_pwr = array("f",dut_pwr)      #List to Array
-            dut_mon = array("f",dut_mon)      #List to Array
-            lstpow.append(dut_pwr)
-
-        #for hedder
-        header = ["Wavelength(nm)"]
-
-        for item in self.dut_data:
-            if (item.RangeNumber != mpmrange):
-                continue
-            header_str = "Slot" + str(item.SlotNumber) + "Ch" + str(item.ChannelNumber)
-            header.append(header_str)
-
-        header_str = "Monitor"
-        header.append(header_str)
-
-        #Open file and write data for .csv
-        with open(fpath,"w",newline = "") as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-
-            #for data
-            write_st =[]
-            counter = 0
-            for wave in wavetable:
-                write_st.append(wave)
-                #power data
-                for item in lstpow:
-                    data = item[counter]
-                    write_st.append(data)
-                #monitor data
-                data = dut_mon[counter]
-                write_st.append(data)
-                writer.writerow(write_st)
-                write_st.clear()
-                counter += 1
-            f.close()
-
-        return errorstr
-
-    
-    #Load Reference Raw data
-    def sts_load_ref_data(self,lstchdata,lstmonitor):
-
-        errorstr = ""
-        counter = 0
-        for item in self.ref_data:
-
-            chdata = lstchdata[counter]
-            arychdata = array("f",chdata)       #List to Array
-            arymonitor = array("f",lstmonitor)
-
-            #Add in Reference Raw data
-            errorcode = self._ilsts.Add_Ref_Rawdata(arychdata,arymonitor,item)
-            if (errorcode !=0):
-                raise Exception (str(errorcode) + ": " + stsprocess_err_str(errorcode))
-            counter +=1
-        return errorstr
-
-
-    def sts_save_param_data_unused(self, file_last_scan_params): #TODO: delete this method from this class. It was moved to main.
-
-        #create a psuedo object for our array of STSDataStruct (self.ref_data)
-
-        arrayofdatastructures = []
-        index = 0
-        
-        for this_datastruct in self.ref_data:
-            
-            #create a new hash table with this data
-            thisHashOfDataStructProps = { #TODO: once confirmed that we dont need this, then delete this dictionary.
-                "MPMNumber" : this_datastruct.MPMNumber,
-                "SlotNumber" : this_datastruct.SlotNumber,
-                "ChannelNumber" : this_datastruct.ChannelNumber,
-                "RangeNumber" : this_datastruct.RangeNumber,
-                "SweepCount" : this_datastruct.SweepCount,
-                "SOP" : this_datastruct.SOP,
-            }
-            arrayofdatastructures.append(thisHashOfDataStructProps)
-            index += 1
-            
-        jsondata = {
-            "selected_chans" : self.selected_chans,
-            "selected_ranges" :self.selected_ranges,
-            "startwave" :self._tsl.startwave,
-            "stopwave" :self._tsl.stopwave,
-            "step" :self._tsl.step,
-            "speed" :self._tsl.speed,
-            "power" :self._tsl.power, #only really used on the TSL, and not on the mpm or spu.
-            "actual_step" :self._tsl.actual_step,
-            #"data_structures" : arrayofdatastructures,
-        }
-
-
-        #save several of our data structure properties. 
-        with open(file_last_scan_params, 'w') as exportfile:
-            json.dump(jsondata, exportfile) #an array
-        
-        return None

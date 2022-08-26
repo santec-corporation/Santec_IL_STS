@@ -47,7 +47,8 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     if (previous_param_data is not None):
         startwave = float(previous_param_data["startwave"])
         stopwave = float(previous_param_data["stopwave"])
-        step = float(previous_param_data["actual_step"]) #The saved "step" is in pm, but we need nm.
+        #step = float(previous_param_data["actual_step"])
+        step = float(previous_param_data["step"]) #step is .001, but step is .1. we need the nm value.
         speed = float(previous_param_data["speed"])
         power = float(previous_param_data["power"])
 
@@ -130,6 +131,15 @@ def prompt_and_get_previous_reference_data():
     if ans not in 'Yy':
         return None
 
+    #Get the file size. If its huge, then the load will freeze for a few seconds.
+    intfilesize = int(os.path.getsize(file_logging.file_last_scan_reference_json))
+    if intfilesize > 1000000:
+        strfilesize = str(int(intfilesize / 1000 / 1000)) + " MB"
+    else:
+        strfilesize = str(int(intfilesize / 1000)) + " KB"
+
+
+    print ("Opening " + strfilesize + " file '" + file_logging.file_last_scan_reference_json + "'...")
     #load the json data.
     with open(file_logging.file_last_scan_reference_json) as json_file:
         previous_reference = json.load(json_file)
@@ -213,17 +223,21 @@ def main():
             print("Loading reference data...")
             ilsts.sts_reference_from_saved_file() #loads from the cached array reference_data_array which is a property of ilsts
 
-
         
         #Perform the sweeps
         ans = 'y'
         while ans in 'yY':
             print('DUT measurement:')
-            print('Input repeat count:')
-            reps = int(input())
-            print('Connect DUT and press ENTER')
-            input() 
-            for _ in range(reps):
+            reps = ""
+            
+            while reps.isnumeric() == False:
+                print('Input repeat count, and connect the DUT and press ENTER:')
+                reps = input()
+                if reps.isnumeric() == False:
+                    print('Invalid repeat count, enter a number.')
+                
+            for _ in range(int(reps)):
+                print("Scan {} of {}...".format(str(_ + 1), reps))
                 ilsts.sts_measurement()
                 #plot(ilsts.wavelengthtable,ilsts.il)
                 #show()
@@ -234,24 +248,15 @@ def main():
         print ("Saving measurement data file '" + file_logging.file_measurement_data_results + "'...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
-        print ("Saving reference json file '" + file_logging.file_last_scan_reference_json + "'...")
-        file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
-
         print ("Saving reference csv data file '" + file_logging.file_reference_data_results + "'...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
         
-
-        print ("Saving reference csv data file 'sts_save_ref_rawdata'...")
-        ilsts.sts_save_ref_rawdata("sts_save_ref_rawdata.csv")
-        
-        
-
-
-     
+        print ("Saving reference json file '" + file_logging.file_last_scan_reference_json + "'...")
+        file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 
     #Save the parameters, whether we have an MPM or not. But only if there is no save file, or the user just set new settings.
     if (previous_param_data is None):
         print ("Saving parameter file '" + file_logging.file_last_scan_params + "'...")
-        file_logging.sts_save_param_data(file_logging.file_last_scan_params, tsl, ilsts) #ilsts might be None
+        file_logging.sts_save_param_data(tsl, ilsts, file_logging.file_last_scan_params) #ilsts might be None
 
 main()

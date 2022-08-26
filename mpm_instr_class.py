@@ -45,12 +45,12 @@ class MpmDevice:
             self._mpm.GPIBAddress = int(self.address)
             self._mpm.Bordnumber = 0
             self._mpm.GPIBConnectType = GPIBConnectType.NI4882
-        else :
+        else:
             mpm_commincation_method  = CommunicationMethod.TCPIP
             self._mpm.IPAddress = self.address
             self._mpm.port = self.port #port = 5000
 
-        self._mpm.TimeOut = 2000 # timeout value for MPM
+        self._mpm.TimeOut = 5000 # timeout value for MPM
 
         errorcode = self._mpm.Connect(mpm_commincation_method)
         if errorcode !=0:
@@ -315,13 +315,10 @@ class MpmDevice:
 
         #constantly get the status in a loop. Increase the MPM timeout for this process, 
         # just in case 2 seconds is not enough. 
-        intial_timeout = self._mpm.TimeOut
-        self._mpm.TimeOut += 3000
         while status == 0:
             errorcode,status,logging_point = self._mpm.Get_Logging_Status(0,0) #Updates status, which should break us out of the loop.
             break
 
-        self._mpm.TimeOut = intial_timeout #set the timeout back to the initial value.
         if (errorcode == -999):
             errorstr = "MPM Trigger received an error! Please check trigger cable connection."
             raise RuntimeError(errorstr)

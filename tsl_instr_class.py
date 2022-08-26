@@ -32,7 +32,7 @@ class TslDevice:
         self.interface = interface
         self.address = address
         self.port = port
-        self.temp_counter = 0 #TODO: delete me after misc bugs are fixed.
+        #self.temp_counter = 0 #a temp counter for displaying debug info during each sweep.
 
         if interface not in ("GPIB", "LAN", "USB"):
             raise Exception ('This interface is not supported')
@@ -329,13 +329,13 @@ class TslDevice:
         errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
 
         #debug stuff to get the current status
-        current_enum = self._tsl.Sweep_Status.WaitingforTrigger #empty enum for now
-        test_num = -9999
-        test_num,current_enum = self._tsl.Get_Sweep_Status(current_enum)
-        str_currentVal = current_enum.value__
+        #current_enum = self._tsl.Sweep_Status.WaitingforTrigger #empty enum for now
+        #test_num = -9999
+        #test_num,current_enum = self._tsl.Get_Sweep_Status(current_enum)
+        #str_currentVal = current_enum.value__
         
-        self.temp_counter += 1
-        print("current counter = {} status = {}".format(self.temp_counter, str_currentVal) )
+        #self.temp_counter += 1
+        #print("current counter = {} status = {}".format(self.temp_counter, str_currentVal) )
 
 
         if errorcode !=0:
