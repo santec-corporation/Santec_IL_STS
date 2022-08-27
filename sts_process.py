@@ -358,7 +358,7 @@ Available modules/channels:
             #sweep handling
             errorstr = self.sts_sweep_process(sweepcount)
 
-            #Get Reference data
+            #Get DUT data
             errorstr = self.sts_get_meas_data(sweepcount)
 
             sweepcount += 1

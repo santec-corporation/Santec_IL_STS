@@ -54,7 +54,7 @@ def rename_old_file(filename: str):
         
         #Create a new subfolder, if it doesn't already exist.
         str_previous_folder = "previous"
-        if (os.path.exists("/" + str_previous_folder) == False):
+        if (os.path.exists(r"./" + str_previous_folder) == False):
             os.mkdir(str_previous_folder)
 
         timenow = datetime.now()
@@ -216,7 +216,12 @@ def sts_save_ref_rawdata_unused(ilsts: sts.StsProcess, filepath: str): #TODO: de
     return None
 
 #Save measurement Rawdata for specific range
-def sts_save_rawdata_unused(ilsts: sts.StsProcess, fpath: str, mpmrange): #TODO: delete this method
+def sts_save_rawdata_unused(ilsts: sts.StsProcess, fpath: str, mpmrange):
+    '''Saves raw data (MPM and power monitor) during DUT measurement
+    Args:
+        ilsts (StsProcess)
+        fpath (str): path and file name
+        mpmrange (int): Optical dynamic range of interest'''
     errorstr = ""
 
     #wavelength table
