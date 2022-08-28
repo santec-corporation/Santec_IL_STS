@@ -21,6 +21,7 @@ Santec IL STS is a python script designed to:
   
   - Make sure all instruments are connected as shown on the following schematic:
 ![image](https://user-images.githubusercontent.com/103238519/187052163-7718c0ee-4fc7-44a3-9086-b7af40b0100a.png)
-    
+![image](https://user-images.githubusercontent.com/103238519/187053147-8edf1644-5ba1-41ed-a1c1-1b900c923ea6.png)
+
   - Make sure that the TSL LD diod is switched ON and warm up during 30min
   - It is recommended to perform a zeroing of the MPM (see MPM user manual)
