@@ -59,8 +59,12 @@ def Initialize_Device_Addresses():
     tools=[i for i in listing if 'GPIB' in i] #select only GPIB connections
     for i in range(len(tools)):
         #connect GPIB into a buffer
-        buffer=rm.open_resource(tools[i], read_termination='\r\n')
-        print(i+1,": ",buffer.query('*IDN?'))
+        try:
+            buffer=rm.open_resource(tools[i], read_termination='\r\n')
+            print(i+1,": ",buffer.query('*IDN?'))
+        except:
+            pass
+        
     print('')
     print("Detected DAQ boards: ")
     for i in system.devices.device_names:

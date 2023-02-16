@@ -60,8 +60,8 @@ class TslDevice:
         if self.interface =="GPIB":
             self._tsl.Terminator = CommunicationTerminator.CrLf
             self._tsl.GPIBAddress = int(self.address.split('::')[1])
-            self._tsl.Bordnumber = 0
-            self._tsl.GPIBConnectType = GPIBConnectType.NI4882
+            self._tsl.GPIBBoard = int(self.address.split('::')[0][-1])
+            self._tsl.GPIBConnectType = GPIBConnectType.NI4882 #For Keysight cable use: GPIBConnectType.KeysightIO
             errorcode = self._tsl.Connect(CommunicationMethod.GPIB)
          # When LAN Communication
         elif self.interface == "LAN":
