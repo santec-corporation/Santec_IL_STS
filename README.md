@@ -16,26 +16,26 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
 
 <h3 align="left"> List of content </h3>
 
-- #### What is this software about ?
+- ### What is this software about ?
     This is a python software for the measurement of the Wavelength Dependent Loss (WDL)[^3] of the Swept Test System (STS)[^6] in combinational of using a Tunable Laser (TSL)[^1] and a Power Meter (MPM)[^2].
 
-- #### Main features 
+- ### Main features 
     The Santec_IL_STS, is a python script designed to: 
     - Configure the Santec Swept Test System (Light source: TSL series, Power meter: MPM series) 
     -  Run a wavelength scan 
     -  Calculate/save the Wavelength Dependent Loss (WDL) data [Insertion Loss (IL)[^4] data].
 
-- #### Tech Stack
+- ### Tech Stack
   <p align="left"> <a href="https://www.python.org" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="python" 
   width="40" height="40"/> <br> Python </a> </p>
 
-- #### Dependencies
+- ### Dependencies
   - [PyVISA] - is a package used to control all kinds of measurement devices.
   - [Pythonnet] - also known as python.NET, is a package for working with .NET (CLR).
   - [Nidaqmx] - is a package containing an API to interact with NIDAQ driver[^5].
  
 
-- #### Core scripts (for more info on the scripts [click here](https://github.com/rpj17-iNSANE/demo-readme-for-IL_STS/blob/main/README.md#more-details-on-the-core-components))
+- ### Core scripts (for more info on the scripts [click here](https://github.com/rpj17-iNSANE/demo-readme-for-IL_STS/blob/main/README.md#more-details-on-the-core-components))
     - [main.py]: Main script of the project
     - [Get_address.py]: Searches connected instrument via GPIB cable and DAQ board (connected via USB)
     - [sl_instr_class.py]: TSL device class
@@ -46,7 +46,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     - [file._logging.py]: Handles saving and loading reference data
 
 
-- #### Precautions before running the script
+- ### Precautions before running the script
     > [!IMPORTANT]
     > Crucial information necessary for users to succeed.
 
@@ -57,7 +57,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     ![N|Solid](https://user-images.githubusercontent.com/103238519/187053147-8edf1644-5ba1-41ed-a1c1-1b900c923ea6.png) 
 
 
-- #### Running the script
+- ### Running the script
     - Run [main.py] script, and [Get_address.py] file will diplay the list of connected instruments.
     - Select the light source (TSL), the detector (MPM) and the DAQ board.
     - The script will try to find previously saved reference data. If not found, the script will record sweep conditions:
@@ -73,7 +73,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     - The script will display the Insertion Loss and propose to run a second measurement
     If no other measurement is required, the script will save the reference and DUT data and disconnects the instruments
 
-- #### System Requirements
+- ### System Requirements
     OS: Windows 10 / 8 / 7.
     National Instruments drivers: NI-488.2 ver. 15 to 21.
     NI-DAQmx ver. 15 to 21.
@@ -82,15 +82,15 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     https://www.ni.com/en-us/support/downloads/drivers/download.ni-488-2.html  
     https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html   
     
-#### What is STS IL PDL ?
+### What is STS IL PDL ?
 The Swept Test System is the photonic solution by santec Corp. to perform Wavelength 
 Dependent Loss characterization of passive optical devices.
 It consists of:
 - A light source: santec’s Tunable Semiconductor Laser (TSL);
 - A power meter: santec’s Multi-port Power Meter (MPM);
 
-#### More details on the core components 
-- #### [main.py] :
+### More details on the core components 
+- ### [main.py] :
     This is the main script of the software, the script begins with import statements that bring in various Python modules and 
     custom-defined classes or functions from other files. Here are some of the notable imports:
     - os: The os module is used for interacting with the operating system.
