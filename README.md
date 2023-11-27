@@ -11,8 +11,7 @@
 - !TSL-550, TSL-710 and TSL-570 laser series 
 - !MPM-210 and MPM210H power meter series 
 
-
-<h1 align="left"> Santec_IL_STS </h2>
+<h1 align="left"> Santec_IL_STS </h1>
 Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (Swept Test System).   
 
 <h3 align="left"> List of content </h3>
