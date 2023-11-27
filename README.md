@@ -14,7 +14,7 @@
 <h1 align="left"> Santec_IL_STS </h1>
 Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (Swept Test System).   
 
-<h3 align="left"> List of content </h3>
+<h2 align="left"> List of content </h2>
 
 - ### What is this software about ?
     This is a python software for the measurement of the Wavelength Dependent Loss (WDL)[^3] of the Swept Test System (STS)[^6] in combinational of using a Tunable Laser (TSL)[^1] and a Power Meter (MPM)[^2].
