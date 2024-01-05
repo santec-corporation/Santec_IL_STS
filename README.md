@@ -12,15 +12,15 @@
 - _MPM-210 and MPM210H power meter series_
 
 <h1 align="left"> Santec_IL_STS </h1>
-Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (Swept Test System).   
+Script for the measurement of the WDL (Wavelength Dependent Loss) of the STS (Swept Test System).   
 
 <h2 align="left"> List of content </h2>
 
-- ### What is this software about ?
-    This is a python software for the measurement of the Wavelength Dependent Loss (WDL)[^3] of the Swept Test System (STS)[^6] in combinational of using a Tunable Laser (TSL)[^1] and a Power Meter (MPM)[^2].
+- ### What is this software about?
+    This is a Python software for the measurement of the Wavelength Dependent Loss (WDL)[^3] of the Swept Test System (STS)[^6] in combinational of using a Tunable Laser (TSL)[^1] and a Power Meter (MPM)[^2].
 
 - ### Main features 
-    The Santec_IL_STS, is a python script designed to: 
+    The Santec_IL_STS is a Python script designed to: 
     - Configure the Santec Swept Test System (Light source: TSL series, Power meter: MPM series) 
     -  Run a wavelength scan 
     -  Calculate/save the Wavelength Dependent Loss (WDL) data [Insertion Loss (IL)[^4] data].
@@ -32,7 +32,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
 - ### Dependencies
   - [PyVISA] - is a package used to control all kinds of measurement devices.
   - [Pythonnet] - also known as python.NET, is a package for working with .NET (CLR).
-  - [Nidaqmx] - is a package containing an API to interact with NIDAQ driver[^5].
+  - [Nidaqmx] - is a package containing an API to interact with the NIDAQ driver[^5].
  
 
 - ### Core scripts (for more info on the scripts [click here](https://github.com/rpj17-iNSANE/demo-readme-for-IL_STS/blob/main/README.md#more-details-on-the-core-components))
@@ -50,7 +50,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     > [!IMPORTANT]
     > Crucial information necessary for users to succeed.
 
-    - Make sure that the TSL LD diod is switched ON and warm up during 30min
+    - Make sure that the TSL LD diode is switched ON and warm up during 30min
     - It is recommended to perform a zeroing of the MPM (see MPM user manual)
 
     ![N|Solid](https://user-images.githubusercontent.com/103238519/187052163-7718c0ee-4fc7-44a3-9086-b7af40b0100a.png) 
@@ -59,7 +59,7 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
 
 - ### Running the script
     - Run [main.py] script, and [Get_address.py] file will diplay the list of connected instruments.
-    - Select the light source (TSL), the detector (MPM) and the DAQ board.
+    - Select the light source (TSL), the detector (MPM), and the DAQ board.
     - The script will try to find previously saved reference data. If not found, the script will record sweep conditions:
         - Start and stop wavelengths
         - Sweep speed
@@ -67,11 +67,11 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
         - Output power
         - MPM optical channels to be measured
         - Optical dynamic ranges
-    - In case previously recorded data are present, the script will invite to upload the sweep parameters and reference data.
-    - The script will invite to connecte each selected optical channel start measuring reference data (Connect the TSL to each optical port directly using a patch cord)
+    - In case previously recorded data are present, the script will invite you to upload the sweep parameters and reference data.
+    - The script will invite you to connect each selected optical channel to start measuring reference data (Connect the TSL to each optical port directly using a patch cord)
     - Connect the Device Under Test (DUT), enter the number of measurement repetitions then press ENTER to start the measurement
     - The script will display the Insertion Loss and propose to run a second measurement
-    If no other measurement is required, the script will save the reference and DUT data and disconnects the instruments
+    If no other measurement is required, the script will save the reference and DUT data and disconnect the instruments
 
 - ### System Requirements
     OS: Windows 10 / 8 / 7.
@@ -82,12 +82,12 @@ Script for the measurement of the WDL (Wavelength Dependenet Loss) of the STS (S
     https://www.ni.com/en-us/support/downloads/drivers/download.ni-488-2.html  
     https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html   
     
-### What is STS IL PDL ?
-The Swept Test System is the photonic solution by santec Corp. to perform Wavelength 
+### What is STS IL PDL?
+The Swept Test System is the photonic solution by Santec Corp. to perform Wavelength 
 Dependent Loss characterization of passive optical devices.
 It consists of:
-- A light source: santec’s Tunable Semiconductor Laser (TSL);
-- A power meter: santec’s Multi-port Power Meter (MPM);
+- A light source: Santec’s Tunable Semiconductor Laser (TSL);
+- A power meter: Santec’s Multi-port Power Meter (MPM);
 
 ### More details on the core components 
 - ### [main.py] :
@@ -130,9 +130,9 @@ It consists of:
 [^3]: [WDL]: Wavelength Dependent Loss. For further info, see IL.
 [^4]: [IL]: Insertion Loss. It is the amount of light lost in a DUT. This is a relative measurement compared to a   Reference. It is measured in dB.
 [^6]: [STS]: Swept Test System.
-[^5]: NIDAQ Driver : also known as NI-DAS, is a driver used for Data Acquistion/
+[^5]: NIDAQ Driver: also known as NI-DAS, is a driver used for Data Acquisition/
 
-[//]: # (Below are the links to the python scripts of the main IL_STS repo)
+[//]: # (Below are the links to the Python scripts of the main IL_STS repo)
 [main.py]: <https://github.com/santec-corporation/Santec_IL_STS/blob/main/main.py>
 [Get_address.py]: <https://github.com/santec-corporation/Santec_IL_STS/blob/main/Get_address.py>
 [sl_instr_class.py]: <https://github.com/santec-corporation/Santec_IL_STS/blob/main/sl_instr_class.py>
