@@ -7,23 +7,24 @@ Created on Thu Mar 17 11:33:52 2022
 
 import os
 import numpy
-import clr # python for .net
+import clr  # python for .net
 
-ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-#print(ROOT) #<-- comment in to check if the root was selected properly
+ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
+# print(ROOT) #<-- comment in to check if the root was selected properly
 
-PATH1 ='InstrumentDLL'
-#Add  santec.Instrument.DLL
-ans = clr.AddReference(ROOT+PATH1)
+PATH1 = 'InstrumentDLL'
+# Add  santec.Instrument.DLL
+ans = clr.AddReference(ROOT + PATH1)
 
-#print(ans) #<-- comment in to check if the DLL was added properly
+# print(ans) #<-- comment in to check if the DLL was added properly
 
-from Santec import TSL, ExceptionCode                  #　namespace of instrument DLL
+from Santec import TSL, ExceptionCode  # namespace of instrument DLL
 from Santec import CommunicationTerminator
 from Santec.Communication import CommunicationMethod
 from Santec.Communication import GPIBConnectType
 
 from error_handing_class import inst_err_str
+
 
 class TslDevice:
     '''TSL device class'''
@@ -35,7 +36,7 @@ class TslDevice:
         self.port = port
 
         if interface not in ("GPIB", "LAN", "USB"):
-            raise Exception ('This interface is not supported')
+            raise Exception('This interface is not supported')
 
     def __str__(self):
         return "TslDevice"
@@ -57,37 +58,37 @@ class TslDevice:
         errorcode = 0
 
         # When GPIB communication
-        if self.interface =="GPIB":
+        if self.interface == "GPIB":
             self._tsl.Terminator = CommunicationTerminator.CrLf
             self._tsl.GPIBAddress = int(self.address.split('::')[1])
             self._tsl.GPIBBoard = int(self.address.split('::')[0][-1])
-            self._tsl.GPIBConnectType = GPIBConnectType.NI4882 #For Keysight cable use: GPIBConnectType.KeysightIO
+            self._tsl.GPIBConnectType = GPIBConnectType.NI4882  # For Keysight cable use: GPIBConnectType.KeysightIO
             errorcode = self._tsl.Connect(CommunicationMethod.GPIB)
-         # When LAN Communication
+        # When LAN Communication
         elif self.interface == "LAN":
             self._tsl.Terminator = CommunicationTerminator.Cr
-            self._tsl.IPAddress  = self.address
-            self._tsl.Port = self.port #port =5000
+            self._tsl.IPAddress = self.address
+            self._tsl.Port = self.port  # port =5000
 
             errorcode = self._tsl.Connect(CommunicationMethod.TCPIP)
 
-          # When USB communication
+        # When USB communication
         elif self.interface == "USB":
-            #USB DeviceID is defined uint32, So must be change variable type to unit32
+            # USB DeviceID is defined uint32, So must be change variable type to unit32
             # this code typechange with numpy array
-            ar_address = numpy.array([self.address],dtype ="uint32")
-            self._tsl.DeviceID = ar_address[0]#self.address
+            ar_address = numpy.array([self.address], dtype="uint32")
+            self._tsl.DeviceID = ar_address[0]  # self.address
             self._tsl.Terminator = CommunicationTerminator.Cr
             errorcode = self._tsl.Connect(CommunicationMethod.USB)
         else:
             print("there was no interface")
             errorcode = -1
 
-        if errorcode !=0:
+        if errorcode != 0:
             self._tsl.DisConnect()
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
-        self.get_spec_wavelength() #get spec wavelength(nm)
+        self.get_spec_wavelength()  # get spec wavelength(nm)
 
         if not self.get_550_flag():
             self.get_max_power()
@@ -103,7 +104,7 @@ class TslDevice:
 
         tsl_name = self._tsl.Information.ProductName
 
-        return tsl_name in ("TSL-550" ,"TSL-710")
+        return tsl_name in ("TSL-550", "TSL-710")
 
     def get_spec_wavelength(self):
         """Gets Min and Max wavelengths supported by the connected TSL.
@@ -112,9 +113,9 @@ class TslDevice:
             Exception: In case couldn't get spec min and max wavleengths from the TSL.
         """
 
-        errorcode,self.spec_min_wav,self.spec_max_wav = self._tsl.Get_Spec_Wavelength(0,0)
+        errorcode, self.spec_min_wav, self.spec_max_wav = self._tsl.Get_Spec_Wavelength(0, 0)
 
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
@@ -129,7 +130,7 @@ class TslDevice:
             array: Sweep speeds allowed by the TSL-570.
         """
 
-        errorcode,table = self._tsl.Get_Sweep_Speed_table(None)
+        errorcode, table = self._tsl.Get_Sweep_Speed_table(None)
         self.return_table = []
         # this function only support "TSL-570"
         # when othre TSL connected, errorcode return "DeviceError"
@@ -139,7 +140,7 @@ class TslDevice:
             for item in table:
                 self.return_table.append(item)
 
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return self.return_table
@@ -157,15 +158,15 @@ class TslDevice:
             Exception: In case TSL doesn't return the value.
         """
 
-        errorcode,self.maxpower = self._tsl.Get_APC_Limit_for_Sweep(self.spec_min_wav,
-                                                                    self.spec_max_wav,
-                                                                    0.0)
+        errorcode, self.maxpower = self._tsl.Get_APC_Limit_for_Sweep(self.spec_min_wav,
+                                                                     self.spec_max_wav,
+                                                                     0.0)
 
         if errorcode == ExceptionCode.DeviceError:
             self.maxpower = 999
             errorcode = 0
 
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return None
@@ -187,7 +188,7 @@ class TslDevice:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         errorcode = self._tsl.TSL_Busy_Check(3000)
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return None
@@ -209,13 +210,12 @@ class TslDevice:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         errorcode = self._tsl.TSL_Busy_Check(3000)
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
-
     #
-    def set_sweep_parameters(self, startwave,stopwave,step,speed):
+    def set_sweep_parameters(self, startwave, stopwave, step, speed):
         """Setting the sweep parameters and pass them in the TSL object.
 
         Args:
@@ -234,13 +234,13 @@ class TslDevice:
         self.speed = speed
         self.tsl_busy_check()
 
-        errorcode,self.actual_step = self._tsl.Set_Sweep_Parameter_for_STS(self.startwave,
-                                                                       self.stopwave,
-                                                                       self.speed,
-                                                                       self.step,
-                                                                       0)
+        errorcode, self.actual_step = self._tsl.Set_Sweep_Parameter_for_STS(self.startwave,
+                                                                            self.stopwave,
+                                                                            self.speed,
+                                                                            self.step,
+                                                                            0)
 
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         self.tsl_busy_check()
@@ -254,7 +254,7 @@ class TslDevice:
             RuntimeError: In case TSL is not in Standby mode, or if TSL cannot start the sweep.
         """
         errorcode = self._tsl.Set_Software_Trigger()
-        if errorcode !=0:
+        if errorcode != 0:
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
@@ -266,11 +266,11 @@ class TslDevice:
             Exception: In case TSL doesn't start the sweep.
         """
         errorcode = self._tsl.Sweep_Start()
-        if errorcode !=0 :
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
-    def stop_sweep(self, except_if_error = True):
+    def stop_sweep(self, except_if_error=True):
         """Stops the sweep.
 
         Args:
@@ -283,12 +283,11 @@ class TslDevice:
             Exception: In case failure in stopping the TSL.
         """
         errorcode = self._tsl.Sweep_Stop()
-        if errorcode !=0 and except_if_error is True:
+        if errorcode != 0 and except_if_error is True:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
-
-    def tsl_busy_check(self) :
+    def tsl_busy_check(self):
         """Checks if the TSL is busy with other tasks.
         Default timeout = 3000 ms
 
@@ -296,7 +295,7 @@ class TslDevice:
             Exception: In case no response from TSL after timeout.
         """
         errorcode = self._tsl.TSL_Busy_Check(3000)
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 
@@ -316,16 +315,16 @@ class TslDevice:
         Raises:
             Exception: In case TSL is not set to the specified status after timeout.
         """
-        _status ={
-            1:self._tsl.Sweep_Status.Standby,
-            2:self._tsl.Sweep_Status.Running,
-            3:self._tsl.Sweep_Status.Pausing,
-            4:self._tsl.Sweep_Status.WaitingforTrigger,
-            5:self._tsl.Sweep_Status.Returning
-            }
+        _status = {
+            1: self._tsl.Sweep_Status.Standby,
+            2: self._tsl.Sweep_Status.Running,
+            3: self._tsl.Sweep_Status.Pausing,
+            4: self._tsl.Sweep_Status.WaitingforTrigger,
+            5: self._tsl.Sweep_Status.Returning
+        }
         errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
 
-        if errorcode !=0:
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
 

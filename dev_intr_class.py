@@ -7,17 +7,18 @@ Created on Thu Mar 24 20:04:16 2022
 
 from error_handing_class import inst_err_str
 import os
-import clr # python for .net
+import clr  # python for .net
 
-ROOT = str(os.path.dirname(__file__))+'\\DLL\\'
-#print(ROOT) #<-- comment in to check if the root was selected properly
+ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
+# print(ROOT) #<-- comment in to check if the root was selected properly
 
 PATH1 = 'InstrumentDLL'
-#Add in santec.Instrument.DLL
-ans = clr.AddReference(ROOT+PATH1)
-from Santec import SPU  # 　namespace of instrument DLL
+# Add in santec.Instrument.DLL
+ans = clr.AddReference(ROOT + PATH1)
+from Santec import SPU  # namespace of instrument DLL
 
-#print(ans) #<-- comment in to check if the DLL was added properly
+
+# print(ans) #<-- comment in to check if the DLL was added properly
 
 
 class SpuDevice:
