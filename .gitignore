@@ -71,3 +71,7 @@ data_measurement.csv
 data_reference.csv
 last_scan_params.json
 last_scan_reference_data.json
+__pycache__/file_logging.cpython-312.pyc
+*.pyc
+*.xml
+*.iml

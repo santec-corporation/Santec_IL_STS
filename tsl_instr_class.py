@@ -89,7 +89,8 @@ class TslDevice:
 
         self.get_spec_wavelength() #get spec wavelength(nm)
 
-        self.maxpow = self.get_max_power()
+        if not self.get_550_flag():
+            self.get_max_power()
 
         return None
 
