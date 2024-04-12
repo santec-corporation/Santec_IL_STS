@@ -15,7 +15,7 @@ from datetime import datetime
 
 from santec.daq_device_class import SpuDevice
 from santec.error_handing_class import sts_process_error_strings
-from santec.mpm_instr_class import MpmDevice
+from santec.mpm_instrument_class import MpmDevice
 from santec.tsl_instrument_class import TslDevice
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
@@ -210,7 +210,7 @@ class StsProcess:
 
     def cancel(self):
         self._tsl.Disconnect()
-        self._mpm.disconnect()
+        self._mpm.Disconnect()
         self._spu.Disconnect()
 
     def set_selected_ranges(self, previous_param_data):
@@ -229,7 +229,7 @@ class StsProcess:
             print('Available dynamic ranges:')
             i = 1
             self._mpm.get_range()
-            for range in self._mpm.rangedata:
+            for range in self._mpm.range_data:
                 print('{}- {}'.format(i, range))
                 i += 1
             selection = input()
@@ -459,7 +459,7 @@ class StsProcess:
         """
 
         # Get MPM logging data
-        logdata = self._mpm.get_each_chan_logdata(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
+        logdata = self._mpm.get_each_channel_log_data(data_struct_item.SlotNumber, data_struct_item.ChannelNumber)
 
         # Add MPM Logging data for STS Process Class
         self.logdata = array('d', logdata)  # List to Array
@@ -552,7 +552,7 @@ class StsProcess:
                 continue
 
             # Get MPM login data
-            logdata = self._mpm.get_each_chan_logdata(item.SlotNumber, item.ChannelNumber)
+            logdata = self._mpm.get_each_channel_log_data(item.SlotNumber, item.ChannelNumber)
             logdata = array("d", logdata)  # List to Array
 
             # Add MPM Logging data for STSProcess Class with STSDatastruct

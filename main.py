@@ -11,8 +11,7 @@ import os
 import json
 from matplotlib.pyplot import plot, show
 
-from santec import TslDevice, SpuDevice, GetAddress
-from santec.mpm_instr_class import MpmDevice
+from santec import TslDevice, MpmDevice, SpuDevice, GetAddress
 
 import santec.sts_process as sts
 import santec.file_logging as file_logging
