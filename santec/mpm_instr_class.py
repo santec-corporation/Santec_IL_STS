@@ -12,7 +12,7 @@ import clr  # python for .net
 import time
 from numpy import array
 
-from santec.error_handing_class import instr_err_str
+from santec.error_handing_class import instrument_error_strings
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 # print(ROOT) #<-- comment in to check if the root was selected properly
@@ -59,7 +59,7 @@ class MpmDevice:
         errorcode = self._mpm.Connect(mpm_commincation_method)
         if errorcode != 0:
             self._mpm.DisConnect()
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return None
 
@@ -192,7 +192,7 @@ class MpmDevice:
         errorcode = self._mpm.Set_Range(powerrange)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return None
 
@@ -214,9 +214,9 @@ class MpmDevice:
         errorcode = self._mpm.Zeroing()
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
-        return instr_err_str(errorcode)
+        return instrument_error_strings(errorcode)
 
     def get_averaging_time(self):
         """
@@ -232,7 +232,7 @@ class MpmDevice:
         errorcode, self.averaging_time = self._mpm.Get_Averaging_Time(0)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return self.averaging_time
 
@@ -245,7 +245,7 @@ class MpmDevice:
         """
         errorcode = self._mpm.Logging_Start()
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def logging_stop(self, except_if_error=True):
         """
@@ -262,7 +262,7 @@ class MpmDevice:
         """
         errorcode = self._mpm.Logging_Stop()
         if errorcode != 0 and except_if_error is True:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def get_each_chan_logdata(self, slot_num: int, chan_num: int) -> array:
         """
@@ -280,7 +280,7 @@ class MpmDevice:
         """
         errorcode, logdata = self._mpm.Get_Each_Channel_Logdata(slot_num, chan_num, None)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return logdata
 
     def set_logging_parameters(self, startwave, stopwave, step, speed):
@@ -304,9 +304,9 @@ class MpmDevice:
                                                             self._mpm.Measurement_Mode.Freerun)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
-        return instr_err_str(errorcode)
+        return instrument_error_strings(errorcode)
 
     def disconnect(self):
         self._mpm.DisConnect()
@@ -330,5 +330,5 @@ class MpmDevice:
 
         if (
                 errorcode != 0 and status != -1):  # it's a success if either the error code is 0, or the status is -1. Otherwise, throw.
-            raise RuntimeError(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None

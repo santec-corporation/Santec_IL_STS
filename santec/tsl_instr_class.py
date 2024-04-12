@@ -11,7 +11,7 @@ import os
 import numpy
 import clr  # python for .net
 
-from santec.error_handing_class import instr_err_str
+from santec.error_handing_class import instrument_error_strings
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 # print(ROOT) #<-- comment in to check if the root was selected properly
@@ -90,7 +90,7 @@ class TslDevice:
 
         if errorcode != 0:
             self._tsl.DisConnect()
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         self.get_spec_wavelength()  # get spec wavelength(nm)
 
@@ -122,7 +122,7 @@ class TslDevice:
         errorcode, self.spec_min_wav, self.spec_max_wav = self._tsl.Get_Spec_Wavelength(0, 0)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def get_sweep_speed_table(self):
@@ -149,7 +149,7 @@ class TslDevice:
                 self.return_table.append(item)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return self.return_table
 
@@ -176,7 +176,7 @@ class TslDevice:
             errorcode = 0
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return None
 
@@ -195,11 +195,11 @@ class TslDevice:
         errorcode = self._tsl.Set_APC_Power_dBm(self.power)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         errorcode = self._tsl.TSL_Busy_Check(3000)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         return None
 
@@ -218,11 +218,11 @@ class TslDevice:
         errorcode = self._tsl.Set_Wavelength(wavelength)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         errorcode = self._tsl.TSL_Busy_Check(3000)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     #
@@ -253,7 +253,7 @@ class TslDevice:
                                                                             0)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         self.tsl_busy_check()
 
@@ -268,7 +268,7 @@ class TslDevice:
         """
         errorcode = self._tsl.Set_Software_Trigger()
         if errorcode != 0:
-            raise RuntimeError(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def start_sweep(self):
@@ -281,7 +281,7 @@ class TslDevice:
         """
         errorcode = self._tsl.Sweep_Start()
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def stop_sweep(self, except_if_error=True):
@@ -299,7 +299,7 @@ class TslDevice:
         """
         errorcode = self._tsl.Sweep_Stop()
         if errorcode != 0 and except_if_error is True:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def tsl_busy_check(self):
@@ -312,7 +312,7 @@ class TslDevice:
         """
         errorcode = self._tsl.TSL_Busy_Check(3000)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def wait_for_sweep_status(self, waiting_time: int, sweep_status: int):
@@ -342,7 +342,7 @@ class TslDevice:
         errorcode = self._tsl.Waiting_For_Sweep_Status(waiting_time, _status[sweep_status])
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def disconnect(self):

@@ -34,6 +34,7 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
 
     Args:
         connected_tsl (TslDevice): Instanced TSL class.
+        previous_param_data: If previous sweep process data is selected.
 
     Returns:
         None

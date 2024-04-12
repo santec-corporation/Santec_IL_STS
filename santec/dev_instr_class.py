@@ -10,7 +10,7 @@ Created on Thu Mar 24 20:04:16 2022
 import os
 import clr  # python for .net
 
-from santec.error_handing_class import instr_err_str
+from santec.error_handing_class import instrument_error_strings
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 # print(ROOT) #<-- comment in to check if the root was selected properly
@@ -55,9 +55,9 @@ class SpuDevice:
 
         errorcode, ans = self._spu.Connect("")
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
-        return instr_err_str(errorcode)
+        return instrument_error_strings(errorcode)
 
     # SPU Set logging parameter
     def set_logging_parameters(self, startwave,
@@ -81,25 +81,25 @@ class SpuDevice:
                                                      tsl_actual_step)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
-        return instr_err_str(errorcode)
+        return instrument_error_strings(errorcode)
 
     def sampling_start(self):
         errorcode = self._spu.Sampling_Start()
         if errorcode != 0:
-            raise RuntimeError(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def sampling_wait(self):
         errorcode = self._spu.Waiting_for_sampling()
         if errorcode != 0:
-            raise RuntimeError(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def get_sampling_raw(self):
         errorcode, trigger, monitor = self._spu.Get_Sampling_Rawdata(
             None, None)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instr_err_str(errorcode))
+            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return trigger, monitor
 
     def disconnect(self):

@@ -8,7 +8,7 @@ Created on Thu Mar 17 19:51:35 2022
 """
 
 
-def instr_err_str(errorcode):
+def instrument_error_strings(errorcode):
     """
     return  InstrumentDLL Error string
 
@@ -23,7 +23,7 @@ def instr_err_str(errorcode):
         Error description.
 
     """
-    inst_error = {
+    instrument_error = {
         '-2147483648': "Unknown",
         '-40': "InUseError",
         '-30': "ParameterError",
@@ -40,13 +40,13 @@ def instr_err_str(errorcode):
         '11': "AlreadyConnected",
         '10': "Stopped"
     }
-    if str(errorcode) in inst_error.keys():
-        return inst_error[str(errorcode)]
+    if str(errorcode) in instrument_error.keys():
+        return instrument_error[str(errorcode)]
     else:
         return 'Unknown Error'
 
 
-def stsprocess_err_str(errorcode):
+def sts_process_error_strings(errorcode):
     """
     return STSProcess DLL Error string
 
