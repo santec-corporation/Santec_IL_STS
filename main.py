@@ -11,10 +11,9 @@ import os
 import json
 from matplotlib.pyplot import plot, show
 
-from santec import TslDevice, MpmDevice, SpuDevice, GetAddress
+from santec import TslDevice, MpmDevice, SpuDevice, GetAddress, file_logging
 
 import santec.sts_process as sts
-import santec.file_logging as file_logging
 
 device_address = GetAddress()
 

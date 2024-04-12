@@ -510,7 +510,7 @@ class StsProcess:
             # unscaled monitor data is required if we want to load the reference data later.
             "rescaled_monitor": list(array('d', rescaled_ref_mon)),  # rescaled monitor data
             "rescaled_wavelength": list(array('d', wavelengtharray)),  # all wavelengths, including triggers inbetween.
-            "rescaled_referencepower": list(array('d', rescaled_ref_pwr)),  # rescaled reference power
+            "rescaled_reference_power": list(array('d', rescaled_ref_pwr)),  # rescaled reference power
         }
 
         self._reference_data_array.append(ref_object)
