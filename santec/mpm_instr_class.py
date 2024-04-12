@@ -290,8 +290,8 @@ class MpmDevice:
         Args:
             startwave (float): Input the start wavelength value.
             stopwave (float): Input the stop wavelength value.
-            step (float): Input the sweep step wavelength value.
-            speed (float): Input the sweep speed value.
+            step (float): Input the sweep sweep_step wavelength value.
+            speed (float): Input the sweep sweep_speed value.
 
         Raises:
             RuntimeError: When trigger signal is not detected

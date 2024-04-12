@@ -14,7 +14,7 @@ from array import array
 from datetime import datetime
 
 import santec.sts_process as sts
-from santec.tsl_instr_class import TslDevice
+from santec.tsl_instrument_class import TslDevice
 from santec.error_handing_class import sts_process_error_strings
 
 # from mpm_instr_class import MpmDevice
@@ -33,10 +33,10 @@ def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, strfilename: str)
     jsondata = {
         "selected_chans": ilsts.selected_chans,
         "selected_ranges": ilsts.selected_ranges,
-        "startwave": tsl.startwave,
-        "stopwave": tsl.stopwave,
-        "step": tsl.step,
-        "speed": tsl.speed,
+        "start_wavelength": tsl.start_wavelength,
+        "stop_wavelength": tsl.stop_wavelength,
+        "sweep_step": tsl.sweep_step,
+        "sweep_speed": tsl.sweep_speed,
         "power": tsl.power,  # only really used on the TSL, and not on the mpm or spu.
         "actual_step": tsl.actual_step,
     }

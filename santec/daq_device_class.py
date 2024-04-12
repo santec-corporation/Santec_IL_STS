@@ -34,7 +34,7 @@ class SpuDevice:
         self.__spu = SPU()
         self.__deviceName = device_name
 
-    def ConnectSpu(self):
+    def ConnectSPU(self):
         """
         Connects the DAQ board (SPU Connect).
 
@@ -73,8 +73,8 @@ class SpuDevice:
         Args:
             start_wavelength (float): Input the start wavelength value.
             stop_wavelength (float): Input the stop wavelength value.
-            sweep_speed (float): Input the sweep speed value.
-            tsl_actual_step (float): Input the sweep step wavelength value.
+            sweep_speed (float): Input the sweep sweep_speed value.
+            tsl_actual_step (float): Input the sweep sweep_step wavelength value.
 
         Raises:
             Exception

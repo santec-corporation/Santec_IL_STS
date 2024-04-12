@@ -11,11 +11,11 @@ import os
 import json
 from matplotlib.pyplot import plot, show
 
-from santec.tsl_instr_class import TslDevice
+from santec import TslDevice, SpuDevice, GetAddress
 from santec.mpm_instr_class import MpmDevice
-from santec import SpuDevice
-from santec import GetAddress
-from santec import sts_process as sts, file_logging as file_logging
+
+import santec.sts_process as sts
+import santec.file_logging as file_logging
 
 device_address = GetAddress()
 
@@ -24,12 +24,12 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     """
     Setting sweep parameters. Will ask for:
 
-        startwave:  Starting wavelength (nm)
-        stopwave:   Stopping wavelength (nm)
-        step:       Sweep step (pm)
-        speed:      Sweep speed (nm/sec).
+        start_wavelength:  Starting wavelength (nm)
+        stop_wavelength:   Stopping wavelength (nm)
+        sweep_step:       Sweep sweep_step (pm)
+        sweep_speed:      Sweep sweep_speed (nm/sec).
                     In case of TSL-570, the code will prompt
-                    invite to select a speed from a list.
+                    invite to select a sweep_speed from a list.
         power:      Output power (dBm)
 
     These arguments will be passed to the connected_tsl object.
@@ -43,36 +43,36 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     """
 
     if previous_param_data is not None:
-        startwave = float(previous_param_data["startwave"])
-        stopwave = float(previous_param_data["stopwave"])
-        step = float(previous_param_data["step"])  # step is .001, but step is .1. we need the nm value.
-        speed = float(previous_param_data["speed"])
+        start_wavelength = float(previous_param_data["start_wavelength"])
+        stop_wavelength = float(previous_param_data["stop_wavelength"])
+        sweep_step = float(previous_param_data["sweep_step"])  # sweep_step is .001, but sweep_step is .1. we need the nm value.
+        sweep_speed = float(previous_param_data["sweep_speed"])
         power = float(previous_param_data["power"])
 
-        print('Start Wavelength (nm): ' + str(startwave))
-        print('Stop Wavelength (nm): ' + str(stopwave))
-        print('Sweep Step (nm): ' + str(step))  # nm, not pm.
-        print('Sweep Speed (nm): ' + str(speed))
+        print('Start Wavelength (nm): ' + str(start_wavelength))
+        print('Stop Wavelength (nm): ' + str(stop_wavelength))
+        print('Sweep Step (nm): ' + str(sweep_step))  # nm, not pm.
+        print('Sweep Speed (nm): ' + str(sweep_speed))
         print('Output Power (nm): ' + str(power))
 
     else:
         print('Input Start Wavelength (nm):')
-        startwave = float(input())
+        start_wavelength = float(input())
         print('Input Stop Wavelength (nm):')
-        stopwave = float(input())
+        stop_wavelength = float(input())
         print('Input Sweep Step (pm):')
-        step = float(input()) / 1000
+        sweep_step = float(input()) / 1000
 
         if connected_tsl.get_550_flag() is True:
             print('Input Sweep Speed (nm/sec):')
-            speed = float(input())
+            sweep_speed = float(input())
         else:
-            print('Select sweep speed (nm/sec):')
+            print('Select sweep sweep_speed (nm/sec):')
             num = 1
             for i in connected_tsl.get_sweep_speed_table():
                 print(str(num) + '- ' + str(i))
                 num += 1
-            speed = connected_tsl.get_sweep_speed_table()[int(input()) - 1]
+            sweep_speed = connected_tsl.get_sweep_speed_table()[int(input()) - 1]
 
         print('Input Output Power (dBm):')
         power = float(input())
@@ -85,7 +85,7 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     # TSL Power setting
     connected_tsl.set_power(power)
 
-    connected_tsl.set_sweep_parameters(startwave, stopwave, step, speed)
+    connected_tsl.set_sweep_parameters(start_wavelength, stop_wavelength, sweep_step, sweep_speed)
 
     return None
 
@@ -148,7 +148,7 @@ def main():
     # only connect to the devices that the user wants to connect to
     if tsl_address is not None:
         tsl = TslDevice(interface, tsl_address)
-        tsl.connect_tsl()
+        tsl.ConnectTSL()
     else:
         raise Exception("There must be a TSL connected")
 
@@ -158,7 +158,7 @@ def main():
 
     if dev_address is not None:
         dev = SpuDevice(dev_address)
-        dev.ConnectSpu()
+        dev.ConnectSPU()
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(

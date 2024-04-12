@@ -16,7 +16,7 @@ from datetime import datetime
 from santec.daq_device_class import SpuDevice
 from santec.error_handing_class import sts_process_error_strings
 from santec.mpm_instr_class import MpmDevice
-from santec.tsl_instr_class import TslDevice
+from santec.tsl_instrument_class import TslDevice
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 # print(ROOT) #<-- comment in to check if the root was selected properly
@@ -54,9 +54,9 @@ class StsProcess:
         Sets parameters for STS process.
         Args:
             start wave (float): Input the start wavelength value.
-            stopwave (float): Input the stop wavelength value.
-            step (float): Input the sweep step wavelength value.
-            speed (float): Input the sweep speed value.
+            stop_wavelength (float): Input the stop wavelength value.
+            sweep_step (float): Input the sweep sweep_step wavelength value.
+            sweep_speed (float): Input the sweep sweep_speed value.
 
 
         Raises:
@@ -71,15 +71,15 @@ class StsProcess:
         """
 
         # Logging parameters for MPM
-        self._mpm.set_logging_parameters(self._tsl.startwave,
-                                         self._tsl.stopwave,
-                                         self._tsl.step,
-                                         self._tsl.speed)
+        self._mpm.set_logging_parameters(self._tsl.start_wavelength,
+                                         self._tsl.stop_wavelength,
+                                         self._tsl.sweep_step,
+                                         self._tsl.sweep_speed)
 
         # Logging parameter for SPU(DAQ)
-        self._spu.set_logging_parameters(self._tsl.startwave,
-                                         self._tsl.stopwave,
-                                         self._tsl.speed,
+        self._spu.set_logging_parameters(self._tsl.start_wavelength,
+                                         self._tsl.stop_wavelength,
+                                         self._tsl.sweep_speed,
                                          self._tsl.actual_step)
 
         # pass MPM averaging time to SPU　 Class
@@ -97,17 +97,17 @@ class StsProcess:
             raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         # Make Wavelength table at sweep
-        sts_error = self._ilsts.Make_Sweep_Wavelength_Table(self._tsl.startwave,
-                                                            self._tsl.stopwave,
+        sts_error = self._ilsts.Make_Sweep_Wavelength_Table(self._tsl.start_wavelength,
+                                                            self._tsl.stop_wavelength,
                                                             self._tsl.actual_step)
 
         if sts_error != 0:
             raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         # make wavelength table as rescaling
-        sts_error = self._ilsts.Make_Target_Wavelength_Table(self._tsl.startwave,
-                                                             self._tsl.stopwave,
-                                                             self._tsl.step)
+        sts_error = self._ilsts.Make_Target_Wavelength_Table(self._tsl.start_wavelength,
+                                                             self._tsl.stop_wavelength,
+                                                             self._tsl.sweep_step)
 
         if sts_error != 0:
             raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
@@ -209,7 +209,7 @@ class StsProcess:
         return None
 
     def cancel(self):
-        self._tsl.disconnect()
+        self._tsl.Disconnect()
         self._mpm.disconnect()
         self._spu.Disconnect()
 
@@ -298,7 +298,7 @@ class StsProcess:
             self._mpm.set_range(self.range[0])
 
             # TSL Wavelength set to use Sweep Start Command
-            # self._tsl.start_sweep() #redundant, also exists within sts_sweep_process
+            # self.__tsl.start_sweep() #redundant, also exists within sts_sweep_process
 
             # Sweep handling
             print("Scanning...")
