@@ -13,10 +13,10 @@ import re
 from array import array
 from datetime import datetime
 
-from santec.dev_instr_class import SpuDevice
+from santec.daq_device_class import SpuDevice
+from santec.error_handing_class import sts_process_error_strings
 from santec.mpm_instr_class import MpmDevice
 from santec.tsl_instr_class import TslDevice
-from santec.error_handing_class import sts_process_error_strings
 
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 # print(ROOT) #<-- comment in to check if the root was selected properly
@@ -211,7 +211,7 @@ class StsProcess:
     def cancel(self):
         self._tsl.disconnect()
         self._mpm.disconnect()
-        self._spu.disconnect()
+        self._spu.Disconnect()
 
     def set_selected_ranges(self, previous_param_data):
         """Sets the optical dynamic range of the MPM."""

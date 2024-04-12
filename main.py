@@ -13,9 +13,9 @@ from matplotlib.pyplot import plot, show
 
 from santec.tsl_instr_class import TslDevice
 from santec.mpm_instr_class import MpmDevice
-from santec.dev_instr_class import SpuDevice
-from santec import sts_process as sts, file_logging as file_logging
+from santec import SpuDevice
 from santec import GetAddress
+from santec import sts_process as sts, file_logging as file_logging
 
 device_address = GetAddress()
 
@@ -158,7 +158,7 @@ def main():
 
     if dev_address is not None:
         dev = SpuDevice(dev_address)
-        dev.connect_spu()
+        dev.ConnectSpu()
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
