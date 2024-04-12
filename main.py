@@ -15,7 +15,9 @@ from santec.tsl_instr_class import TslDevice
 from santec.mpm_instr_class import MpmDevice
 from santec.dev_instr_class import SpuDevice
 from santec import sts_process as sts, file_logging as file_logging
-from santec.Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
+from santec import GetAddress
+
+device_address = GetAddress()
 
 
 def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
@@ -137,10 +139,10 @@ def main():
 
     global tsl, mpm, dev, ilsts
 
-    Initialize_Device_Addresses()
-    tsl_address = Get_Tsl_Address()
-    mpm_address = Get_Mpm_Address()
-    dev_address = Get_Dev_Address()
+    device_address.Initialize_Device_Addresses()
+    tsl_address = device_address.Get_Tsl_Address()
+    mpm_address = device_address.Get_Mpm_Address()
+    dev_address = device_address.Get_Dev_Address()
     interface = 'GPIB'
 
     # only connect to the devices that the user wants to connect to
