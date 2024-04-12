@@ -10,12 +10,12 @@ Created on Fri Jan 21 17:17:26 2022
 import os
 import json
 from matplotlib.pyplot import plot, show
-from Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
-import sts_process as sts
-import file_logging as file_logging
-from tsl_instr_class import TslDevice
-from mpm_instr_class import MpmDevice
-from dev_intr_class import SpuDevice
+
+from santec.tsl_instr_class import TslDevice
+from santec.mpm_instr_class import MpmDevice
+from santec.dev_instr_class import SpuDevice
+from santec import sts_process as sts, file_logging as file_logging
+from santec.Get_address import Initialize_Device_Addresses, Get_Tsl_Address, Get_Mpm_Address, Get_Dev_Address
 
 
 def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
