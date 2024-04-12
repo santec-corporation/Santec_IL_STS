@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Thu Mar 24 20:04:16 2022
 
 @author: chentir
+@organization: santec holdings corp.
 """
 
 from error_handing_class import inst_err_str
@@ -22,14 +24,14 @@ from Santec import SPU  # namespace of instrument DLL
 
 
 class SpuDevice:
-    '''DAQ board device class'''
+    """DAQ board device class"""
 
     def __init__(self, devicename: str):
         self._spu = SPU()
         self.devicename = devicename
 
     def connect_spu(self):
-        '''
+        """
         Connects the DAQ board (SPU Connect).
 
         Parameters
@@ -47,20 +49,20 @@ class SpuDevice:
         TYPE
             DESCRIPTION.
 
-        '''
+        """
         self._spu.DeviceName = str(self.devicename)
 
         errorcode, ans = self._spu.Connect("")
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return inst_err_str(errorcode)
 
-    # SPU Set logging paramter
+    # SPU Set logging parameter
     def set_logging_parameters(self, startwave,
                                stopwave, speed,
                                tsl_actual_step):
-        '''
+        """
 
         Args:
             startwave (float): Input the start wavelength value.
@@ -70,32 +72,32 @@ class SpuDevice:
 
         Raises:
             Exception
-        '''
+        """
 
         errorcode = self._spu.Set_Sampling_Parameter(startwave,
                                                      stopwave,
                                                      speed,
                                                      tsl_actual_step)
 
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
         return inst_err_str(errorcode)
 
     def sampling_start(self):
         errorcode = self._spu.Sampling_Start()
-        if (errorcode != 0):
+        if errorcode != 0:
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
 
     def sampling_wait(self):
         errorcode = self._spu.Waiting_for_sampling()
-        if (errorcode != 0):
+        if errorcode != 0:
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
 
     def get_sampling_raw(self):
         errorcode, trigger, monitor = self._spu.Get_Sampling_Rawdata(
             None, None)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return trigger, monitor
 

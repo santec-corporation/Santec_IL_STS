@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Fri Feb 28 11:24:04 2020
 
 @author: chentir
+@organization: santec holdings corp.
 """
+
 import pyvisa
 import nidaqmx
 
 rm = pyvisa.ResourceManager()
-listing = rm.list_resources()  # creat a list of all detected connections
+listing = rm.list_resources()  # create a list of all detected connections
 system = nidaqmx.system.System.local()
 
 _cached_Tsl_Address = None
@@ -24,27 +27,26 @@ def Connection_Info_Class():
 
 
 def Get_Tsl_Address():
-    if _cached_Tsl_Address == None:
+    if _cached_Tsl_Address is None:
         Initialize_Device_Addresses()
     return _cached_Tsl_Address
 
 
 def Get_Mpm_Address():
-    if _cached_MPM_Address == None:
+    if _cached_MPM_Address is None:
         Initialize_Device_Addresses()
     return _cached_MPM_Address
 
 
 def Get_Dev_Address():
-    if _cached_Dev_Address == None:
+    if _cached_Dev_Address is None:
         Initialize_Device_Addresses()
     return _cached_Dev_Address
 
 
 def Initialize_Device_Addresses():
-    '''
-
-    #each device needs to prompt for a different connection type
+    """
+    Each device needs to prompt for a different connection type
     Returns
     -------
     TSL : str
@@ -54,7 +56,7 @@ def Initialize_Device_Addresses():
     Dev : str
         DESCRIPTION.
 
-    '''
+    """
     global _cached_Tsl_Address, _cached_MPM_Address, _cached_Dev_Address
     print("###################################################################")
     print("Present GPIB instruments: ")

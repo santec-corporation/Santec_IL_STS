@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Fri Jan 21 17:17:26 2022
 
 @author: chentir
+@organization: santec holdings corp.
 """
+
 import os
 import json
 from matplotlib.pyplot import plot, show
@@ -30,13 +33,13 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     These arguments will be passed to the connected_tsl object.
 
     Args:
-        connected_tsl (TslDevice): Instanciated TSL class.
+        connected_tsl (TslDevice): Instanced TSL class.
 
     Returns:
         None
     """
 
-    if (previous_param_data is not None):
+    if previous_param_data is not None:
         startwave = float(previous_param_data["startwave"])
         stopwave = float(previous_param_data["stopwave"])
         step = float(previous_param_data["step"])  # step is .001, but step is .1. we need the nm value.
@@ -85,8 +88,8 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
 
 
 def prompt_and_get_previous_param_data(file_last_scan_params):
-    '''If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,  previous reference data etc.'''
-    if (os.path.exists(file_last_scan_params) == False):
+    """If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,  previous reference data etc."""
+    if not os.path.exists(file_last_scan_params):
         return None
 
     print('Would you like to load the most recent parameter settings from {}? [y|n]'.format(file_last_scan_params))
@@ -102,9 +105,9 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
 
 
 def prompt_and_get_previous_reference_data():
-    '''Ask the user if they want to use the previous reference data (if it exists). If so, then load it. '''
+    """Ask the user if they want to use the previous reference data (if it exists). If so, then load it. """
 
-    if (os.path.exists(file_logging.file_last_scan_reference_json) == False):
+    if not os.path.exists(file_logging.file_last_scan_reference_json):
         return None
 
     print("Would you like to use the most recent reference data from file '{}'? [y|n]".format(
@@ -113,7 +116,7 @@ def prompt_and_get_previous_reference_data():
     if ans not in 'Yy':
         return None
 
-    # Get the file size. If its huge, then the load will freeze for a few seconds.
+    # Get the file size. If It's huge, then the load will freeze for a few seconds.
     intfilesize = int(os.path.getsize(file_logging.file_last_scan_reference_json))
     if intfilesize > 1000000:
         strfilesize = str(int(intfilesize / 1000 / 1000)) + " MB"
@@ -140,17 +143,17 @@ def main():
     interface = 'GPIB'
 
     # only connect to the devices that the user wants to connect to
-    if tsl_address != None:
+    if tsl_address is not None:
         tsl = TslDevice(interface, tsl_address)
         tsl.connect_tsl()
     else:
         raise Exception("There must be a TSL connected")
 
-    if mpm_address != None:
+    if mpm_address is not None:
         mpm = MpmDevice(interface, mpm_address)
         mpm.connect_mpm()
 
-    if dev_address != None:
+    if dev_address is not None:
         dev = SpuDevice(dev_address)
         dev.connect_spu()
 
@@ -160,7 +163,7 @@ def main():
     setting_tsl_sweep_params(tsl, previous_param_data)  # previous_param_data might be none
 
     # If there is an MPM, then create instance of ILSTS
-    if mpm.address != None:
+    if mpm.address is not None:
         ilsts = sts.StsProcess(tsl, mpm, dev)
 
         ilsts.set_selected_channels(previous_param_data)
@@ -171,10 +174,10 @@ def main():
 
         # Determine if we should load reference data
         previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and logdata. Might be null if the user said no, or the file didn't exist.
-        if (previous_ref_data_array is not None):
+        if previous_ref_data_array is not None:
             ilsts._reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
 
-        if (len(ilsts._reference_data_array) == 0):
+        if len(ilsts._reference_data_array) == 0:
 
             print('Connect for Reference measurement and press ENTER')
             print('Reference process:')
@@ -191,10 +194,10 @@ def main():
             print('DUT measurement:')
             reps = ""
 
-            while reps.isnumeric() == False:
+            while not reps.isnumeric():
                 print('Input repeat count, and connect the DUT and press ENTER:')
                 reps = input()
-                if reps.isnumeric() == False:
+                if not reps.isnumeric():
                     print('Invalid repeat count, enter a number.')
 
             for _ in range(int(reps)):
@@ -215,7 +218,7 @@ def main():
         file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 
     # Save the parameters, whether we have an MPM or not. But only if there is no save file, or the user just set new settings.
-    if (previous_param_data is None):
+    if previous_param_data is None:
         print("Saving parameter file '" + file_logging.file_last_scan_params + "'...")
         file_logging.sts_save_param_data(tsl, ilsts, file_logging.file_last_scan_params)  # ilsts might be None
 

@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Thu Mar 17 19:51:35 2022
 
 @author: chentir
+@organization: santec holdings corp.
 """
 
 
 def inst_err_str(errorcode):
-    '''
-    reutrn  InstrumentDLL Error string
+    """
+    return  InstrumentDLL Error string
 
     Parameters
     ----------
@@ -20,14 +22,14 @@ def inst_err_str(errorcode):
     str
         Error description.
 
-    '''
+    """
     inst_error = {
         '-2147483648': "Unknown",
         '-40': "InUseError",
         '-30': "ParameterError",
         '-20': "DeviceError",
         '-14': "CommunicationFailure",
-        '-13': "UbauthorizeAccess",
+        '-13': "UnauthorizedAccess",
         '-12': "IOException",
         '-11': "NotConnected",
         '-10': "Uninitialized",
@@ -45,7 +47,7 @@ def inst_err_str(errorcode):
 
 
 def stsprocess_err_str(errorcode):
-    '''
+    """
     return STSProcess DLL Error string
 
     Parameters
@@ -58,7 +60,7 @@ def stsprocess_err_str(errorcode):
     str
         Error description.
 
-    '''
+    """
     process_error = {
         '-2147483648': "Unknown",
         '-1115': "MeasureNotMatch",

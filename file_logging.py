@@ -19,7 +19,7 @@ file_reference_data_results = "data_reference.csv"
 def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, strfilename: str):
     rename_old_file(strfilename)
 
-    # create a psuedo object for our array of STSDataStruct (self.ref_data)
+    # create a pseudo object for our array of STSDataStruct (self.ref_data)
     jsondata = {
         "selected_chans": ilsts.selected_chans,
         "selected_ranges": ilsts.selected_ranges,
@@ -31,7 +31,7 @@ def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, strfilename: str)
         "actual_step": tsl.actual_step,
     }
 
-    if (ilsts is not None):
+    if ilsts is not None:
         jsondata['selected_chans'] = ilsts.selected_chans
         jsondata['selected_ranges'] = ilsts.selected_ranges
 
@@ -57,7 +57,7 @@ def rename_old_file(filename: str):
 
         # Create a new subfolder, if it doesn't already exist.
         str_previous_folder = "previous"
-        if (os.path.exists(r"./" + str_previous_folder) == False):
+        if os.path.exists(r"./" + str_previous_folder) == False:
             os.mkdir(str_previous_folder)
 
         timenow = datetime.now()
@@ -93,7 +93,7 @@ def save_reference_result_data(ilsts: sts.StsProcess, strfilename: str):
     allrows = []  # our row array will contain one array for each line.
 
     wavelengthtable = ref_data_array[0][
-        "rescaled_wavelength"]  # all of the wavelengths are all the same for any slot and channel. So just get the first one.
+        "rescaled_wavelength"]  # all the wavelengths are all the same for any slot and channel. So just get the first one.
     # errorcode,wavelengthtable = ilsts._ilsts.Get_Target_Wavelength_Table(None)
 
     # For each wavelength, get the data
@@ -126,13 +126,13 @@ def save_meas_data(ilsts: sts.StsProcess, filepath: str):
 
     # Get rescaling wavelength table
     errorcode, wavelengthtable = ilsts._ilsts.Get_Target_Wavelength_Table(None)
-    if (errorcode != 0):
+    if errorcode != 0:
         raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
     for item in ilsts.merge_data:
         # Pull out IL data of aftar merge
         errorcode, ilsts.il_data = ilsts._ilsts.Get_IL_Merge_Data(None, item)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         ilsts.il_data = array("d", ilsts.il_data)  # List to Array
@@ -171,14 +171,14 @@ def sts_save_ref_rawdata_unused(ilsts: sts.StsProcess, filepath: str):  # TODO: 
     rename_old_file(filepath)
     # wavelength data
     errorcode, wavetable = ilsts._ilsts.Get_Target_Wavelength_Table(None)
-    if (errorcode != 0):
+    if errorcode != 0:
         raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
     lstpow = []
-    # Pull out reference raw data of aftar rescaling
+    # Pull out reference raw data of after rescaling
     for item in ilsts.ref_data:
         errorcode, ref_pwr, ref_mon = ilsts._ilsts.Get_Ref_RawData(item, None, None)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         ref_pwr = array("d", ref_pwr)  # List to Array
@@ -190,7 +190,7 @@ def sts_save_ref_rawdata_unused(ilsts: sts.StsProcess, filepath: str):  # TODO: 
         writer = csv.writer(f)
         header = ["Wavelength(nm)"]
 
-        # for hedder
+        # for header
         for item in ilsts.ref_data:
             header_str = "Slot" + str(item.SlotNumber) + "Ch" + str(item.ChannelNumber)
             header.append(header_str)
@@ -220,11 +220,13 @@ def sts_save_ref_rawdata_unused(ilsts: sts.StsProcess, filepath: str):  # TODO: 
 
 # Save measurement Rawdata for specific range
 def sts_save_rawdata_unused(ilsts: sts.StsProcess, fpath: str, mpmrange):
-    '''Saves raw data (MPM and power monitor) during DUT measurement
+    """
+    Saves raw data (MPM and power monitor) during DUT measurement
     Args:
         ilsts (StsProcess)
         fpath (str): path and file name
-        mpmrange (int): Optical dynamic range of interest'''
+        mpmrange (int): Optical dynamic range of interest
+    """
     errorstr = ""
 
     # wavelength table
@@ -236,13 +238,13 @@ def sts_save_rawdata_unused(ilsts: sts.StsProcess, fpath: str, mpmrange):
     # data
     for item in ilsts.dut_data:
         print(item)
-        if (item.RangeNumber != mpmrange):
+        if item.RangeNumber != mpmrange:
             print(item.RangeNumber)
             input()
             continue
         # Pull out measurement raw data of aftar rescaling
         errorcode, dut_pwr, dut_mon = ilsts._ilsts.Get_Meas_RawData(item, None, None)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
 
         dut_pwr = array("d", dut_pwr)  # List to Array
@@ -253,7 +255,7 @@ def sts_save_rawdata_unused(ilsts: sts.StsProcess, fpath: str, mpmrange):
     header = ["Wavelength(nm)"]
 
     for item in ilsts.dut_data:
-        if (item.RangeNumber != mpmrange):
+        if item.RangeNumber != mpmrange:
             continue
         header_str = "Slot" + str(item.SlotNumber) + "Ch" + str(item.ChannelNumber)
         header.append(header_str)
@@ -299,7 +301,7 @@ def sts_load_ref_data_unused(ilsts, lstchdata, lstmonitor):  # TODO: delete this
 
         # Add in Reference Raw data
         errorcode = ilsts._ilsts.Add_Ref_Rawdata(arychdata, arymonitor, item)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + stsprocess_err_str(errorcode))
         counter += 1
     return errorstr

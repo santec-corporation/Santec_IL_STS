@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Thu Mar 17 19:48:11 2022
 
 @author: chentir
+@organization: santec holdings corp.
 """
 
 import os
@@ -21,14 +23,14 @@ ans = clr.AddReference(ROOT + PATH1)
 # print(ans) #<-- comment in to check if the DLL was added properly
 
 from Santec import MPM  # namespace of instrument DLL
-from Santec.Communication import CommunicationMethod  # Enumration Class
-from Santec.Communication import GPIBConnectType  # Enumration Class
+from Santec.Communication import CommunicationMethod  # Enumeration Class
+from Santec.Communication import GPIBConnectType  # Enumeration Class
 
 from error_handing_class import inst_err_str
 
 
 class MpmDevice:
-    '''MPM device class'''
+    """MPM device class"""
 
     def __init__(self, interface: str, address: str, port: int = None):
         self._mpm = MPM()
@@ -37,7 +39,8 @@ class MpmDevice:
         self.port = port
 
     def connect_mpm(self):
-        """Method handling the connection protocol of the MPM.
+        """
+        Method handling the connection protocol of the MPM.
 
         Raises:
             Exception: In case failed to connect to the MPM.
@@ -62,7 +65,8 @@ class MpmDevice:
         return None
 
     def get_mods_chans(self):
-        """Detects all the modules that are mounted on the MPM (looping on the 5 possible slots).
+        """
+        Detects all the modules that are mounted on the MPM (looping on the 5 possible slots).
         If the detected module is an MPM-212, then the possible optical channels are numbered 1 and 2
         Else, then the possible optical channels are numbered from 1 to 4.
         If no module is detected then the method returns an empty array.
@@ -89,7 +93,8 @@ class MpmDevice:
         return self.mods_and_chans
 
     def check_module_type(self):
-        """Checks the type of modules that are mounted on the MPM.
+        """
+        Checks the type of modules that are mounted on the MPM.
         This method calls check_mpm_215 and check_mpm_213 methods.
 
         Raises:
@@ -117,7 +122,8 @@ class MpmDevice:
         return flag_215, flag_213
 
     def check_mpm_215(self, slotnum: int) -> bool:
-        """Checks if the mounted module at slot number slotnum is a MPM-215.
+        """
+        Checks if the mounted module at slot number slotnum is an MPM-215.
 
         Args:
             slotnum (int): The module number (0~4).
@@ -128,29 +134,32 @@ class MpmDevice:
         return bool(self._mpm.Information.ModuleType[slotnum] == "MPM-215")
 
     def check_mpm_213(self, slotnum: int) -> bool:
-        """Checks if the mounted module at slot number slotnum is a MPM-213.
+        """
+        Checks if the mounted module at slot number slotnum is an MPM-213.
 
         Args:
             slotnum (int): The module number (0~4).
 
         Returns:
-            bool: True if a MPM-213 is detected.
+            bool: True if an MPM-213 is detected.
         """
         return bool(self._mpm.Information.ModuleType[slotnum] == "MPM-213")
 
     def check_mpm_212(self, slotnum: int) -> bool:
-        """Checks if the mounted module at slot number slotnum is a MPM-212.
+        """
+        Checks if the mounted module at slot number slotnum is an MPM-212.
 
         Args:
             slotnum (int): The module number (0~4).
 
         Returns:
-            bool: True if a MPM-212 is detected.
+            bool: True if an MPM-212 is detected.
         """
         return bool(self._mpm.Information.ModuleType[slotnum] == "MPM-212")
 
     def get_range(self) -> array:
-        """Gets the measurment dynamic range of the MPM module.
+        """
+        Gets the measurement dynamic range of the MPM module.
         Depending on the module type, the dynamic range varies.
         This method calls check_mpm_215 and check_mpm_213 methods.
 
@@ -170,11 +179,12 @@ class MpmDevice:
         return None
 
     def set_range(self, powerrange):
-        """Sets the dynamic range of the MPM.
+        """
+        Sets the dynamic range of the MPM.
 
         Args:
             powerrange (int): check get_range method for
-            available dyanmic ranges.
+            available dynamic ranges.
 
         Raises:
             Exception:  In case the MPM is busy.
@@ -188,8 +198,9 @@ class MpmDevice:
         return None
 
     def zeroing(self):
-        """Performs a Zeroing on all MPM channels.
-        All the channels must be closed with respective balck caps before
+        """
+        Performs a Zeroing on all MPM channels.
+        All the channels must be closed with respective back caps before
         performing this operation.
 
         Raises:
@@ -209,7 +220,8 @@ class MpmDevice:
         return inst_err_str(errorcode)
 
     def get_averaging_time(self):
-        """Gets the averaging time of the MPM.
+        """
+        Gets the averaging time of the MPM.
 
         Raises:
             Exception:  In case the MPM is busy;
@@ -226,7 +238,8 @@ class MpmDevice:
         return self.averaging_time
 
     def logging_start(self):
-        """MPM starts logging.
+        """
+        MPM starts logging.
 
         Raises:
             Exception:  In case the MPM is busy.
@@ -236,7 +249,8 @@ class MpmDevice:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
     def logging_stop(self, except_if_error=True):
-        """MPM stops logging.
+        """
+        MPM stops logging.
 
         Args:
             except_if_error (bool, optional): Set True if raising exception is
@@ -252,7 +266,8 @@ class MpmDevice:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
 
     def get_each_chan_logdata(self, slot_num: int, chan_num: int) -> array:
-        """Gets log data for specified slot and channel.
+        """
+        Gets log data for specified slot and channel.
 
         Args:
             slot_num (int): Module number (0~4).
@@ -265,12 +280,12 @@ class MpmDevice:
             array: array of logged data.
         """
         errorcode, logdata = self._mpm.Get_Each_Channel_Logdata(slot_num, chan_num, None)
-        if (errorcode != 0):
+        if errorcode != 0:
             raise Exception(str(errorcode) + ": " + inst_err_str(errorcode))
         return logdata
 
     def set_logging_parameters(self, startwave, stopwave, step, speed):
-        '''
+        """
         Sets the logging parameter for MPM integrated in STS
 
         Args:
@@ -282,7 +297,7 @@ class MpmDevice:
         Raises:
             RuntimeError: When trigger signal is not detected
             RuntimeError: if the MPM didn't record data
-        '''
+        """
         errorcode = self._mpm.Set_Logging_Paremeter_for_STS(startwave,
                                                             stopwave,
                                                             step,
@@ -310,11 +325,11 @@ class MpmDevice:
                                                                             0)  # Updates status, which should break us out of the loop.
             break
 
-        if (errorcode == -999):
+        if errorcode == -999:
             errorstr = "MPM Trigger received an error! Please check trigger cable connection."
             raise RuntimeError(errorstr)
 
         if (
-                errorcode != 0 and status != -1):  # its a success if either the error code is 0, or the status is -1. Otherwise throw.
+                errorcode != 0 and status != -1):  # it's a success if either the error code is 0, or the status is -1. Otherwise, throw.
             raise RuntimeError(str(errorcode) + ": " + inst_err_str(errorcode))
         return None
