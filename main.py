@@ -7,14 +7,15 @@ Created on Fri Jan 21 17:17:26 2022
 @organization: santec holdings corp.
 """
 
+# Basic imports
 import os
 import json
 from matplotlib.pyplot import plot, show
 
-from santec import TslDevice, MpmDevice, SpuDevice, GetAddress, file_logging
+# Importing santec and its control classes
+from santec import TslDevice, MpmDevice, SpuDevice, GetAddress, file_logging, STS
 
-import santec.sts_process as sts
-
+# Initializing get instrument address class
 device_address = GetAddress()
 
 
@@ -89,7 +90,10 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
 
 
 def prompt_and_get_previous_param_data(file_last_scan_params):
-    """If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,  previous reference data etc."""
+    """
+    If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,
+    previous reference data etc.
+    """
     if not os.path.exists(file_last_scan_params):
         return None
 
@@ -98,7 +102,7 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
     if ans not in 'Yy':
         return None
 
-    # load the json data.
+    # Load the json data.
     with open(file_last_scan_params) as json_file:
         previous_settings = json.load(json_file)
 
@@ -106,7 +110,10 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
 
 
 def prompt_and_get_previous_reference_data():
-    """Ask the user if they want to use the previous reference data (if it exists). If so, then load it. """
+    """
+    Ask the user if they want to use the previous reference data (if it exists).
+    If so, then load it.
+    """
 
     if not os.path.exists(file_logging.file_last_scan_reference_json):
         return None
@@ -118,13 +125,13 @@ def prompt_and_get_previous_reference_data():
         return None
 
     # Get the file size. If It's huge, then the load will freeze for a few seconds.
-    intfilesize = int(os.path.getsize(file_logging.file_last_scan_reference_json))
-    if intfilesize > 1000000:
-        strfilesize = str(int(intfilesize / 1000 / 1000)) + " MB"
+    int_file_size = int(os.path.getsize(file_logging.file_last_scan_reference_json))
+    if int_file_size > 1000000:
+        str_file_size = str(int(int_file_size / 1000 / 1000)) + " MB"
     else:
-        strfilesize = str(int(intfilesize / 1000)) + " KB"
+        str_file_size = str(int(int_file_size / 1000)) + " KB"
 
-    print("Opening " + strfilesize + " file '" + file_logging.file_last_scan_reference_json + "'...")
+    print("Opening " + str_file_size + " file '" + file_logging.file_last_scan_reference_json + "'...")
     # load the json data.
     with open(file_logging.file_last_scan_reference_json) as json_file:
         previous_reference = json.load(json_file)
@@ -133,9 +140,12 @@ def prompt_and_get_previous_reference_data():
 
 
 def main():
-    """Main method of this project"""
+    """ Main method of this project """
 
-    global tsl, mpm, dev, ilsts
+    tsl = None
+    mpm = None
+    dev = None
+    ilsts = None
 
     device_address.Initialize_Device_Addresses()
     tsl_address = device_address.Get_Tsl_Address()
@@ -143,7 +153,7 @@ def main():
     dev_address = device_address.Get_Dev_Address()
     interface = 'GPIB'
 
-    # only connect to the devices that the user wants to connect to
+    # Only connect to the devices that the user wants to connect
     if tsl_address is not None:
         tsl = TslDevice(interface, tsl_address)
         tsl.ConnectTSL()
@@ -160,12 +170,12 @@ def main():
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
-        file_logging.file_last_scan_params)  # might be empty, if there is no data, or if the user chose to not load it.
+        file_logging.file_last_scan_params)             # might be empty, if there is no data, or if the user chose to not load it.
     setting_tsl_sweep_params(tsl, previous_param_data)  # previous_param_data might be none
 
     # If there is an MPM, then create instance of ILSTS
     if mpm.address is not None:
-        ilsts = sts.StsProcess(tsl, mpm, dev)
+        ilsts = STS.StsProcess(tsl, mpm, dev)
 
         ilsts.set_selected_channels(previous_param_data)
         ilsts.set_selected_ranges(previous_param_data)
@@ -224,4 +234,5 @@ def main():
         file_logging.sts_save_param_data(tsl, ilsts, file_logging.file_last_scan_params)  # ilsts might be None
 
 
-main()
+if __name__ == '__main__':
+    main()

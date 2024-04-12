@@ -14,7 +14,7 @@ import csv
 from array import array
 from datetime import datetime
 
-# Importing sts process and instrument classes
+# Importing STS process and instrument classes
 import santec.sts_process as sts
 from santec.tsl_instrument_class import TslDevice
 from santec.error_handing_class import sts_process_error_strings
