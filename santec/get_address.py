@@ -18,7 +18,7 @@ import nidaqmx
 resource_manager = pyvisa.ResourceManager()
 
 # Getting a list of all detected instruments
-listing = resource_manager.list_resources()
+resources = resource_manager.list_resources()
 
 # Getting a list of all detected DAQ devices
 system = nidaqmx.system.System.local()
@@ -26,7 +26,7 @@ system = nidaqmx.system.System.local()
 
 class GetAddress:
     def __init__(self):
-        """Initializing TSL, MPM and DAQ objects"""
+        """ Initializing TSL, MPM and DAQ objects """
         self.__cached_TSL_Address = None
         self.__cached_MPM_Address = None
         self.__cached_DAQ_Address = None
@@ -78,44 +78,52 @@ class GetAddress:
             DESCRIPTION.
 
         """
-        tools = [i for i in listing if 'GPIB' in i]  # Gets and sorts GPIB connections only
+        devices = {'Name': [], 'Resource': []}
 
-        print("Present GPIB Instruments: ")
-        for i in range(len(tools)):
-            # Connect GPIB into a buffer
+        resource_tools = [i for i in resources if 'GPIB' in i]  # Gets and sorts GPIB connections only
+
+        for resource in resource_tools:
             try:
-                buffer = resource_manager.open_resource(tools[i])
-                # buffer.read_termination = "\r\n"
-                print(i + 1, ": ", buffer.query('*IDN?'))
-
+                resource_idn = resource_manager.open_resource(resource).query("*IDN?")
+                if 'SANTEC' in resource_idn:
+                    devices['Name'].append(resource_idn)
+                    devices['Resource'].append(resource)
             except Exception as err:
                 print(f"Unexpected {err=}, {type(err)=}")
 
+        devices_list = list(zip(devices['Name'], devices['Resource']))
+        devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
+        devices['Name'], devices['Resource'] = zip(*devices_list)
+
+        print("Present GPIB Instruments: ")
+        for i in range(len(devices['Name'])):
+            print(i + 1, ": ", devices['Name'][i])
+
         print("Detected DAQ devices: ")
         for i in system.devices.device_names:
-            print(system.devices.device_names.index(i) + 1 + len(tools), ": ", i)
+            print(system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
 
         time.sleep(0.5)
 
-        selection = input("\nSelect Laser instrument: ")
-
+        selection = int(input("\nSelect Laser instrument: "))
+        selected_resource = devices['Resource'][selection - 1]
         # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(tools[int(selection) - 1])
+        buffer = resource_manager.open_resource(selected_resource)
         # buffer.read_termination = "\r\n"
-
         # set the TSL to CRLF delimiter
         buffer.write('SYST:COMM:GPIB:DEL 2')
         TSL = buffer.resource_name
 
-        selection = input("Select Power meter: ")
-        # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(tools[int(selection) - 1])
 
+        selection = int(input("Select Power meter: "))
+        selected_resource = devices['Resource'][selection - 1]
+        # connect GPIB into a buffer
+        buffer = resource_manager.open_resource(selected_resource)
         # buffer.read_termination = "\r\n"
         OPM = buffer.resource_name
 
         selection = input("Select DAQ board: ")
-        DAQ = system.devices[int(selection) - 1 - len(tools)].name
+        DAQ = system.devices[int(selection) - 1 - len(devices['Name'])].name
 
         self.__cached_TSL_Address = TSL
         self.__cached_MPM_Address = OPM
