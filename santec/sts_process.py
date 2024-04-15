@@ -238,7 +238,7 @@ class StsProcess:
         else:  # select new optical dynamic ranges
             self.selected_ranges = []
             print("\nSelect a dynamic range. ex: 1 or 3 or 5")
-            print("\nAvailable dynamic ranges:")
+            print("Available dynamic ranges:")
             i = 1
             self._mpm.get_range()
             for mpm_range in self._mpm.range_data:
