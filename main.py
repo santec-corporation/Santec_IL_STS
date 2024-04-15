@@ -55,7 +55,7 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
         print('Output Power (nm): ' + str(power))
 
     else:
-        print('Input Start Wavelength (nm):')
+        print('\nInput Start Wavelength (nm):')
         start_wavelength = float(input())
         print('Input Stop Wavelength (nm):')
         stop_wavelength = float(input())
@@ -184,7 +184,7 @@ def main():
         ilsts.set_parameters()  # will automatically use either newly-input data, or saved data from the previous_param_data.
 
         # Determine if we should load reference data
-        previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and logdata. Might be null if the user said no, or the file didn't exist.
+        previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and log_data. Might be null if the user said no, or the file didn't exist.
         if previous_ref_data_array is not None:
             ilsts._reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
 
@@ -212,12 +212,14 @@ def main():
                     print('Invalid repeat count, enter a number.')
 
             for _ in range(int(reps)):
-                print("Scan {} of {}...".format(str(_ + 1), reps))
+                print("\nScan {} of {}...".format(str(_ + 1), reps))
                 ilsts.sts_measurement()
-                plot(ilsts.wavelengthtable, ilsts.il)
-                show()
-            print('Redo? (y/n)')
-            ans = input()
+                user_map_display = input('\nDo you want to view the graph ?? (y/n) ')
+                if user_map_display == 'y':
+                    plot(ilsts.wavelength_table, ilsts.il)
+                    show()
+
+            ans = input('Redo Scan ? (y/n)')
 
         print("Saving measurement data file '" + file_logging.file_measurement_data_results + "'...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)

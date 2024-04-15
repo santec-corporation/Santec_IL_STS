@@ -57,7 +57,7 @@ def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, str_filename: str
 def save_reference_json_data(ilsts: sts.StsProcess, str_filename: str):
     rename_old_file(str_filename)
 
-    with open(strfilename, 'w') as export_file:
+    with open(str_filename, 'w') as export_file:
         json.dump(
             ilsts._reference_data_array,
             export_file)     # No indents or newlines for this large file. If needed, then look at the CSV instead.
