@@ -216,18 +216,18 @@ def main():
 
             ans = input("\nRedo Scan ? (y/n)")
 
-        print("Saving measurement data file "" + file_logging.file_measurement_data_results + ""...")
+        print("Saving measurement data to file " + file_logging.file_measurement_data_results + "...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
-        print("Saving reference csv data file "" + file_logging.file_reference_data_results + ""...")
+        print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
 
-        print("Saving reference json file "" + file_logging.file_last_scan_reference_json + ""...")
+        print("Saving reference json to file " + file_logging.file_last_scan_reference_json + "...")
         file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 
     # Save the parameters, whether we have an MPM or not. But only if there is no save file, or the user just set new settings.
     if previous_param_data is None:
-        print("Saving parameter file "" + file_logging.file_last_scan_params + ""...")
+        print("Saving parameters to file " + file_logging.file_last_scan_params + "...")
         file_logging.sts_save_param_data(tsl, ilsts, file_logging.file_last_scan_params)  # ilsts might be None
 
 
