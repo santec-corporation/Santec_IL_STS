@@ -55,24 +55,27 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
         print("Output Power (nm): " + str(power))
 
     else:
-        start_wavelength = float(input("\nInput Start Wavelength (nm): "))
-        stop_wavelength = float(input("Input Stop Wavelength (nm): "))
-        sweep_step = float(input("Input Sweep Step (pm): ")) / 1000
+        print("\nInput Start Wavelength (nm):")
+        start_wavelength = float(input())
+        print("Input Stop Wavelength (nm):")
+        stop_wavelength = float(input())
+        print("Input Sweep Step (pm):")
+        sweep_step = float(input()) / 1000
 
         if connected_tsl.get_550_flag() is True:
-            sweep_speed = float(input("Input Sweep Speed (nm/sec): "))
+            sweep_speed = float(input("Input Sweep Speed (nm/sec):"))
         else:
-            speed = input("Select sweep sweep_speed (nm/sec): ")
+            print("Select sweep sweep_speed (nm/sec):")
             num = 1
             for i in connected_tsl.get_sweep_speed_table():
                 print(str(num) + "- " + str(i))
                 num += 1
-            sweep_speed = connected_tsl.get_sweep_speed_table()[int(speed) - 1]
+            sweep_speed = connected_tsl.get_sweep_speed_table()[int(input()) - 1]
 
-        power = float(input("Input Output Power (dBm): "))
+        power = float(input("Input Output Power (dBm):"))
         while power > 10:
             print("Invalid value of Output Power (<=10 dBm)")
-            power = float(input("Input Output Power (dBm): "))
+            power = float(input("Input Output Power (dBm):"))
 
     # Now that we have our parameters, set them on the TSL.
     # TSL Power setting
