@@ -199,9 +199,9 @@ def main():
             reps = ""
 
             while not reps.isnumeric():
-                reps = input("Input repeat count, and connect the DUT and press ENTER:")
+                reps = input("Input repeat count, and connect the DUT and press ENTER: ")
                 if not reps.isnumeric():
-                    print("Invalid repeat count, enter a number.")
+                    print("Invalid repeat count, enter a number.\n")
 
             for _ in range(int(reps)):
                 print("\nScan {} of {}...".format(str(_ + 1), reps))
@@ -213,12 +213,19 @@ def main():
 
             ans = input("\nRedo Scan ? (y/n)")
 
+        # Save IL measurement data
         print("Saving measurement data to file " + file_logging.file_measurement_data_results + "...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
+        # Save reference data
         print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
 
+        # Save dut data
+        print("Saving reference csv data to file " + file_logging.file_dut_data_results + "...")
+        file_logging.save_dut_result_data(ilsts, file_logging.file_dut_data_results)
+
+        # Save reference data into json file
         print("Saving reference json to file " + file_logging.file_last_scan_reference_json + "...")
         file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 
