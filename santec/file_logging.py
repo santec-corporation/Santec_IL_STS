@@ -26,7 +26,6 @@ file_last_scan_params = "last_scan_params.json"
 file_last_scan_reference_json = "last_scan_reference_data.json"
 file_measurement_data_results = "data_measurement.csv"
 file_reference_data_results = "data_reference.csv"
-file_dut_data_results = "data_dut.csv"
 
 
 def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, str_filename: str):
@@ -117,48 +116,6 @@ def save_reference_result_data(ilsts: sts.StsProcess, str_filename: str):
         for this_refdata in ref_data_array:
             this_row_array.append(str(this_refdata["rescaled_monitor"][i]))  # TSL power
             this_row_array.append(str(this_refdata["rescaled_reference_power"][i]))  # MPM power
-
-        all_rows.append(this_row_array)
-        i += 1
-
-    with open(str_filename, 'w', encoding='UTF8', newline='') as f:
-        writer = csv.writer(f)
-        # write the header
-        writer.writerow(header)
-        # write all rows
-        writer.writerows(all_rows)
-
-    return None
-
-
-# Save dut data to CSV for human consumption.
-def save_dut_result_data(ilsts: sts.StsProcess, str_filename: str):
-    rename_old_file(str_filename)
-
-    # Create a CSV file that has columns similar to...
-    # Wavelength Slot1Ch1_TSLPower Slot1Ch1_MPMPower Slot1Ch2_TSLPower Slot1Ch2_MPMPower
-
-    dut_data_array = ilsts._dut_data_array
-
-    # Header wavelength is static. There could be any number of slots and channels.
-    header = ["Wavelength(nm)"]
-    for item in dut_data_array:
-        header.append("Slot{}Ch{}_TSLDUTPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"])))
-        header.append("Slot{}Ch{}_MPMDUTPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"])))
-
-    all_rows = []  # our row array will contain one array for each line.
-
-    # All the wavelengths are all the same for any slot and channel. So just get the first one.
-    wavelength_table = dut_data_array[0]["rescaled_wavelength"]
-    # errorcode, wavelength table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
-
-    # For each wavelength, get the data
-    i = 0
-    for this_wavelength in wavelength_table:
-        this_row_array = [this_wavelength]  # wavelength
-        for this_dutdata in dut_data_array:
-            this_row_array.append(str(this_dutdata["rescaled_dut_monitor"][i]))  # TSL DUT power
-            this_row_array.append(str(this_dutdata["rescaled_dut_power"][i]))  # MPM DUT power
 
         all_rows.append(this_row_array)
         i += 1
