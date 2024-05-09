@@ -63,6 +63,7 @@ class StsProcess:
         self._spu = _spu
         self._ilsts = ILSTS()
         self._reference_data_array = []
+        self._dut_data_array = []
 
     def set_parameters(self):
         """
@@ -377,17 +378,14 @@ class StsProcess:
             error_string = self._mpm.set_range(mpm_range)
 
             # sweep handling
-            error_string = self.sts_sweep_process(sweep_count)
+            self.sts_sweep_process(sweep_count)
 
             # Get DUT data
             error_string = self.sts_get_meas_data(sweep_count)
 
-            sweep_count += 1
+            self.rescale_dut_data()
 
-        # Rescaling,
-        errorcode = self._ilsts.Cal_MeasData_Rescaling()
-        if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            sweep_count += 1
 
         # Range data merge
         errorcode = self._ilsts.Cal_IL_Merge(Module_Type.MPM_211)
@@ -500,6 +498,7 @@ class StsProcess:
 
         # After rescaling is done, get the raw reference data.
         errorcode, rescaled_ref_pwr, rescaled_ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item, None, None)
+
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
@@ -559,13 +558,14 @@ class StsProcess:
     # Get logging data & add STSProcess class for Measurement
     def sts_get_meas_data(self, sweep_count):
         """
-        ets logged data during DUT measurement.
+        Gets logged data during DUT measurement.
         Args:
             sweep count (int)
 
         Raises:
             Exception: if power monitor/MPM data couldn't be added to the data structure
         """
+        errorcode = 0
         for item in self.dut_data:
             if item.SweepCount != sweep_count:
                 continue
@@ -593,5 +593,48 @@ class StsProcess:
             errorcode = self._ilsts.Add_Meas_MonitorData(trigger, monitor, item)
             if errorcode != 0:
                 raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+        return errorcode
+
+    def rescale_dut_data(self):
+        for data_struct_item in self.dut_data:
+            # Rescaling
+            errorcode = self._ilsts.Cal_MeasData_Rescaling()
+            if errorcode != 0:
+                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+            # After rescaling is done, get the raw dut data.
+            errorcode, rescaled_dut_pwr, rescaled_dut_mon = self._ilsts.Get_Meas_RawData(data_struct_item, None, None)
+            if errorcode != 0:
+                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+            errorcode, wavelength_array = self._ilsts.Get_Target_Wavelength_Table(None)
+            if errorcode != 0:
+                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+            if len(wavelength_array) == 0 or len(wavelength_array) != len(rescaled_dut_pwr) or len(
+                    wavelength_array) != len(rescaled_dut_mon):
+                raise Exception(
+                    "The length of the wavelength array is {}, the length of the dut power array is {},"
+                    " and the length of the dut monitor is {}. They must all be the same length.".format(
+                        len(wavelength_array), len(rescaled_ref_pwr), len(rescaled_ref_mon))
+                )
+
+            dut_object = {
+                "MPMNumber": data_struct_item.MPMNumber,
+                "SlotNumber": data_struct_item.SlotNumber,
+                "ChannelNumber": data_struct_item.ChannelNumber,
+                # # unscaled log data is required if we want to load the dut data later.
+                # "trigger": list(array('d', trigger)),
+                # # motor positions that correspond to wavelengths. required if we want to load the dut data later.
+                # "monitor": list(array('d', monitor)),
+                # unscaled monitor data is required if we want to load the dut data later.
+                "rescaled_wavelength": list(array('d', wavelength_array)),
+                # all wavelengths, including triggers in between.
+                "rescaled_dut_monitor": list(array('d', rescaled_dut_mon)),  # rescaled monitor data
+                "rescaled_dut_power": list(array('d', rescaled_dut_pwr)),  # rescaled dut power
+            }
+
+            self._dut_data_array.append(dut_object)
 
         return None
