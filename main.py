@@ -55,27 +55,24 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
         print("Output Power (nm): " + str(power))
 
     else:
-        print("\nInput Start Wavelength (nm):")
-        start_wavelength = float(input())
-        print("Input Stop Wavelength (nm):")
-        stop_wavelength = float(input())
-        print("Input Sweep Step (pm):")
-        sweep_step = float(input()) / 1000
+        start_wavelength = float(input("\nInput Start Wavelength (nm): "))
+        stop_wavelength = float(input("Input Stop Wavelength (nm): "))
+        sweep_step = float(input("Input Sweep Step (pm): ")) / 1000
 
         if connected_tsl.get_550_flag() is True:
-            sweep_speed = float(input("Input Sweep Speed (nm/sec):"))
+            sweep_speed = float(input("Input Sweep Speed (nm/sec): "))
         else:
-            print("Select sweep sweep_speed (nm/sec):")
+            speed = input("Select sweep sweep_speed (nm/sec): ")
             num = 1
             for i in connected_tsl.get_sweep_speed_table():
                 print(str(num) + "- " + str(i))
                 num += 1
-            sweep_speed = connected_tsl.get_sweep_speed_table()[int(input()) - 1]
+            sweep_speed = connected_tsl.get_sweep_speed_table()[int(speed) - 1]
 
-        power = float(input("Input Output Power (dBm):"))
+        power = float(input("Input Output Power (dBm): "))
         while power > 10:
             print("Invalid value of Output Power (<=10 dBm)")
-            power = float(input("Input Output Power (dBm):"))
+            power = float(input("Input Output Power (dBm): "))
 
     # Now that we have our parameters, set them on the TSL.
     # TSL Power setting
@@ -202,9 +199,9 @@ def main():
             reps = ""
 
             while not reps.isnumeric():
-                reps = input("Input repeat count, and connect the DUT and press ENTER:")
+                reps = input("Input repeat count, and connect the DUT and press ENTER: ")
                 if not reps.isnumeric():
-                    print("Invalid repeat count, enter a number.")
+                    print("Invalid repeat count, enter a number.\n")
 
             for _ in range(int(reps)):
                 print("\nScan {} of {}...".format(str(_ + 1), reps))
@@ -214,14 +211,24 @@ def main():
                     plot(ilsts.wavelength_table, ilsts.il)
                     show()
 
+            # Get and store dut scan data of each channel, each range
+            ilsts.get_dut_data()
+
             ans = input("\nRedo Scan ? (y/n)")
 
-        print("Saving measurement data to file " + file_logging.file_measurement_data_results + "...")
+        # Save IL measurement data
+        print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
+        # Save reference data
         print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
 
+        # Save dut data
+        print("Saving reference csv data to file " + file_logging.file_dut_data_results + "...")
+        file_logging.save_dut_result_data(ilsts, file_logging.file_dut_data_results)
+
+        # Save reference data into json file
         print("Saving reference json to file " + file_logging.file_last_scan_reference_json + "...")
         file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
 

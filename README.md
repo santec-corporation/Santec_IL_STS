@@ -2,9 +2,6 @@
 <p align="right"> <a href="https://www.santec.com/jp/" target="_blank" rel="noreferrer"> <img src="https://www.santec.com/dcms_media/image/common_logo01.png" alt="santec" 
   width="250" height="45"/> </a> </p>
 
-> [!NOTE]
-> If you have any [issues](https://github.com/santec-corporation/Santec_IL_STS/issues), create a new issue [HERE](https://github.com/santec-corporation/Santec_IL_STS/issues/new). 
-
 <h1 align="left"> Santec_IL_STS </h1>
 Script for the measurement of the IL (Insertion Loss) or WDL (Wavelength Dependent Loss) of the STS (Swept Test System).   
 <br /> <br />
