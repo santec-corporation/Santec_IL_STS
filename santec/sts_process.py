@@ -376,16 +376,21 @@ class StsProcess:
         for mpm_range in self.range:
             # set MPM Range
             error_string = self._mpm.set_range(mpm_range)
+            # print(error_string)
 
             # sweep handling
             self.sts_sweep_process(sweep_count)
 
             # Get DUT data
             error_string = self.sts_get_meas_data(sweep_count)
-
-            self.rescale_dut_data()
+            # print(error_string)
 
             sweep_count += 1
+
+        # Rescaling
+        errorcode = self._ilsts.Cal_MeasData_Rescaling()
+        if errorcode != 0:
+            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Range data merge
         errorcode = self._ilsts.Cal_IL_Merge(Module_Type.MPM_211)
@@ -570,7 +575,7 @@ class StsProcess:
             if item.SweepCount != sweep_count:
                 continue
 
-            # Get MPM login data
+            # Get MPM logging data
             log_data = self._mpm.get_each_channel_log_data(item.SlotNumber, item.ChannelNumber)
             log_data = array("d", log_data)  # List to Array
 
@@ -596,15 +601,12 @@ class StsProcess:
 
         return errorcode
 
-    def rescale_dut_data(self):
+    # Get and store dut data
+    def get_dut_data(self):
+        # After rescaling is done, get the raw dut data
         for data_struct_item in self.dut_data:
-            # Rescaling
-            errorcode = self._ilsts.Cal_MeasData_Rescaling()
-            if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
-
-            # After rescaling is done, get the raw dut data.
-            errorcode, rescaled_dut_pwr, rescaled_dut_mon = self._ilsts.Get_Meas_RawData(data_struct_item, None, None)
+            errorcode, rescaled_dut_pwr, rescaled_dut_mon = self._ilsts.Get_Meas_RawData(data_struct_item,
+                                                                                         None, None)
             if errorcode != 0:
                 raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
@@ -620,15 +622,13 @@ class StsProcess:
                         len(wavelength_array), len(rescaled_ref_pwr), len(rescaled_ref_mon))
                 )
 
+            # print("Channel: {}, Range: {} ".format(data_struct_item.ChannelNumber, data_struct_item.RangeNumber))
+
             dut_object = {
                 "MPMNumber": data_struct_item.MPMNumber,
                 "SlotNumber": data_struct_item.SlotNumber,
                 "ChannelNumber": data_struct_item.ChannelNumber,
-                # # unscaled log data is required if we want to load the dut data later.
-                # "trigger": list(array('d', trigger)),
-                # # motor positions that correspond to wavelengths. required if we want to load the dut data later.
-                # "monitor": list(array('d', monitor)),
-                # unscaled monitor data is required if we want to load the dut data later.
+                "RangeNumber": data_struct_item.RangeNumber,
                 "rescaled_wavelength": list(array('d', wavelength_array)),
                 # all wavelengths, including triggers in between.
                 "rescaled_dut_monitor": list(array('d', rescaled_dut_mon)),  # rescaled monitor data

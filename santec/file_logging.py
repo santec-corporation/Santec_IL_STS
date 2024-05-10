@@ -143,8 +143,8 @@ def save_dut_result_data(ilsts: sts.StsProcess, str_filename: str):
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
     for item in dut_data_array:
-        header.append("Slot{}Ch{}_TSLDUTPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"])))
-        header.append("Slot{}Ch{}_MPMDUTPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"])))
+        header.append("Slot{}Ch{}R{}_TSLPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]), str(item["RangeNumber"])))
+        header.append("Slot{}Ch{}R{}_MPMPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]), str(item["RangeNumber"])))
 
     all_rows = []  # our row array will contain one array for each line.
 

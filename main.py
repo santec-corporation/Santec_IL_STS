@@ -211,10 +211,13 @@ def main():
                     plot(ilsts.wavelength_table, ilsts.il)
                     show()
 
+            # Get and store dut scan data of each channel, each range
+            ilsts.get_dut_data()
+
             ans = input("\nRedo Scan ? (y/n)")
 
         # Save IL measurement data
-        print("Saving measurement data to file " + file_logging.file_measurement_data_results + "...")
+        print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
         file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
         # Save reference data
