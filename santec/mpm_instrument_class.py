@@ -71,15 +71,22 @@ class MpmDevice:
 
         return None
 
-    def Query(self, command: str):
+    def QueryMPM(self, command: str):
         """ Queries a command to the instrument and returns a string """
         command = command.upper()
-        return self.__mpm.query(command)
+        status, response = self.__mpm.Echo(command, "")
+        return status, response
 
-    def Write(self, command: str):
+    def WriteMPM(self, command: str):
         """ Writes a command to the instrument """
         command = command.upper()
-        return self.__mpm.write(command)
+        status = self.__mpm.Write(command)
+        return status
+
+    def ReadMPM(self):
+        """ Reads from the instrument """
+        status, response = self.__mpm.Read("")
+        return status, response
 
     def get_mods_chans(self):
         """

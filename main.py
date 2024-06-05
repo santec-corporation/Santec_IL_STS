@@ -62,16 +62,17 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
         if connected_tsl.get_550_flag() is True:
             sweep_speed = float(input("Input Sweep Speed (nm/sec): "))
         else:
-            speed = input("Select sweep sweep_speed (nm/sec): ")
             num = 1
+            print('\nSpeed table:')
             for i in connected_tsl.get_sweep_speed_table():
                 print(str(num) + "- " + str(i))
                 num += 1
+            speed = input("Select a sweep speed (nm/sec): ")
             sweep_speed = connected_tsl.get_sweep_speed_table()[int(speed) - 1]
 
         power = float(input("Input Output Power (dBm): "))
         while power > 10:
-            print("Invalid value of Output Power (<=10 dBm)")
+            print("Invalid value of Output Power ( <=10 dBm )")
             power = float(input("Input Output Power (dBm): "))
 
     # Now that we have our parameters, set them on the TSL.
@@ -140,7 +141,7 @@ def main():
     dev = None
     ilsts = None
 
-    device_address.Initialize_Device_Addresses()
+    device_address.Initialize_Device_Addresses('SME')
     tsl_address = device_address.Get_Tsl_Address()
     mpm_address = device_address.Get_Mpm_Address()
     dev_address = device_address.Get_Dev_Address()

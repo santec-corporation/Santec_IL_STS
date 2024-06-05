@@ -116,15 +116,22 @@ class TslDevice:
 
         return None
 
-    def Query(self, command: str):
+    def QueryTSL(self, command: str):
         """ Queries a command to the instrument and returns a string """
         command = command.upper()
-        return self.__tsl.query(command)
+        status, response = self.__tsl.Echo(command, "")
+        return status, response
 
-    def Write(self, command: str):
+    def WriteTSL(self, command: str):
         """ Writes a command to the instrument """
         command = command.upper()
-        return self.__tsl.write(command)
+        status = self.__tsl.Write(command)
+        return status
+
+    def ReadTSL(self):
+        """ Reads from the instrument """
+        status, response = self.__tsl.Read("")
+        return status, response
 
     def get_550_flag(self):
         """

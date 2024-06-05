@@ -65,7 +65,7 @@ class GetAddress:
             self.Initialize_Device_Addresses()
         return self.__cached_DAQ_Address
 
-    def Initialize_Device_Addresses(self):
+    def Initialize_Device_Addresses(self, mode: str = ""):
         """
         Each device needs to prompt for a different connection type
         Returns
@@ -109,10 +109,11 @@ class GetAddress:
         for i in range(len(devices['Name'])):
             print(i + 1, ": ", devices['Name'][i])
 
-        # Prints all the detected DAQ devices
-        print("Detected DAQ devices: ")
-        for i in system.devices.device_names:
-            print(system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
+        if mode == 'SME':
+            # Prints all the detected DAQ devices
+            print("Detected DAQ devices: ")
+            for i in system.devices.device_names:
+                print(system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
 
         time.sleep(0.2)
 
@@ -134,13 +135,17 @@ class GetAddress:
         # buffer.read_termination = "\r\n"
         OPM = buffer.resource_name
 
-        # User daq device selection
-        selection = input("Select DAQ board: ")
-        DAQ = system.devices[int(selection) - 1 - len(devices['Name'])].name
+        DAQ = None
+        if mode == 'SME':
+            # User daq device selection
+            selection = input("Select DAQ board: ")
+            DAQ = system.devices[int(selection) - 1 - len(devices['Name'])].name
 
         # Assigning all the user selected instruments
         self.__cached_TSL_Address = TSL
         self.__cached_MPM_Address = OPM
-        self.__cached_DAQ_Address = DAQ
+
+        if mode == 'SME':
+            self.__cached_DAQ_Address = DAQ
 
         return None
