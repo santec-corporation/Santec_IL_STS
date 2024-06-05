@@ -10,6 +10,8 @@ Created on Fri Jan 21 17:17:26 2022
 # Basic imports
 import os
 import json
+import time
+
 from matplotlib.pyplot import plot, show
 
 # Importing high level santec package and its modules
@@ -211,6 +213,7 @@ def main():
                 if user_map_display == "y":
                     plot(ilsts.wavelength_table, ilsts.il)
                     show()
+                time.sleep(2)
 
             # Get and store dut scan data of each channel, each range
             ilsts.get_dut_data()
