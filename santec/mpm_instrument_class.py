@@ -306,7 +306,7 @@ class MpmDevice:
         errorcode, log_data = self.__mpm.Get_Each_Channel_Logdata(slot_num, chan_num, None)
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-        return log_data
+        return list(log_data)
 
     def set_logging_parameters(self, start_wavelength, stop_wavelength, sweep_step, sweep_speed):
         """
