@@ -94,7 +94,7 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
     if not os.path.exists(file_last_scan_params):
         return None
 
-    ans = input("\nWould you like to load the most recent parameter settings from {}? [y|n]".format(file_last_scan_params))
+    ans = input("\nWould you like to load the most recent parameter settings from {}? [y|n]: ".format(file_last_scan_params))
     if ans not in "Yy":
         return None
 
@@ -114,7 +114,7 @@ def prompt_and_get_previous_reference_data():
     if not os.path.exists(file_logging.file_last_scan_reference_json):
         return None
 
-    ans = input("\nWould you like to use the most recent reference data from file '{}'? [y|n]".format(
+    ans = input("\nWould you like to use the most recent reference data from file '{}'? [y|n]: ".format(
         file_logging.file_last_scan_reference_json))
 
     if ans not in "Yy":
@@ -209,7 +209,7 @@ def main():
             for _ in range(int(reps)):
                 print("\nScan {} of {}...".format(str(_ + 1), reps))
                 ilsts.sts_measurement()
-                user_map_display = input("\nDo you want to view the graph ?? (y/n) ")
+                user_map_display = input("\nDo you want to view the graph ?? (y/n): ")
                 if user_map_display == "y":
                     plot(ilsts.wavelength_table, ilsts.il)
                     show()
@@ -218,7 +218,7 @@ def main():
             # Get and store dut scan data of each channel, each range
             ilsts.get_dut_data()
 
-            ans = input("\nRedo Scan ? (y/n)")
+            ans = input("\nRedo Scan ? (y/n): ")
 
         # Save IL measurement data
         print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
