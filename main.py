@@ -11,7 +11,7 @@ Created on Fri Jan 21 17:17:26 2022
 import os
 import json
 import time
-
+import numpy as np
 from matplotlib.pyplot import plot, show
 
 # Importing high level santec package and its modules
@@ -166,7 +166,7 @@ def main():
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
-        file_logging.file_last_scan_params)             # might be empty, if there is no data, or if the user chose to not load it.
+        file_logging.file_last_scan_params)  # might be empty, if there is no data, or if the user chose to not load it.
     setting_tsl_sweep_params(tsl, previous_param_data)  # previous_param_data might be none
 
     # If there is an MPM, then create instance of ILSTS
@@ -197,42 +197,68 @@ def main():
             print("Loading reference data...")
             ilsts.sts_reference_from_saved_file()  # loads from the cached array reference_data_array which is a property of ilsts
 
+        repetition_number: int = 1
+        scan_repetitions_list = [2, 4, 8, 16, 32]
+
+        scan_results_average = []
+
         # Perform the sweeps
-        ans = "y"
-        while ans in "yY":
+        ans = 'y'
+        while ans in 'y':
             print("\nDUT measurement")
-            reps = ""
+            print("Please connect the DUT")
+            scan_results = []
+            scan_results_il = []
+            user_choice = input("Do you want to perform repeated scanning: Y/n ").lower()
+            if 'y' in user_choice:
+                while True:
+                    print("\nAvailable scan repetitions: 2, 4, 8, 16, 32")
+                    repetition_number = int(input("Input repeat count: "))
+                    if repetition_number not in scan_repetitions_list:
+                        print("Invalid repetition number, enter again.")
+                    else:
+                        break
 
-            while not reps.isnumeric():
-                reps = input("Input repeat count, and connect the DUT and press ENTER: ")
-                if not reps.isnumeric():
-                    print("Invalid repeat count, enter a number.\n")
-
-            for _ in range(int(reps)):
-                print("\nScan {} of {}...".format(str(_ + 1), reps))
+            for _ in range(repetition_number):
+                print("\nScan {} of {}...".format(str(_ + 1), repetition_number))
                 ilsts.sts_measurement()
-                user_map_display = input("\nDo you want to view the graph ?? (y/n): ")
-                if user_map_display == "y":
-                    plot(ilsts.wavelength_table, ilsts.il)
-                    show()
-                time.sleep(2)
+                scan_results.append(ilsts)
+                scan_results_il.append(ilsts.il)  # Get and store dut scan data of each channel, each range
 
-            # Get and store dut scan data of each channel, each range
-            ilsts.get_dut_data()
+            if repetition_number > 1:
+                scan_results_average = np.mean(scan_results_il, axis=0).tolist()
+            else:
+                scan_results_average = scan_results_il
 
-            ans = input("\nRedo Scan ? (y/n): ")
+            user_map_display = input("\nDo you want to view the graph ?? (y/n) ")
+            if user_map_display == "y":
+                plot(ilsts.wavelength_table, scan_results_average)
+                show()
 
-        # Save IL measurement data
-        print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
-        file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
+
+            ans = input("\nRedo Scan ? (y/n)").lower()
+
+        if repetition_number > 1:
+            print("\nSaving average of repeated scans measurement data to file "
+                  + file_logging.file_measurement_data_results + "...")
+            file_logging.save_avg_repeated_meas_data(ilsts, scan_results_average,
+                                                     file_logging.file_avg_repeated_measurement_data_results)
+            print("Saving all repeated scans measurement data to file "
+                  + file_logging.file_measurement_data_results + "...")
+            file_logging.save_all_repeated_meas_data(scan_results,
+                                                     file_logging.file_all_repeated_measurement_data_results)
+        else:
+            # Save IL measurement data
+            print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
+            file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
         # Save reference data
         print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
         file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
 
-        # Save dut data
-        print("Saving reference csv data to file " + file_logging.file_dut_data_results + "...")
-        file_logging.save_dut_result_data(ilsts, file_logging.file_dut_data_results)
+        # # Save dut data
+        # print("Saving reference csv data to file " + file_logging.file_dut_data_results + "...")
+        # file_logging.save_dut_result_data(ilsts, file_logging.file_dut_data_results)
 
         # Save reference data into json file
         print("Saving reference json to file " + file_logging.file_last_scan_reference_json + "...")

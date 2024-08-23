@@ -25,6 +25,8 @@ from santec.error_handing_class import sts_process_error_strings
 file_last_scan_params = "last_scan_params.json"
 file_last_scan_reference_json = "last_scan_reference_data.json"
 file_measurement_data_results = "data_measurement.csv"
+file_avg_repeated_measurement_data_results = "avg_repeated_data_measurement.csv"
+file_all_repeated_measurement_data_results = "all_repeated_data_measurement.csv"
 file_reference_data_results = "data_reference.csv"
 file_dut_data_results = "data_dut.csv"
 
@@ -40,7 +42,7 @@ def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, str_filename: str
         "stop_wavelength": tsl.stop_wavelength,
         "sweep_step": tsl.sweep_step,
         "sweep_speed": tsl.sweep_speed,
-        "power": tsl.power,                 # only really used on the TSL, and not on the mpm or spu.
+        "power": tsl.power,  # only really used on the TSL, and not on the mpm or spu.
         "actual_step": tsl.actual_step,
     }
 
@@ -61,7 +63,7 @@ def save_reference_json_data(ilsts: sts.StsProcess, str_filename: str):
     with open(str_filename, 'w') as export_file:
         json.dump(
             ilsts._reference_data_array,
-            export_file)     # No indents or newlines for this large file. If needed, then look at the CSV instead.
+            export_file)  # No indents or newlines for this large file. If needed, then look at the CSV instead.
 
     return None
 
@@ -143,8 +145,10 @@ def save_dut_result_data(ilsts: sts.StsProcess, str_filename: str):
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
     for item in dut_data_array:
-        header.append("Slot{}Ch{}R{}_TSLPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]), str(item["RangeNumber"])))
-        header.append("Slot{}Ch{}R{}_MPMPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]), str(item["RangeNumber"])))
+        header.append("Slot{}Ch{}R{}_TSLPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]),
+                                                      str(item["RangeNumber"])))
+        header.append("Slot{}Ch{}R{}_MPMPower".format(str(item["SlotNumber"]), str(item["ChannelNumber"]),
+                                                      str(item["RangeNumber"])))
 
     all_rows = []  # our row array will contain one array for each line.
 
@@ -217,6 +221,72 @@ def save_meas_data(ilsts: sts.StsProcess, filepath: str):
             writer.writerow(writestr)
             writestr.clear()
             counter += 1
+
+    f.close()
+    return None
+
+
+# save repeated measurement data
+def save_avg_repeated_meas_data(ilsts, ilsts_average: list, filepath: str):
+    rename_old_file(filepath)
+    # Get rescaling wavelength table
+    errorcode, wavelength_table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
+    if errorcode != 0:
+        raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+    data = {
+        'Wavelength(nm)': wavelength_table,
+        'Average Loss(dBm)': ilsts_average
+    }
+
+    headers = list(data.keys())
+    rows = zip(*data.values())
+
+    with open(filepath, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(rows)
+
+    f.close()
+    return None
+
+
+# save repeated measurement data
+def save_all_repeated_meas_data(ilsts_list: list, filepath: str):
+    rename_old_file(filepath)
+    wavelength_table = []
+    il_data_array = []
+    # Get rescaling wavelength table
+    errorcode, wavelength_table = ilsts_list[0]._ilsts.Get_Target_Wavelength_Table(None)
+    if errorcode != 0:
+        raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+
+    # for ilsts in ilsts_list:
+    #     for item in ilsts.merge_data:
+    #         # Pull out IL data of after merge
+    #         errorcode, il_data = ilsts._ilsts.Get_IL_Merge_Data(None, item)
+    #         if errorcode != 0:
+    #             raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+    #
+    #         il_data = array("d", il_data)  # List to Array
+    #         il_data_array.append(il_data)
+
+    data = {
+        'Wavelength(nm)': wavelength_table,
+    }
+    index = 0
+    for ilsts in ilsts_list:
+        for item, il_data in zip(ilsts.merge_data, ilsts.il_data_array):
+            data[f'Slot{item.SlotNumber}Ch{item.ChannelNumber}Rep{index+1}'] = il_data
+        index += 1
+
+    headers = list(data.keys())
+    rows = zip(*data.values())
+
+    with open(filepath, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(rows)
 
     f.close()
     return None
@@ -354,7 +424,7 @@ def sts_load_ref_data_unused(ilsts, lst_channel_data, lst_monitor):  # TODO: del
     for item in ilsts.ref_data:
 
         channel_data = lst_channel_data[counter]
-        array_channel_data = array("d", channel_data)    # List to Array
+        array_channel_data = array("d", channel_data)  # List to Array
         array_monitor = array("d", lst_monitor)
 
         # Add in Reference Raw data
