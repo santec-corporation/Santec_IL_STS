@@ -179,8 +179,10 @@ def main():
         ilsts.set_data_struct()  # will automatically use either newly-input data, or saved data from the previous_param_data.
         ilsts.set_parameters()  # will automatically use either newly-input data, or saved data from the previous_param_data.
 
-        # Determine if we should load reference data
-        previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and log_data. Might be null if the user said no, or the file didn't exist.
+        previous_ref_data_array = None
+        if previous_param_data is not None:
+            # Determine if we should load reference data
+            previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and log_data. Might be null if the user said no, or the file didn't exist.
         if previous_ref_data_array is not None:
             ilsts._reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
 
