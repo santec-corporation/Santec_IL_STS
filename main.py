@@ -236,21 +236,23 @@ def main():
                 plot(ilsts.wavelength_table, scan_results_average)
                 show()
 
-            ans = input("\nRedo Scan ? (y/n)").lower()
+            user_save_meas_data_choice = input('Do you want to save the measurement data (y/n): ')
+            if 'yY' in user_save_meas_data_choice:
+                if repetition_number > 1:
+                    print("\nSaving average of repeated scans measurement data to file "
+                          + file_logging.file_measurement_data_results + "...")
+                    file_logging.save_avg_repeated_meas_data(ilsts, scan_results_average,
+                                                             file_logging.file_avg_repeated_measurement_data_results)
+                    print("Saving all repeated scans measurement data to file "
+                          + file_logging.file_measurement_data_results + "...")
+                    file_logging.save_all_repeated_meas_data(scan_results,
+                                                             file_logging.file_all_repeated_measurement_data_results)
+                else:
+                    # Save IL measurement data
+                    print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
+                    file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
 
-        if repetition_number > 1:
-            print("\nSaving average of repeated scans measurement data to file "
-                  + file_logging.file_measurement_data_results + "...")
-            file_logging.save_avg_repeated_meas_data(ilsts, scan_results_average,
-                                                     file_logging.file_avg_repeated_measurement_data_results)
-            print("Saving all repeated scans measurement data to file "
-                  + file_logging.file_measurement_data_results + "...")
-            file_logging.save_all_repeated_meas_data(scan_results,
-                                                     file_logging.file_all_repeated_measurement_data_results)
-        else:
-            # Save IL measurement data
-            print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
-            file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
+            ans = input("\nRedo Scan ? (y/n)").lower()
 
         # Save reference data
         print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
