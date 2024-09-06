@@ -197,9 +197,8 @@ def main():
             print("Loading reference data...")
             ilsts.sts_reference_from_saved_file()  # loads from the cached array reference_data_array which is a property of ilsts
 
-        repetition_number: int = 1
+        repetition_number: int = 0
         scan_repetitions_list = [2, 4, 8, 16, 32]
-
         scan_results_average = []
 
         # Perform the sweeps
@@ -218,7 +217,9 @@ def main():
                         print("Invalid repetition number, enter again.")
                     else:
                         break
-
+            else:
+                repetition_number = 1
+            input("\nPress Enter to continue... ")
             for _ in range(repetition_number):
                 print("\nScan {} of {}...".format(str(_ + 1), repetition_number))
                 ilsts.sts_measurement()
@@ -228,13 +229,12 @@ def main():
             if repetition_number > 1:
                 scan_results_average = np.mean(scan_results_il, axis=0).tolist()
             else:
-                scan_results_average = scan_results_il
+                scan_results_average = ilsts.il
 
             user_map_display = input("\nDo you want to view the graph ?? (y/n) ")
             if user_map_display == "y":
                 plot(ilsts.wavelength_table, scan_results_average)
                 show()
-
 
             ans = input("\nRedo Scan ? (y/n)").lower()
 
