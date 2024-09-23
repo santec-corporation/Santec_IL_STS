@@ -22,11 +22,16 @@ from santec.error_handing_class import sts_process_error_strings
 # from mpm_instr_class import MpmDevice
 # from dev_instr_class import SpuDevice
 
+# Get the current date and time
+now = datetime.now()
+# Format the date and time as YYYY-MM-DD HH:MM:SS
+formatted_datetime = now.strftime("%Y%m%d_%Hhr%Mm%Ssec")
+
 file_last_scan_params = "last_scan_params.json"
 file_last_scan_reference_json = "last_scan_reference_data.json"
-file_measurement_data_results = "data_measurement.csv"
-file_reference_data_results = "data_reference.csv"
-file_dut_data_results = "data_dut.csv"
+file_measurement_data_results = f"data_measurement_{formatted_datetime}.csv"
+file_reference_data_results = f"data_reference_{formatted_datetime}.csv"
+file_dut_data_results = f"data_dut_{formatted_datetime}.csv"
 
 
 def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, str_filename: str):
