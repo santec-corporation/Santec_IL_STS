@@ -2,7 +2,7 @@ import logging
 import datetime
 
 # About
-__version__ = "2.6.2"
+__version__ = "2.6.3"
 __author__ = "Chentir MT"
 __organization__ = "Santec Holdings Corporation"
 __description__ = "Program to measure the Insertion Loss using the Swept Test System"
