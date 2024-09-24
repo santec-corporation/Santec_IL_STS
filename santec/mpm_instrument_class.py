@@ -308,7 +308,7 @@ class MpmDevice:
             raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return list(log_data)
 
-    def set_logging_parameters(self, start_wavelength, stop_wavelength, sweep_step, sweep_speed):
+    def set_logging_parameters(self, start_wavelength, stop_wavelength, sweep_step, sweep_speed, trigger_step=0.0):
         """
         Sets the logging parameter for MPM integrated in STS
 
@@ -317,6 +317,7 @@ class MpmDevice:
             stop_wavelength (float): Input the stop wavelength value.
             sweep_step (float): Input the sweep sweep_step wavelength value.
             sweep_speed (float): Input the sweep sweep_speed value.
+            trigger_step (float): The step size (nm) between two TSL triggers.
 
         Raises:
             RuntimeError: When trigger signal is not detected
@@ -325,6 +326,7 @@ class MpmDevice:
         errorcode = self.__mpm.Set_Logging_Paremeter_for_STS(start_wavelength,
                                                              stop_wavelength,
                                                              sweep_step,
+                                                             trigger_step,
                                                              sweep_speed,
                                                              self.__mpm.Measurement_Mode.Freerun)
 
