@@ -8,9 +8,20 @@ Connection modes: GPIB, LAN, USB(TSL).
 @organization: Santec Holdings Corp.
 """
 
+import os
+import clr
 import time
 import pyvisa
 import nidaqmx
+
+# Adding Instrument DLL to the reference
+ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
+# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
+PATH1 = 'InstrumentDLL'
+ans = clr.AddReference(ROOT + PATH1)  # Add in santec.Instrument.DLL
+# print(ans) #<-- comment in to check if the DLL was added properly
+
+from Santec.Communication import MainCommunication
 
 
 class GetAddress:
@@ -92,20 +103,32 @@ class GetAddress:
                     logger.info(f"Error while opening resource: {resource}, {err}")
                     print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
 
+        # USB instruments
+        logger.info("Getting USB resources")
+        main_communication = MainCommunication()
+        usb_resources = list(main_communication.Get_USB_Resouce())
+        logger.info(f"Available USB resources: {usb_resources}")
+        if len(usb_resources) > 0:
+            for i in range(len(usb_resources)):
+                usb_id = f"USB{i}"
+                devices['Name'].append(usb_resources[i])
+                devices['Resource'].append(usb_id)
+                devices['Interface'].append("USB ")
+
         # Zipping devices dictionary 'Name' and 'Resource' into a list
-        devices_list = list(zip(devices['Name'], devices['Resource']))
+        devices_list = list(zip(devices['Name'], devices['Resource'], devices['Interface']))
 
         if len(devices_list) > 0:
             # Sorting the device list in order from TSL to MPM instruments
             devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
 
             # Unzipping the sorted devices list and assigning key & values of device dictionary
-            devices['Name'], devices['Resource'] = zip(*devices_list)
+            devices['Name'], devices['Resource'], devices['Interface'] = zip(*devices_list)
 
-        # Prints all the detected SANTEC GPIB instruments in order of TSL to MPM
-        print("Present GPIB Instruments: ")
+        # Prints all the detected SANTEC instruments in order of TSL to MPM
+        print("Present Instruments: ")
         for i in range(len(devices['Name'])):
-            print(i + 1, ": ", devices['Name'][i])
+            print(i + 1, ": ", devices['Interface'][i], " | ", devices['Name'][i])
 
         if mode == 'SME':
             # Prints all the detected DAQ devices
@@ -115,7 +138,9 @@ class GetAddress:
                 logger.info(f"Detected DAQ device: {i}")
                 print(self._system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
 
-        time.sleep(0.2)
+        if len(devices) == 0 and len(usb_devices) == 0:
+            logger.critical("No TSL or MPM instruments connected!!")
+            raise Exception("No TSL or MPM instruments connected!!")
 
         TSL = None
         OPM = None
@@ -132,6 +157,7 @@ class GetAddress:
             # set the TSL to CRLF delimiter
             buffer.write('SYST:COMM:GPIB:DEL 2')
             TSL = buffer.resource_name
+            logger.info(f"Opened laser instrument: {TSL}")
         except Exception as err:
             logger.info(f"Error while opening resource: {selected_resource}, {err}")
             print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
@@ -146,6 +172,7 @@ class GetAddress:
             buffer = self._resource_manager.open_resource(selected_resource)
             # buffer.read_termination = "\r\n"
             OPM = buffer.resource_name
+            logger.info(f"Opened power meter instrument: {OPM}")
         except Exception as err:
             logger.info(f"Error while opening resource: {selected_resource}, {err}")
             print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
