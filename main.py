@@ -143,10 +143,10 @@ def main():
     dev = None
     ilsts = None
 
-    device_address.Initialize_Device_Addresses('SME')
-    tsl_address = device_address.Get_Tsl_Address()
-    mpm_address = device_address.Get_Mpm_Address()
-    dev_address = device_address.Get_Dev_Address()
+    device_address.initialize_instrument_addresses('SME')
+    tsl_address = device_address.get_tsl_address()
+    mpm_address = device_address.get_mpm_address()
+    dev_address = device_address.get_dev_address()
     interface = 'GPIB'
 
     # Only connect to the devices that the user wants to connect
