@@ -21,7 +21,7 @@ from santec import TslDevice, MpmDevice, SpuDevice, GetAddress, file_logging, St
 device_address = GetAddress()
 
 
-def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
+def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data):
     """
     Setting sweep parameters. Will ask for:
 
@@ -36,7 +36,7 @@ def setting_tsl_sweep_params(connected_tsl: TslDevice, previous_param_data):
     These arguments will be passed to the connected_tsl object.
 
     Args:
-        connected_tsl (TslDevice): Instanced TSL class.
+        connected_tsl (TslInstrument): Instanced TSL class.
         previous_param_data: If previous sweep process data is selected.
 
     Returns:
@@ -151,8 +151,8 @@ def main():
 
     # Only connect to the devices that the user wants to connect
     if tsl_address is not None:
-        tsl = TslDevice(interface, tsl_address)
-        tsl.ConnectTSL()
+        tsl = TslInstrument(interface, tsl_address)
+        tsl.connect()
     else:
         raise Exception("There must be a TSL connected")
 

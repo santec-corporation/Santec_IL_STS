@@ -18,7 +18,7 @@ from datetime import datetime
 from santec.daq_device_class import SpuDevice
 from santec.error_handing_class import sts_process_error_strings
 from santec.mpm_instrument_class import MpmDevice
-from santec.tsl_instrument_class import TslDevice
+from santec.tsl_instrument_class import TslInstrument
 
 
 # Adding Instrument DLL to the reference
@@ -39,7 +39,7 @@ class StsProcess:
     Swept Test System processing class
     """
     # Initializing attributes
-    _tsl: TslDevice
+    _tsl: TslInstrument
     _mpm: MpmDevice
     _spu: SpuDevice
 
@@ -222,7 +222,7 @@ class StsProcess:
         return None
 
     def cancel(self):
-        self._tsl.Disconnect()
+        self._tsl.disconnect()
         self._mpm.Disconnect()
         self._spu.Disconnect()
 
