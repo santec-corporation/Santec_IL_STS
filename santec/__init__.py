@@ -12,7 +12,7 @@ import datetime
 import clr
 
 # About
-__version__ = "2.7.7"
+__version__ = "2.7.8"
 __author__ = "Chentir MT"
 __organization__ = "Santec Holdings Corporation"
 __description__ = "Program to measure the Insertion Loss using the Swept Test System"
