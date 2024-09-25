@@ -19,7 +19,7 @@ import santec.sts_process as sts
 from santec.tsl_instrument_class import TslInstrument
 from santec.error_handing_class import sts_process_error_strings
 
-# from mpm_instr_class import MpmDevice
+# from mpm_instr_class import MpmInstrument
 # from dev_instr_class import SpuDevice
 
 # Get the current date and time
