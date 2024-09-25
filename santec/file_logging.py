@@ -62,7 +62,7 @@ def save_reference_data_json(ilsts: StsProcess,
 
     with open(str_filename, 'w', encoding='utf-8') as export_file:
         json.dump(
-            ilsts._reference_data_array,
+            ilsts.reference_data_array,
             export_file)     # No indents or newlines for this large file. If needed, then look at the CSV instead.
 
 
@@ -96,7 +96,7 @@ def save_reference_result_data(ilsts: StsProcess,
     # Create a CSV file that has columns similar to...
     # Wavelength Slot1Ch1_TSLPower Slot1Ch1_MPMPower Slot1Ch2_TSLPower Slot1Ch2_MPMPower
 
-    ref_data_array = ilsts._reference_data_array
+    ref_data_array = ilsts.reference_data_array
 
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
@@ -137,7 +137,7 @@ def save_dut_result_data(ilsts: StsProcess,
     # Create a CSV file that has columns similar to...
     # Wavelength Slot1Ch1_TSLPower Slot1Ch1_MPMPower Slot1Ch2_TSLPower Slot1Ch2_MPMPower
 
-    dut_data_array = ilsts._dut_data_array
+    dut_data_array = ilsts.dut_data_array
 
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
