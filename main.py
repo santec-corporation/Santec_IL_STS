@@ -15,7 +15,7 @@ import time
 from matplotlib.pyplot import plot, show
 
 # Importing high level santec package and its modules
-from santec import TslDevice, MpmDevice, SpuDevice, GetAddress, file_logging, StsProcess
+from santec import TslDevice, MpmInstrument, SpuDevice, GetAddress, file_logging, StsProcess
 
 # Initializing get instrument address class
 device_address = GetAddress()
