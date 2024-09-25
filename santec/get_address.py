@@ -14,13 +14,7 @@ import time
 import pyvisa
 import nidaqmx
 
-# Adding Instrument DLL to the reference
-ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
-# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
-PATH1 = 'InstrumentDLL'
-ans = clr.AddReference(ROOT + PATH1)  # Add in santec.Instrument.DLL
-# print(ans) #<-- comment in to check if the DLL was added properly
-
+# Import Santec communication class from Santec namespace
 from Santec.Communication import MainCommunication
 
 
