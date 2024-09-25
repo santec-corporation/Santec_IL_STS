@@ -10,8 +10,13 @@ Santec DLLs serve the fundamental base to establish instrument connections and p
   
 - **STSProcess.dll**
   - **Version**: 2.2.6
-  - **Description**: Perform Insertion Loss operation.
+  - **Description**: Perform Insertion Loss operation. <br><br>
 
+- **FTD2XX_NET.dll**
+  - **Version**: 1.0.14
+  - **Description**: FTD2XX_NET.dll is a .NET library that facilitates communication with FTDI USB-to-serial devices for data transfer and configuration.
+  - **Documentation**: https://ftdichip.com/software-examples/code-examples/csharp-examples/
+  
 ## Contact
 **Organization**: Santec Holdings Corp. <br>
 **Contact Us**: https://www.santec.com/en/inquiry/ <br>
