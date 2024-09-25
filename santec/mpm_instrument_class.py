@@ -15,14 +15,6 @@ from numpy import array
 # Importing instrument error strings
 from santec.error_handing_class import instrument_error_strings
 
-# Adding Instrument DLL to the reference
-ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
-logger.info(f"Getting DLL path in the MPM class, {ROOT}")
-# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
-PATH1 = 'InstrumentDLL'
-ans = clr.AddReference(ROOT + PATH1)  # Add in santec.Instrument.DLL
-logger.info(f"Adding Instrument DLL to the root in the MPM class, {ans}")
-# print(ans) #<-- comment in to check if the DLL was added properly
 
 # Importing from Santec namespace
 from Santec import MPM  # Importing MPM class
