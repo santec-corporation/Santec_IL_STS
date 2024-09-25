@@ -111,25 +111,25 @@ def prompt_and_get_previous_reference_data():
     If so, then load it.
     """
 
-    if not os.path.exists(file_logging.file_last_scan_reference_json):
+    if not os.path.exists(file_logging.FILE_LAST_SCAN_REFERENCE_JSON):
         return None
 
     ans = input("\nWould you like to use the most recent reference data from file '{}'? [y|n]: ".format(
-        file_logging.file_last_scan_reference_json))
+        file_logging.FILE_LAST_SCAN_REFERENCE_JSON))
 
     if ans not in "Yy":
         return None
 
     # Get the file size. If It's huge, then the load will freeze for a few seconds.
-    int_file_size = int(os.path.getsize(file_logging.file_last_scan_reference_json))
+    int_file_size = int(os.path.getsize(file_logging.FILE_LAST_SCAN_REFERENCE_JSON))
     if int_file_size > 1000000:
         str_file_size = str(int(int_file_size / 1000 / 1000)) + " MB"
     else:
         str_file_size = str(int(int_file_size / 1000)) + " KB"
 
-    print("Opening " + str_file_size + " file '" + file_logging.file_last_scan_reference_json + "'...")
+    print("Opening " + str_file_size + " file '" + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "'...")
     # load the json data.
-    with open(file_logging.file_last_scan_reference_json) as json_file:
+    with open(file_logging.FILE_LAST_SCAN_REFERENCE_JSON) as json_file:
         previous_reference = json.load(json_file)
 
     return previous_reference
@@ -166,7 +166,7 @@ def main():
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
-        file_logging.file_last_scan_params)             # might be empty, if there is no data, or if the user chose to not load it.
+        file_logging.FILE_LAST_SCAN_PARAMS)             # might be empty, if there is no data, or if the user chose to not load it.
     setting_tsl_sweep_params(tsl, previous_param_data)  # previous_param_data might be none
 
     # If there is an MPM, then create instance of ILSTS
@@ -223,25 +223,25 @@ def main():
             ans = input("\nRedo Scan ? (y/n): ")
 
         # Save IL measurement data
-        print("\nSaving measurement data to file " + file_logging.file_measurement_data_results + "...")
-        file_logging.save_meas_data(ilsts, file_logging.file_measurement_data_results)
+        print("\nSaving measurement data to file " + file_logging.FILE_MEASUREMENT_DATA_RESULTS + "...")
+        file_logging.save_measurement_data(ilsts, file_logging.FILE_MEASUREMENT_DATA_RESULTS)
 
         # Save reference data
-        print("Saving reference csv data to file " + file_logging.file_reference_data_results + "...")
-        file_logging.save_reference_result_data(ilsts, file_logging.file_reference_data_results)
+        print("Saving reference csv data to file " + file_logging.FILE_REFERENCE_DATA_RESULTS + "...")
+        file_logging.save_reference_result_data(ilsts, file_logging.FILE_REFERENCE_DATA_RESULTS)
 
         # Save dut data
-        print("Saving reference csv data to file " + file_logging.file_dut_data_results + "...")
-        file_logging.save_dut_result_data(ilsts, file_logging.file_dut_data_results)
+        print("Saving reference csv data to file " + file_logging.FILE_DUT_DATA_RESULTS + "...")
+        file_logging.save_dut_result_data(ilsts, file_logging.FILE_DUT_DATA_RESULTS)
 
         # Save reference data into json file
-        print("Saving reference json to file " + file_logging.file_last_scan_reference_json + "...")
-        file_logging.save_reference_json_data(ilsts, file_logging.file_last_scan_reference_json)
+        print("Saving reference json to file " + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "...")
+        file_logging.save_reference_data_json(ilsts, file_logging.FILE_LAST_SCAN_REFERENCE_JSON)
 
     # Save the parameters, whether we have an MPM or not. But only if there is no save file, or the user just set new settings.
     if previous_param_data is None:
-        print("Saving parameters to file " + file_logging.file_last_scan_params + "...")
-        file_logging.sts_save_param_data(tsl, ilsts, file_logging.file_last_scan_params)  # ilsts might be None
+        print("Saving parameters to file " + file_logging.FILE_LAST_SCAN_PARAMS + "...")
+        file_logging.save_sts_parameter_data(tsl, ilsts, file_logging.FILE_LAST_SCAN_PARAMS)  # ilsts might be None
 
 
 if __name__ == "__main__":
