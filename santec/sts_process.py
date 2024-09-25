@@ -58,6 +58,10 @@ class StsProcess(STSData):
         logger.info(f"STS Process details, TslInstrument: {_tsl}, MpmInstrument: {_mpm},"
                     f" SpuDevice: {_spu}")
 
+    @property
+    def ilsts(self):
+        return self._ilsts
+
     def set_parameters(self):
         """
         Sets parameters for STS process.
