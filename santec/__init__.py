@@ -106,7 +106,7 @@ from .error_handing_class import instrument_error_strings, sts_process_error_str
 __all__ = [
     "StsProcess",
     "TslDevice",
-    "MpmDevice",
+    "MpmInstrument",
     "SpuDevice",
     "GetAddress",
     "file_logging",

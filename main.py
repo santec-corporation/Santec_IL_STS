@@ -157,8 +157,8 @@ def main():
         raise Exception("There must be a TSL connected")
 
     if mpm_address is not None:
-        mpm = MpmDevice(interface, mpm_address)
-        mpm.connect_mpm()
+        mpm = MpmInstrument(interface, mpm_address)
+        mpm.connect()
 
     if dev_address is not None:
         dev = SpuDevice(dev_address)
