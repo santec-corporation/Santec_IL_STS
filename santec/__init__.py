@@ -100,12 +100,12 @@ from .get_address import GetAddress
 from .sts_process import StsProcess
 from .daq_device_class import SpuDevice
 from .mpm_instrument_class import MpmDevice
-from .tsl_instrument_class import TslDevice
+from .tsl_instrument_class import TslInstrument
 from .error_handing_class import instrument_error_strings, sts_process_error_strings
 
 __all__ = [
     "StsProcess",
-    "TslDevice",
+    "TslInstrument",
     "MpmDevice",
     "SpuDevice",
     "GetAddress",
