@@ -15,7 +15,7 @@ import time
 from matplotlib.pyplot import plot, show
 
 # Importing high level santec package and its modules
-from santec import TslInstrument, MpmDevice, SpuDevice, GetAddress, file_logging, StsProcess
+from santec import TslInstrument, MpmInstrument, SpuDevice, GetAddress, file_logging, StsProcess
 
 # Initializing get instrument address class
 device_address = GetAddress()
@@ -157,8 +157,8 @@ def main():
         raise Exception("There must be a TSL connected")
 
     if mpm_address is not None:
-        mpm = MpmDevice(interface, mpm_address)
-        mpm.connect_mpm()
+        mpm = MpmInstrument(interface, mpm_address)
+        mpm.connect()
 
     if dev_address is not None:
         dev = SpuDevice(dev_address)
