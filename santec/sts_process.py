@@ -29,7 +29,7 @@ class StsProcess:
     Swept Test System processing class
     """
     # Initializing attributes
-    _tsl: TslDevice
+    _tsl: TslInstrument
     _mpm: MpmDevice
     _spu: SpuDevice
 
@@ -212,7 +212,7 @@ class StsProcess:
         return None
 
     def cancel(self):
-        self._tsl.Disconnect()
+        self._tsl.disconnect()
         self._mpm.Disconnect()
         self._spu.Disconnect()
 
