@@ -162,7 +162,7 @@ def main():
 
     if dev_address is not None:
         dev = SpuDevice(dev_address)
-        dev.ConnectSPU()
+        dev.connect_spu()
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(

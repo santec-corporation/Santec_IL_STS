@@ -214,7 +214,7 @@ class StsProcess:
     def cancel(self):
         self._tsl.disconnect()
         self._mpm.disconnect()
-        self._spu.Disconnect()
+        self._spu.disconnect()
 
     def set_selected_ranges(self, previous_param_data):
         """ Sets the optical dynamic range of the MPM """
@@ -479,7 +479,7 @@ class StsProcess:
             raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Get SPU sampling data
-        trigger, monitor = self._spu.get_sampling_raw()
+        trigger, monitor = self._spu.get_sampling_raw_data()
 
         # Add Monitor data for STS Process Class
         errorcode = self._ilsts.Add_Ref_MonitorData(trigger, monitor, data_struct_item)
@@ -575,7 +575,7 @@ class StsProcess:
                 raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Get monitor data
-        trigger, monitor = self._spu.get_sampling_raw()
+        trigger, monitor = self._spu.get_sampling_raw_data()
 
         trigger = array("d", trigger)  # List to Array
         monitor = array("d", monitor)  # list to Array
