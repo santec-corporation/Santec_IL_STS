@@ -171,7 +171,7 @@ def main():
 
     # If there is an MPM, then create instance of ILSTS
     if mpm.address is not None:
-        ilsts = STS.StsProcess(tsl, mpm, dev)
+        ilsts = StsProcess(tsl, mpm, dev)
 
         ilsts.set_selected_channels(previous_param_data)
         ilsts.set_selected_ranges(previous_param_data)
