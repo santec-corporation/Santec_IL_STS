@@ -30,7 +30,7 @@ class StsProcess:
     """
     # Initializing attributes
     _tsl: TslDevice
-    _mpm: MpmDevice
+    _mpm: MpmInstrument
     _spu: SpuDevice
 
     def __init__(self, _tsl, _mpm, _spu):
@@ -152,7 +152,7 @@ class StsProcess:
         self.selected_chans = []
         # Array of arrays: array 0  displays the connected modules
         # The following arrays contain ints of available channels of each module
-        self.all_channels = self._mpm.get_mods_chans()
+        self.all_channels = self._mpm.get_modules_and_channels()
 
         print("\nAvailable modules/channels:")
         for i in range(len(self.all_channels)):
@@ -213,7 +213,7 @@ class StsProcess:
 
     def cancel(self):
         self._tsl.Disconnect()
-        self._mpm.Disconnect()
+        self._mpm.disconnect()
         self._spu.Disconnect()
 
     def set_selected_ranges(self, previous_param_data):
@@ -442,7 +442,7 @@ class StsProcess:
             self._spu.sampling_start()
             self._tsl.soft_trigger()
             self._spu.sampling_wait()
-            self._mpm.wait_log_completion(sweep_count)
+            self._mpm.wait_for_log_completion(sweep_count)
             self._mpm.logging_stop(True)
         except RuntimeError as scan_exception:
             self._tsl.stop_sweep(False)

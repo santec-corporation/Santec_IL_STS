@@ -8,7 +8,7 @@ Created on Wed 05 17:17:26 2024
 """
 
 # Importing high level santec package and its modules
-from santec import TslDevice, MpmDevice, GetAddress
+from santec import TslDevice, MpmInstrument, GetAddress
 
 # Initializing get instrument address class
 device_address = GetAddress()
@@ -33,8 +33,8 @@ def main():
         raise Exception("There must be a TSL connected")
 
     if mpm_address is not None:
-        mpm = MpmDevice(interface, mpm_address)
-        mpm.connect_mpm()
+        mpm = MpmInstrument(interface, mpm_address)
+        mpm.connect()
 
     # TSL Query / Write example
     # Write to TSL
@@ -48,11 +48,11 @@ def main():
 
     # MPM Query / Write example
     # Write to MPM
-    status = mpm.WriteMPM('AVG 5')    # Sets MPM averaging time to 5
+    status = mpm.write_mpm('AVG 5')    # Sets MPM averaging time to 5
     print(status)  # Prints 0 if write was successful
 
     # Query MPM
-    status, response = mpm.QueryMPM('AVG?')  # Gets MPM averaging time
+    status, response = mpm.query_mpm('AVG?')  # Gets MPM averaging time
     print(status)  # Prints status 0 if query was successful
     print(response)  # Prints query response
 
