@@ -8,7 +8,7 @@ Created on Wed 05 17:17:26 2024
 """
 
 # Importing high level santec package and its modules
-from santec import TslDevice, MpmInstrument, GetAddress
+from santec import TslInstrument, MpmInstrument, GetAddress
 
 # Initializing get instrument address class
 device_address = GetAddress()
@@ -27,8 +27,8 @@ def main():
 
     # Only connect to the devices that the user wants to connect
     if tsl_address is not None:
-        tsl = TslDevice(interface, tsl_address)
-        tsl.ConnectTSL()
+        tsl = TslInstrument(interface, tsl_address)
+        tsl.connect()
     else:
         raise Exception("There must be a TSL connected")
 
@@ -38,11 +38,11 @@ def main():
 
     # TSL Query / Write example
     # Write to TSL
-    status = tsl.WriteTSL('POW 5')       # Sets TSL output power to 5
+    status = tsl.write_tsl('POW 5')       # Sets TSL output power to 5
     print(status)               # Prints 0 if write was successful
 
     # Query TSL
-    status, response = tsl.QueryTSL('POW?')        # Gets TSL output power
+    status, response = tsl.query_tsl('POW?')        # Gets TSL output power
     print(status)             # Prints status 0 if query was successful
     print(response)           # Prints query response
 

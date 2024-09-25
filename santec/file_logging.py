@@ -16,7 +16,7 @@ from datetime import datetime
 
 # Importing STS process and instrument classes
 import santec.sts_process as sts
-from santec.tsl_instrument_class import TslDevice
+from santec.tsl_instrument_class import TslInstrument
 from santec.error_handing_class import sts_process_error_strings
 
 # from mpm_instr_class import MpmInstrument
@@ -34,7 +34,7 @@ file_reference_data_results = f"data_reference_{formatted_datetime}.csv"
 file_dut_data_results = f"data_dut_{formatted_datetime}.csv"
 
 
-def sts_save_param_data(tsl: TslDevice, ilsts: sts.StsProcess, str_filename: str):
+def sts_save_param_data(tsl: TslInstrument, ilsts: sts.StsProcess, str_filename: str):
     rename_old_file(str_filename)
 
     # Create a pseudo object for our array of STSDataStruct (self.ref_data)
