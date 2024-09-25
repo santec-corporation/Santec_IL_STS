@@ -1,71 +1,73 @@
 # -*- coding: utf-8 -*-
+from . import logger
 
 """
-Created on Fri Feb 28 11:24:04 2020
+Get Instrument Addresses.
+Connection modes: GPIB, LAN, USB(TSL).
 
-@author: chentir
-@organization: santec holdings corp.
+@organization: Santec Holdings Corp.
 """
 
-# Basic imports
+import os
+import clr
 import time
-
-# Importing pyvisa and nidaqmx -> to control TSL and MPM, and DAQ device
 import pyvisa
 import nidaqmx
 
-# Initializing pyvisa resource manager class
-resource_manager = pyvisa.ResourceManager()
+# Adding Instrument DLL to the reference
+ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
+# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
+PATH1 = 'InstrumentDLL'
+ans = clr.AddReference(ROOT + PATH1)  # Add in santec.Instrument.DLL
+# print(ans) #<-- comment in to check if the DLL was added properly
 
-# Getting a list of all detected instruments
-resources = resource_manager.list_resources()
-
-# Getting a list of all detected DAQ devices
-system = nidaqmx.system.System.local()
+from Santec.Communication import MainCommunication
 
 
 class GetAddress:
+    _resource_manager = pyvisa.ResourceManager()    # Initializing pyvisa resource manager class
+    _resources = _resource_manager.list_resources()     # Getting a list of all detected instruments
+    _system = nidaqmx.system.System.local()     # Getting a list of all detected DAQ devices
+
+    # Instrument attributes
+    GPIB_address: int
+    IPAddress: str
+    USB_Address: str
+    Port: int
+
     def __init__(self):
-        """ Initializing TSL, MPM and DAQ objects """
+        """ Initializing TSL, MPM, and DAQ objects. """
         self.__cached_TSL_Address = None
         self.__cached_MPM_Address = None
         self.__cached_DAQ_Address = None
+        self.is_disposed = False
 
-    @staticmethod
-    def Connection_Info_Class():
+    def get_tsl_address(self):
         """
-        Instruments attributes
-        """
-        GPIB_address: int
-        IPAddress: str
-        USB_Address: str
-        Port: int
-
-    def Get_Tsl_Address(self):
-        """
-        Initialized TSL instrument
+        Initialized a TSL instrument
         """
         if self.__cached_TSL_Address is None:
-            self.Initialize_Device_Addresses()
+            self.initialize_instrument_addresses()
         return self.__cached_TSL_Address
 
-    def Get_Mpm_Address(self):
+    def get_mpm_address(self):
         """
         Initialized MPM instrument
         """
         if self.__cached_MPM_Address is None:
-            self.Initialize_Device_Addresses()
+            self.initialize_instrument_addresses()
         return self.__cached_MPM_Address
 
-    def Get_Dev_Address(self):
+    def get_dev_address(self):
         """
         Initialized DAQ device
         """
         if self.__cached_DAQ_Address is None:
-            self.Initialize_Device_Addresses()
+            self.initialize_instrument_addresses()
         return self.__cached_DAQ_Address
 
-    def Initialize_Device_Addresses(self, mode: str = ""):
+    def initialize_instrument_addresses(self,
+                                        mode: str = ""):
         """
         Each device needs to prompt for a different connection type
         Returns
@@ -78,74 +80,120 @@ class GetAddress:
             DESCRIPTION.
 
         """
-        # Initializing an empty dictionary
-        devices = {'Name': [], 'Resource': []}
+        logger.info("Initializing Instrument Addresses")
+        devices = {'Name': [], 'Resource': [], 'Interface': []}      # Initializing an empty dictionary of devices.
 
-        # Gets and sorts GPIB connections only
-        resource_tools = [i for i in resources if 'GPIB' in i]
+        logger.info("Getting GPIB resources")
+        resource_tools = [i for i in self._resources if 'GPIB' in i]      # Gets and sorts GPIB connections only
+        logger.info(f"Available GPIB resources: {resource_tools}")
 
-        # Open the resources from the resource tools list and filter out SANTEC instruments only
-        # Append the resource and teh instrument idn to devices dictionary
-        for resource in resource_tools:
-            try:
-                resource_idn = resource_manager.open_resource(resource).query("*IDN?")
-                if 'SANTEC' in resource_idn:
-                    devices['Name'].append(resource_idn)
-                    devices['Resource'].append(resource)
-            except Exception as err:
-                print(f"Unexpected {err=}, {type(err)=}")
+        if len(resource_tools) > 0:
+            # Open the resources from the resource tools list and filter out SANTEC instruments only
+            # Append the resource and the instrument idn to devices dictionary
+            for resource in resource_tools:
+                try:
+                    logger.info(f"Opening resource: {resource}")
+                    resource_idn = self._resource_manager.open_resource(resource).query("*IDN?")
+                    logger.info(f"Opened instrument: {resource_idn}")
+                    if 'SANTEC' in resource_idn:
+                        devices['Name'].append(resource_idn)
+                        devices['Resource'].append(resource)
+                        devices['Interface'].append("GPIB")
+                except Exception as err:
+                    logger.info(f"Error while opening resource: {resource}, {err}")
+                    print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
+
+        # USB instruments
+        logger.info("Getting USB resources")
+        main_communication = MainCommunication()
+        usb_resources = list(main_communication.Get_USB_Resouce())
+        logger.info(f"Available USB resources: {usb_resources}")
+        if len(usb_resources) > 0:
+            for i in range(len(usb_resources)):
+                usb_id = f"USB{i}"
+                devices['Name'].append(usb_resources[i])
+                devices['Resource'].append(usb_id)
+                devices['Interface'].append("USB ")
 
         # Zipping devices dictionary 'Name' and 'Resource' into a list
-        devices_list = list(zip(devices['Name'], devices['Resource']))
+        devices_list = list(zip(devices['Name'], devices['Resource'], devices['Interface']))
 
-        # Sorting the devices list in order from TSL to MPM instruments
-        devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
+        if len(devices_list) > 0:
+            # Sorting the device list in order from TSL to MPM instruments
+            devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
 
-        # Unzipping the sorted devices list and assigning key & values of devices dictionary
-        devices['Name'], devices['Resource'] = zip(*devices_list)
+            # Unzipping the sorted devices list and assigning key & values of device dictionary
+            devices['Name'], devices['Resource'], devices['Interface'] = zip(*devices_list)
 
-        # Prints all the detected SANTEC GPIB instruments in order of TSL to MPM
-        print("Present GPIB Instruments: ")
+        # Prints all the detected SANTEC instruments in order of TSL to MPM
+        print("Present Instruments: ")
         for i in range(len(devices['Name'])):
-            print(i + 1, ": ", devices['Name'][i])
+            print(i + 1, ": ", devices['Interface'][i], " | ", devices['Name'][i])
 
         if mode == 'SME':
             # Prints all the detected DAQ devices
             print("Detected DAQ devices: ")
-            for i in system.devices.device_names:
-                print(system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
+            logger.info("Getting DAQ devices.")
+            for i in self._system.devices.device_names:
+                logger.info(f"Detected DAQ device: {i}")
+                print(self._system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
 
-        time.sleep(0.2)
+        if len(devices) == 0 and len(usb_devices) == 0:
+            logger.critical("No TSL or MPM instruments connected!!")
+            raise Exception("No TSL or MPM instruments connected!!")
+
+        TSL = None
+        OPM = None
 
         # User laser instrument selection
         selection = int(input("\nSelect Laser instrument: "))
         selected_resource = devices['Resource'][selection - 1]
-        # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(selected_resource)
-        # buffer.read_termination = "\r\n"
-        # set the TSL to CRLF delimiter
-        buffer.write('SYST:COMM:GPIB:DEL 2')
-        TSL = buffer.resource_name
+        logger.info(f"Selected laser instrument: {selected_resource}")
+        # Connect GPIB into a buffer
+        logger.info(f"Opening laser instrument resource: {selected_resource}")
+        try:
+            buffer = self._resource_manager.open_resource(selected_resource)
+            # buffer.read_termination = "\r\n"
+            # set the TSL to CRLF delimiter
+            buffer.write('SYST:COMM:GPIB:DEL 2')
+            TSL = buffer.resource_name
+            logger.info(f"Opened laser instrument: {TSL}")
+        except Exception as err:
+            logger.info(f"Error while opening resource: {selected_resource}, {err}")
+            print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
 
         # User power meter instrument selection
         selection = int(input("Select Power meter: "))
         selected_resource = devices['Resource'][selection - 1]
+        logger.info(f"Selected power meter instrument: {selected_resource}")
         # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(selected_resource)
-        # buffer.read_termination = "\r\n"
-        OPM = buffer.resource_name
+        logger.info(f"Opening power meter instrument resource: {selected_resource}")
+        try:
+            buffer = self._resource_manager.open_resource(selected_resource)
+            # buffer.read_termination = "\r\n"
+            OPM = buffer.resource_name
+            logger.info(f"Opened power meter instrument: {OPM}")
+        except Exception as err:
+            logger.info(f"Error while opening resource: {selected_resource}, {err}")
+            print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
 
-        DAQ = None
-        if mode == 'SME':
-            # User daq device selection
-            selection = input("Select DAQ board: ")
-            DAQ = system.devices[int(selection) - 1 - len(devices['Name'])].name
-
-        # Assigning all the user selected instruments
         self.__cached_TSL_Address = TSL
         self.__cached_MPM_Address = OPM
 
         if mode == 'SME':
+            # User daq device selection
+            selection = input("Select DAQ board: ")
+            DAQ = self._system.devices[int(selection) - 1 - len(devices['Name'])].name
+            logger.info(f"Selected DAQ instrument: {DAQ}")
             self.__cached_DAQ_Address = DAQ
 
         return None
+
+    def dispose(self) -> None:
+        logger.info("Destroying instrument objects.")
+        if not self.is_disposed:
+            self._resource_manager.close()
+            self._system = None
+            self.__cached_TSL_Address = None
+            self.__cached_MPM_Address = None
+            self.__cached_DAQ_Address = None
