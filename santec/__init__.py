@@ -21,11 +21,11 @@ OUTPUT_LOGGER_NAME = f"output_{dt}.log"
 
 
 # Setup logging
-def setup_logging(level=logging.DEBUG):
+def setup_logging(level=logging.DEBUG, file_write_mode='w'):
     setup_logger = logging.getLogger(PROJECT_NAME)
     setup_logger.setLevel(level)
 
-    file_handler = logging.FileHandler(OUTPUT_LOGGER_NAME)
+    file_handler = logging.FileHandler(OUTPUT_LOGGER_NAME, mode=file_write_mode)
     file_handler.setLevel(level)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
