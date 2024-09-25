@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Thu Mar 17 19:51:35 2022
+Error Handling Class.
 
-@author: chentir
-@organization: santec holdings corp.
+@organization: Santec Holdings Corp.
 """
 
 
 def instrument_error_strings(errorcode):
     """
-    return  InstrumentDLL Error string
+    Instrument error strings.
 
     Parameters
     ----------
@@ -20,7 +19,7 @@ def instrument_error_strings(errorcode):
     Returns
     -------
     str
-        Error description.
+        InstrumentDLL Error string.
 
     """
     instrument_error = {
@@ -40,15 +39,14 @@ def instrument_error_strings(errorcode):
         '11': "AlreadyConnected",
         '10': "Stopped"
     }
-    if str(errorcode) in instrument_error.keys():
+    if str(errorcode) in instrument_error:
         return instrument_error[str(errorcode)]
-    else:
-        return 'Unknown Error'
+    return "Unknown Error"
 
 
 def sts_process_error_strings(errorcode):
     """
-    return STSProcess DLL Error string
+    STS Process error strings.
 
     Parameters
     ----------
@@ -58,7 +56,7 @@ def sts_process_error_strings(errorcode):
     Returns
     -------
     str
-        Error description.
+        STSProcess DLL Error string.
 
     """
     process_error = {
@@ -74,7 +72,6 @@ def sts_process_error_strings(errorcode):
         '-1': "Failure",
         '0': "Success"
     }
-    if str(errorcode) in process_error.keys():
+    if str(errorcode) in process_error:
         return process_error[str(errorcode)]
-    else:
-        return 'Unknown Error'
+    return 'Unknown Error'
