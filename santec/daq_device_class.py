@@ -6,16 +6,14 @@ DAQ Device Class.
 @organization: Santec Holdings Corp.
 """
 
-import os
-import clr
-from . import logger
+# Importing SPU class from the DLL
+from Santec import SPU
 
 # Importing instrument error strings
 from santec.error_handing_class import instrument_error_strings
 
-
-# Importing SPU class from the DLL
-from Santec import SPU
+# Import program logger
+from . import logger
 
 
 class SpuDevice:
@@ -128,4 +126,3 @@ class SpuDevice:
             logger.info("SPU connection disconnected.")
         except Exception as e:
             logger.error(f"Error while disconnecting the SPU connection, {e}")
-        return None
