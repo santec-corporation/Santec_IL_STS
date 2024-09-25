@@ -15,23 +15,13 @@ from array import array
 from datetime import datetime
 
 # Importing instrument classes and sts error strings
-from santec.daq_device_class import SpuDevice
-from santec.error_handing_class import sts_process_error_strings
-from santec.mpm_instrument_class import MpmDevice
-from santec.tsl_instrument_class import TslInstrument
-
-
-# Adding Instrument DLL to the reference
-ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
-# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
-
-PATH = 'STSProcess'
-# Add in santec.STSProcess.DLL
-ans = clr.AddReference(ROOT + PATH)
-# print(ans) #<-- comment in to check if the DLL was added properly
+from .daq_device_class import SpuDevice
+from .error_handing_class import sts_process_error_strings
+from .mpm_instrument_class import MpmDevice
+from .tsl_instrument_class import TslDevice
 
 # Importing classes from STSProcess DLL
-from Santec.STSProcess import *  # namespace of  STSProcess DLL
+from Santec.STSProcess import *  # namespace of STSProcess DLL
 
 
 class StsProcess:
