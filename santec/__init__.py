@@ -6,8 +6,10 @@ Santec IL STS process.
 @organization: Santec Holdings Corp.
 """
 
+import os
 import logging
 import datetime
+import clr
 
 # About
 __version__ = "2.7.7"
@@ -76,6 +78,20 @@ def log_to_stream(stream_output, level=logging.DEBUG) -> None:
     )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+
+
+# Add the Santec DLL to the root.
+ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
+logger.info("Getting DLL path, root: %s", ROOT)
+# print(ROOT)    # Uncomment in to check if the root was selected properly
+
+PATH1 = 'InstrumentDLL'
+PATH2 = 'STSProcess'
+result1 = clr.AddReference(ROOT + PATH1)  # Add the Instrument DLL to the root
+result2 = clr.AddReference(ROOT + PATH2)  # Add the STSProcess DLL to the root
+logger.info("Adding Instrument DLL to the root, result: %s", result1)
+logger.info("Adding STSProcess DLL to the root, result: %s", result2)
+# print(result1, result2)     # Comment in to check if the DLLs were added.
 
 
 # Import santec modules
