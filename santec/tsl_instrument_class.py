@@ -6,18 +6,15 @@ TSL Instrument Class.
 @organization: Santec Holdings Corp.
 """
 
-import os
-import clr
-import numpy
-from . import logger
+# Importing from Santec namespace
+from Santec import TSL, ExceptionCode, CommunicationTerminator
+from Santec.Communication import CommunicationMethod, GPIBConnectType
 
 # Importing instrument error strings
 from santec.error_handing_class import instrument_error_strings
 
-
-# Importing from Santec namespace
-from Santec import TSL, ExceptionCode, CommunicationTerminator
-from Santec.Communication import CommunicationMethod, GPIBConnectType
+# Import program logger
+from . import logger
 
 
 class TslData:
@@ -418,7 +415,6 @@ class TslInstrument(TslData):
             logger.error("Error while TSL wait for sweep status", str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL wait for sweep status done.")
-        return None
 
     def disconnect(self):
         """
@@ -429,4 +425,3 @@ class TslInstrument(TslData):
             logger.info("TSL connection disconnected.")
         except Exception as e:
             logger.error(f"Error while disconnecting the TSL connection, {e}")
-        return None
