@@ -62,7 +62,7 @@ def save_reference_data_json(ilsts: StsProcess,
 
     with open(str_filename, 'w', encoding='utf-8') as export_file:
         json.dump(
-            ilsts._reference_data_array,
+            ilsts.reference_data_array,
             export_file)     # No indents or newlines for this large file. If needed, then look at the CSV instead.
 
 
@@ -96,7 +96,7 @@ def save_reference_result_data(ilsts: StsProcess,
     # Create a CSV file that has columns similar to...
     # Wavelength Slot1Ch1_TSLPower Slot1Ch1_MPMPower Slot1Ch2_TSLPower Slot1Ch2_MPMPower
 
-    ref_data_array = ilsts._reference_data_array
+    ref_data_array = ilsts.reference_data_array
 
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
@@ -108,7 +108,7 @@ def save_reference_result_data(ilsts: StsProcess,
 
     # All the wavelengths are all the same for any slot and channel. So just get the first one.
     wavelength_table = ref_data_array[0]["rescaled_wavelength"]
-    # errorcode, wavelength table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
+    # errorcode, wavelength table = ilsts.ilsts.Get_Target_Wavelength_Table(None)
 
     # For each wavelength, get the data
     i = 0
@@ -137,7 +137,7 @@ def save_dut_result_data(ilsts: StsProcess,
     # Create a CSV file that has columns similar to...
     # Wavelength Slot1Ch1_TSLPower Slot1Ch1_MPMPower Slot1Ch2_TSLPower Slot1Ch2_MPMPower
 
-    dut_data_array = ilsts._dut_data_array
+    dut_data_array = ilsts.dut_data_array
 
     # Header wavelength is static. There could be any number of slots and channels.
     header = ["Wavelength(nm)"]
@@ -149,7 +149,7 @@ def save_dut_result_data(ilsts: StsProcess,
 
     # All the wavelengths are all the same for any slot and channel. So just get the first one.
     wavelength_table = dut_data_array[0]["rescaled_wavelength"]
-    # errorcode, wavelength table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
+    # errorcode, wavelength table = ilsts.ilsts.Get_Target_Wavelength_Table(None)
 
     # For each wavelength, get the data
     i = 0
@@ -179,13 +179,13 @@ def save_measurement_data(ilsts: StsProcess,
     il_data_array = []
 
     # Get rescaling wavelength table
-    errorcode, wavelength_table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
+    errorcode, wavelength_table = ilsts.ilsts.Get_Target_Wavelength_Table(None)
     if errorcode != 0:
         raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
     for item in ilsts.merge_data:
         # Pull out IL data of after merge
-        errorcode, ilsts.il_data = ilsts._ilsts.Get_IL_Merge_Data(None, item)
+        errorcode, ilsts.il_data = ilsts.ilsts.Get_IL_Merge_Data(None, item)
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
@@ -229,7 +229,7 @@ def sts_save_rawdata_unused(ilsts: StsProcess,
         fpath (str): path and file name
         mpm_range (int): Optical dynamic range of interest
     """
-    errorcode, wavelength_table = ilsts._ilsts.Get_Target_Wavelength_Table(None)
+    errorcode, wavelength_table = ilsts.ilsts.Get_Target_Wavelength_Table(None)
     if errorcode != 0:
         raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
@@ -242,7 +242,7 @@ def sts_save_rawdata_unused(ilsts: StsProcess,
             input()
             continue
         # Pull out measurement raw data of after rescaling
-        errorcode, dut_pwr, dut_mon = ilsts._ilsts.Get_Meas_RawData(item, None, None)
+        errorcode, dut_pwr, dut_mon = ilsts.ilsts.Get_Meas_RawData(item, None, None)
         if errorcode != 0:
             raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
