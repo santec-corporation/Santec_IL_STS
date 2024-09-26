@@ -15,7 +15,7 @@ from Santec.Communication import CommunicationMethod  # Enumeration Class
 from Santec.Communication import GPIBConnectType  # Enumeration Class
 
 # Importing instrument error strings
-from santec.error_handing_class import instrument_error_strings
+from .error_handing_class import InstrumentError, instrument_error_strings
 
 # Import program logger
 from . import logger
@@ -78,13 +78,16 @@ class MpmInstrument(MpmData):
             raise Exception("There was NO interface specified!!!")
 
         self.__mpm.TimeOut = 5000  # timeout value for MPM
-        errorcode = self.__mpm.Connect(mpm_communication_method)        # Establish the connection
+        try:
+            errorcode = self.__mpm.Connect(mpm_communication_method)        # Establish the connection
 
-        if errorcode != 0:
-            self.__mpm.DisConnect()
-            logger.critical("Mpm instrument connection error, ",
-                            str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            if errorcode != 0:
+                self.__mpm.DisConnect()
+                logger.critical("Mpm instrument connection error, ",
+                                str(errorcode) + ": " + instrument_error_strings(errorcode))
+                raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        except InstrumentError as e:
+            print(f"Error occurred: {e}")
 
         logger.info("Connected to Mpm instrument.")
         return None
@@ -267,7 +270,7 @@ class MpmInstrument(MpmData):
 
         if errorcode != 0:
             logger.error("Error while setting MPM range, ", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("MPM range set.")
         return None
 
@@ -290,9 +293,8 @@ class MpmInstrument(MpmData):
 
         if errorcode != 0:
             logger.error("Error while performing MPM zeroing, ", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-        logger.info(f"MPM zeroing done, error string: {instrument_error_strings(errorcode)}")
-        return instrument_error_strings(errorcode)
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info(f"MPM zeroing done.")
 
     def get_averaging_time(self):
         """
@@ -311,7 +313,7 @@ class MpmInstrument(MpmData):
         if errorcode != 0:
             logger.error("Error while getting MPM averaging time, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info(f"MPM averaging time: {self.averaging_time}")
         return self.averaging_time
 
@@ -326,7 +328,7 @@ class MpmInstrument(MpmData):
         errorcode = self.__mpm.Logging_Start()
         if errorcode != 0:
             logger.error("Error while MPM start logging, ", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("MPM logging started.")
 
     def logging_stop(self, except_if_error=True):
@@ -347,7 +349,7 @@ class MpmInstrument(MpmData):
         errorcode = self.__mpm.Logging_Stop()
         if errorcode != 0 and except_if_error is True:
             logger.error("Error while MPM stop logging, ", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("MPM logging stopped.")
 
     def get_each_channel_log_data(self, slot_num: int, chan_num: int) -> array:
@@ -369,7 +371,7 @@ class MpmInstrument(MpmData):
         if errorcode != 0:
             logger.error("Error while getting channel log data, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info(f"MPM slot {slot_num} channel {chan_num}, log data length: {len(list(log_data))}")
         return list(log_data)
 
@@ -400,9 +402,8 @@ class MpmInstrument(MpmData):
         if errorcode != 0:
             logger.error("Error while setting MPM logging params",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-        logger.info(f"MPM set logging params, error string: {instrument_error_strings(errorcode)}")
-        return instrument_error_strings(errorcode)
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info(f"MPM logging params set.")
 
     def wait_for_log_completion(self, sweep_count: int):
         """ Waits for log completion """
@@ -425,7 +426,7 @@ class MpmInstrument(MpmData):
             # or the status is -1, otherwise, throw.
             logger.error("Error while waiting for MPM log completion, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("MPM logging completed.")
 
     def disconnect(self):
