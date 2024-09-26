@@ -6,20 +6,19 @@ MPM Instrument Class.
 @organization: Santec Holdings Corp.
 """
 
-import os
-import clr
-import time
-from . import logger
+# Import numpy for array operations
 from numpy import array
-
-# Importing instrument error strings
-from santec.error_handing_class import instrument_error_strings
-
 
 # Importing from Santec namespace
 from Santec import MPM  # Importing MPM class
 from Santec.Communication import CommunicationMethod  # Enumeration Class
 from Santec.Communication import GPIBConnectType  # Enumeration Class
+
+# Importing instrument error strings
+from santec.error_handing_class import instrument_error_strings
+
+# Import program logger
+from . import logger
 
 
 class MpmData:
@@ -428,7 +427,6 @@ class MpmInstrument(MpmData):
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("MPM logging completed.")
-        return None
 
     def disconnect(self):
         """ Disconnects MPM instrument """
@@ -437,4 +435,3 @@ class MpmInstrument(MpmData):
             logger.info("MPM connection disconnected.")
         except Exception as e:
             logger.error(f"Error while disconnecting the MPM connection, {e}")
-        return None
