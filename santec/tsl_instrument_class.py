@@ -167,7 +167,7 @@ class TslInstrument(TslData):
             raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
-    def get_sweep_speed_table(self):
+    def get_sweep_speed_table(self) -> list:
         """
         Returns sweep sweep_speed table of TSL-570:
         [1,2,5,10,20,50,100,200] (nm/sec)
