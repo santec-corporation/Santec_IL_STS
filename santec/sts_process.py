@@ -14,9 +14,9 @@ from Santec.STSProcess import *  # namespace of STSProcess DLL
 
 # Importing instrument classes and sts error strings
 from .daq_device_class import SpuDevice
-from .error_handing_class import sts_process_error_strings
 from .mpm_instrument_class import MpmInstrument
 from .tsl_instrument_class import TslInstrument
+from .error_handing_class import STSProcessError, sts_process_error_strings
 
 # Import program logger
 from . import logger
@@ -102,13 +102,13 @@ class StsProcess(STSData):
         if sts_error != 0:
             logger.error("Error while clearing measurement data, ",
                          str(sts_error) + ": " + sts_process_error_strings(sts_error))
-            raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
+            raise STSProcessError(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         sts_error = self._ilsts.Clear_Refdata()     # Reference data Clear
         if sts_error != 0:
             logger.error("Error while clearing reference data, ",
                          str(sts_error) + ": " + sts_process_error_strings(sts_error))
-            raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
+            raise STSProcessError(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         # Make Wavelength table at sweep
         sts_error = self._ilsts.Make_Sweep_Wavelength_Table(self._tsl.start_wavelength,
@@ -118,7 +118,7 @@ class StsProcess(STSData):
         if sts_error != 0:
             logger.error("Error while making wavelength table at sweep, ",
                          str(sts_error) + ": " + sts_process_error_strings(sts_error))
-            raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
+            raise STSProcessError(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         # Make wavelength table as rescaling
         sts_error = self._ilsts.Make_Target_Wavelength_Table(self._tsl.start_wavelength,
@@ -128,7 +128,7 @@ class StsProcess(STSData):
         if sts_error != 0:
             logger.error("Error while making wavelength table as rescaling, ",
                          str(sts_error) + ": " + sts_process_error_strings(sts_error))
-            raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
+            raise STSProcessError(str(sts_error) + ": " + sts_process_error_strings(sts_error))
 
         # Set Rescaling mode for STSProcess class
         sts_error = self._ilsts.Set_Rescaling_Setting(RescalingMode.Freerun_SPU,
@@ -138,9 +138,8 @@ class StsProcess(STSData):
         if sts_error != 0:
             logger.error("Error while rescaling setting, ",
                          str(sts_error) + ": " + sts_process_error_strings(sts_error))
-            raise Exception(str(sts_error) + ": " + sts_process_error_strings(sts_error))
-        logger.info("STS params set, %s", sts_process_error_strings(sts_error))
-        return sts_process_error_strings(sts_error)
+            raise STSProcessError(str(sts_error) + ": " + sts_process_error_strings(sts_error))
+        logger.info("STS params set.")
 
     def set_selected_channels(self, previous_param_data):
         """
@@ -358,16 +357,16 @@ class StsProcess(STSData):
 
             errorcode = self._ilsts.Add_Ref_MPMData_CH(cached_ref_object["log_data"], matched_data_structure)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
             errorcode = self._ilsts.Add_Ref_MonitorData(cached_ref_object["trigger"], cached_ref_object["monitor"],
                                                         matched_data_structure)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
             errorcode = self._ilsts.Cal_RefData_Rescaling()     # Rescaling for reference data.
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
     def sts_measurement(self):
         """ DUT measurement """
@@ -383,11 +382,11 @@ class StsProcess(STSData):
 
         errorcode = self._ilsts.Cal_MeasData_Rescaling()        # Rescaling
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         errorcode = self._ilsts.Cal_IL_Merge(Module_Type.MPM_211)   # Range data merge
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         self._tsl.stop_sweep()      # TSL stop
 
@@ -403,13 +402,13 @@ class StsProcess(STSData):
         for wav in list(self._ilsts.Get_Target_Wavelength_Table(None)[1]):
             self.wavelength_table.append(wav)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         for item in self.merge_data:
             # Pull out IL data of after merge
             errorcode, self.il_data = self._ilsts.Get_IL_Merge_Data(None, item)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
             self.il_data = array("d", self.il_data)  # List to Array
             self.il_data_array.append(self.il_data)
@@ -475,7 +474,7 @@ class StsProcess(STSData):
 
         errorcode = self._ilsts.Add_Ref_MPMData_CH(log_data, data_struct_item)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Get SPU sampling data
         trigger, monitor = self._spu.get_sampling_raw_data()
@@ -484,24 +483,24 @@ class StsProcess(STSData):
         # Add Monitor data for STS Process Class
         errorcode = self._ilsts.Add_Ref_MonitorData(trigger, monitor, data_struct_item)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Rescaling for reference data.
         # We must rescale before we get the reference data.
         # Otherwise, we end up with way too many monitor and logging points.
         errorcode = self._ilsts.Cal_RefData_Rescaling()
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # After rescaling is done, get the raw reference data.
         errorcode, rescaled_ref_pwr, rescaled_ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item, None, None)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         errorcode, wavelength_array = self._ilsts.Get_Target_Wavelength_Table(None)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         if (len(wavelength_array) == 0 or len(wavelength_array) != len(rescaled_ref_pwr) or len(wavelength_array) != len(
                 rescaled_ref_mon)):
@@ -538,7 +537,7 @@ class StsProcess(STSData):
         # Rescaling for reference data
         errorcode = self._ilsts.Cal_RefData_Rescaling()
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+            raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         errorcode, ref_pwr, ref_mon = self._ilsts.Get_Ref_RawData(data_struct_item, None, None)  # testing 2...
         errorcode, wavelength_table = self._ilsts.Get_Target_Wavelength_Table(None)
@@ -577,7 +576,7 @@ class StsProcess(STSData):
             # Add MPM Logging data for STSProcess Class with STSDatastruct
             errorcode = self._ilsts.Add_Meas_MPMData_CH(log_data, item)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
         # Get monitor data
         trigger, monitor = self._spu.get_sampling_raw_data()
@@ -593,7 +592,7 @@ class StsProcess(STSData):
             # Add Monitor data for STSProcess Class with STSDataStruct
             errorcode = self._ilsts.Add_Meas_MonitorData(trigger, monitor, item)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
         return errorcode
 
     def get_dut_data(self):
@@ -606,11 +605,11 @@ class StsProcess(STSData):
             errorcode, rescaled_dut_pwr, rescaled_dut_mon = self._ilsts.Get_Meas_RawData(data_struct_item,
                                                                                          None, None)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
             errorcode, wavelength_array = self._ilsts.Get_Target_Wavelength_Table(None)
             if errorcode != 0:
-                raise Exception(str(errorcode) + ": " + sts_process_error_strings(errorcode))
+                raise STSProcessError(str(errorcode) + ": " + sts_process_error_strings(errorcode))
 
             if len(wavelength_array) == 0 or len(wavelength_array) != len(rescaled_dut_pwr) or len(
                     wavelength_array) != len(rescaled_dut_mon):

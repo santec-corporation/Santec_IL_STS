@@ -10,7 +10,7 @@ DAQ Device Class.
 from Santec import SPU
 
 # Importing instrument error strings
-from santec.error_handing_class import instrument_error_strings
+from .error_handing_class import InstrumentError, instrument_error_strings
 
 # Import program logger
 from . import logger
@@ -42,13 +42,15 @@ class SpuDevice:
         logger.info("Connect Spu device")
         self.__spu.DeviceName = str(self._deviceName)
 
-        errorcode, device_answer = self.__spu.Connect("")
-        if errorcode != 0:
-            logger.critical("Spu instrument connection error ",
-                            str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-        logger.info(f"Connected to Spu device, error string: {instrument_error_strings(errorcode)}")
-        return instrument_error_strings(errorcode)
+        try:
+            errorcode, device_answer = self.__spu.Connect("")
+            if errorcode != 0:
+                logger.critical("Spu instrument connection error ",
+                                str(errorcode) + ": " + instrument_error_strings(errorcode))
+                raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        except InstrumentError as e:
+            print(f"Error occurred: {e}")
+        logger.info(f"Connected to Spu device.")
 
     def set_logging_parameters(self,
                                start_wavelength,
@@ -76,9 +78,8 @@ class SpuDevice:
         if errorcode != 0:
             logger.error("Error while setting SPU logging params, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-        logger.info(f"SPU logging params set. Error string:{instrument_error_strings(errorcode)}")
-        return instrument_error_strings(errorcode)
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info(f"SPU logging params set.")
 
     def sampling_start(self):
         """ Starts the SPU sampling """
@@ -87,7 +88,7 @@ class SpuDevice:
         if errorcode != 0:
             logger.error("Error while SPU sampling start, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("SPU sampling started.")
 
     def sampling_wait(self):
@@ -97,7 +98,7 @@ class SpuDevice:
         if errorcode != 0:
             logger.error("Error while SPU sampling wait, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("SPU sampling wait done.")
 
     def get_sampling_raw_data(self):
@@ -113,7 +114,7 @@ class SpuDevice:
         if errorcode != 0:
             logger.error("Error while getting SPU sampling raw data, ",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info(f"SPU sampling raw data acquired, data length: trigger={len(trigger)}, monitor={len(monitor)}")
         return trigger, monitor
 
