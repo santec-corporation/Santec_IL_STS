@@ -11,7 +11,7 @@ from Santec import TSL, ExceptionCode, CommunicationTerminator
 from Santec.Communication import CommunicationMethod, GPIBConnectType
 
 # Importing instrument error strings
-from santec.error_handing_class import instrument_error_strings
+from .error_handing_class import InstrumentError, instrument_error_strings
 
 # Import program logger
 from . import logger
@@ -76,30 +76,35 @@ class TslInstrument(TslData):
                 self.__tsl.GPIBConnectType = GPIBConnectType.NI4882
             elif "keysight" in self.gpib_connect_type:
                 self.__tsl.GPIBConnectType = GPIBConnectType.KeysightIO
-            errorcode = self.__tsl.Connect(CommunicationMethod.GPIB)
+            communication_type = CommunicationMethod.GPIB
 
         elif "lan" in self.interface:
             logger.info("Connect Tsl instrument, type LAN")
             self.__tsl.Terminator = CommunicationTerminator.Cr
             self.__tsl.IPAddress = self.address
             self.__tsl.Port = self.port
-            errorcode = self.__tsl.Connect(CommunicationMethod.TCPIP)
+            communication_type = CommunicationMethod.TCPIP
 
         elif "usb" in self.interface:
             logger.info("Connect Tsl instrument, type USB")
             self.__tsl.DeviceID = int(self.address[-1])
             self.__tsl.Terminator = CommunicationTerminator.Cr
-            errorcode = self.__tsl.Connect(CommunicationMethod.USB)
+            communication_type = CommunicationMethod.USB
 
         else:
             errorcode = -1
             logger.info("There was NO interface specified!!!")
             raise Exception("There was NO interface specified!!!")
 
-        if errorcode != 0:
-            self.__tsl.DisConnect()
-            logger.critical("Tsl instrument connection error ", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        try:
+            errorcode = self.__tsl.Connect(communication_type)
+
+            if errorcode != 0:
+                self.__tsl.DisConnect()
+                logger.critical("Tsl instrument connection error ", str(errorcode) + ": " + instrument_error_strings(errorcode))
+                raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        except InstrumentError as e:
+            print(f"Error occurred: {e}")
 
         logger.info("Connected to Tsl instrument.")
 
@@ -164,7 +169,7 @@ class TslInstrument(TslData):
         logger.info(f"TSL spec wavelength: min_wav={self.spec_min_wav}, max_wav={self.spec_max_wav}")
         if errorcode != 0:
             logger.warning("Error while getting TSL spec wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def get_sweep_speed_table(self) -> list:
@@ -193,7 +198,7 @@ class TslInstrument(TslData):
         if errorcode != 0:
             logger.error("Error while getting TSL speed table",
                          str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL speed table received.")
         return self.return_table
 
@@ -221,7 +226,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while getting TSL max power", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def set_power(self, power):
@@ -241,13 +246,13 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error(f"Error while setting TSL power", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         errorcode = self.__tsl.TSL_Busy_Check(3000)
 
         if errorcode != 0:
             logger.error(f"Error while setting TSL power", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
     def set_wavelength(self, wavelength):
@@ -266,13 +271,13 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error(f"Error while setting TSL wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         errorcode = self.__tsl.TSL_Busy_Check(3000)
 
         if errorcode != 0:
             logger.error(f"Error while setting TSL wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         return None
 
 
@@ -305,7 +310,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while setting TSL sweep params", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         logger.info(f"TSL sweep params set, actual_step={self.actual_step}")
         self.tsl_busy_check()
@@ -323,7 +328,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while setting TSL soft trigger", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("Issue soft trigger done.")
         return None
 
@@ -340,7 +345,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while starting TSL sweep", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL start sweep done.")
         return None
 
@@ -363,7 +368,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0 and except_if_error is True:
             logger.error("Error while stopping TSL sweep", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL stop sweep done.")
         return None
 
@@ -380,7 +385,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while TSL busy check", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL busy check done.")
         return None
 
@@ -413,7 +418,7 @@ class TslInstrument(TslData):
 
         if errorcode != 0:
             logger.error("Error while TSL wait for sweep status", str(errorcode) + ": " + instrument_error_strings(errorcode))
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
         logger.info("TSL wait for sweep status done.")
 
     def disconnect(self):
