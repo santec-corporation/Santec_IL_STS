@@ -24,7 +24,7 @@ class SpuDevice:
         self._deviceName = device_name
         logger.info(f"Spu Device details, Device Name: {device_name}")
 
-    def connect_spu(self):
+    def connect(self):
         """
         Connects the DAQ board (SPU Connect).
 
