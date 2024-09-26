@@ -176,7 +176,7 @@ def main():
         ilsts.set_selected_channels(previous_param_data)
         ilsts.set_selected_ranges(previous_param_data)
 
-        ilsts.set_data_struct()  # will automatically use either newly-input data, or saved data from the previous_param_data.
+        ilsts.set_sts_data_struct()  # will automatically use either newly-input data, or saved data from the previous_param_data.
         ilsts.set_parameters()  # will automatically use either newly-input data, or saved data from the previous_param_data.
 
         previous_ref_data_array = None
@@ -184,9 +184,9 @@ def main():
             # Determine if we should load reference data
             previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and log_data. Might be null if the user said no, or the file didn't exist.
         if previous_ref_data_array is not None:
-            ilsts._reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
+            ilsts.reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
 
-        if len(ilsts._reference_data_array) == 0:
+        if len(ilsts.reference_data_array) == 0:
 
             print("\nConnect for Reference measurement and press ENTER")
             print("Reference process:")
