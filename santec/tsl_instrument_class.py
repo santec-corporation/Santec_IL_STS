@@ -32,7 +32,7 @@ class TslData:
         sweep_step (float): The step wavelength of a sweep.
         sweep_speed (float): The speed of a sweep.
         sweep_speed_table (list): A table of TSL sweep speeds.
-       """
+    """
     max_power: float = 0.0
     spec_max_wav: float = 0.0
     spec_min_wav: float = 0.0
@@ -427,7 +427,7 @@ class TslInstrument(TslData):
             Default value: True.
 
         Raises:
-            Exception: In case failure in stopping the TSL sweep.
+            InstrumentError: In case of failure in stopping the TSL sweep.
         """
         logger.info("TSL stop sweep")
         errorcode = self.__tsl.Sweep_Stop()
