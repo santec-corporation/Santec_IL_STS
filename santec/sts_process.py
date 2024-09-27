@@ -438,7 +438,7 @@ class StsProcess(STSData):
             self._spu.sampling_start()
             self._tsl.soft_trigger()
             self._spu.sampling_wait()
-            self._mpm.wait_for_log_completion(sweep_count)
+            self._mpm.wait_for_log_completion()
             self._mpm.logging_stop(True)
         except RuntimeError as scan_exception:
             self._tsl.stop_sweep(False)
