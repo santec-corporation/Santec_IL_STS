@@ -42,140 +42,188 @@ class GetAddress:
 
     def initialize_instrument_addresses(self, mode: str = "SME") -> None:
         """
-        Detects and displays all the Santec GPIB and USB instrument connections.
-        Also, detects and displays the DAQ devices.
+        Detects and displays all the Santec GPIB and USB instrument connections,
+        as well as the DAQ devices.
 
         Parameters:
             mode (str): Current STS operation mode.
-                        Default vale: "SME".
-
-        **Information**
-            Upon detecting and displaying the instruments/devices,
-            the user shall select their laser, power meter and daq device for operation.
-            The selected instrument's addresses will be stored into the class attributes,
-                __cached_tsl_address: TSL instrument address
-                __cached_mpm_address: MPM instrument address
-                __cached_daq_address: DAQ device address
-            These addresses can be accessed by using the following methods:
-                get_tsl_address: returns the selected TSL instrument address
-                get_mpm_address: returns the selected MPM instrument address
-                get_dev_address: returns the selected DAQ device address
+            Default value: "SME".
 
         Raises:
-            Exception: If opening a gpib resource fails.
-            RuntimeError: If no TSL or MPM instruments are found,
-                        or if no DAQ device is found.
+            RuntimeError: If no TSL or MPM instruments are found.
         """
         logger.info("Initializing Instrument Addresses")
-        devices = {'Name': [], 'Resource': [], 'Interface': []}      # Initializing an empty dictionary of devices.
+        devices = self.detect_instruments()
 
+        if not devices['Name']:
+            logger.critical("No TSL or MPM instruments were found.")
+            raise RuntimeError("No TSL or MPM instruments were found.")
+
+        self.select_instruments(devices)
+
+        if mode == 'SME':
+            self.select_daq_device(devices)
+
+    def detect_instruments(self) -> dict:
+        """
+        Detects GPIB and USB instruments and returns a dictionary containing
+        the names, resources, and interfaces of the found devices.
+
+        Returns:
+            dict: A dictionary with keys 'Name', 'Resource', and 'Interface',
+                  each containing a list of detected devices.
+        """
+        devices = {'Name': [], 'Resource': [], 'Interface': []}
+        self.detect_gpib_resources(devices)
+        self.detect_usb_resources(devices)
+        self.sort_devices(devices)
+
+        return devices
+
+    def detect_gpib_resources(self, devices: dict) -> None:
+        """
+        Detects GPIB resources and appends them to the provided devices' dictionary.
+
+        Parameters:
+            devices (dict): The dictionary where detected GPIB resources will be stored.
+        """
         logger.info("Getting GPIB resources")
-        resource_tools = [i for i in self._resources if 'GPIB' in i]      # Gets and sorts GPIB connections only
+        resource_tools = [i for i in self._resources if 'GPIB' in i]
         logger.info(f"Available GPIB resources: {resource_tools}")
 
-        if len(resource_tools) > 0:
-            # Open the resources from the resource tools list and filter out SANTEC instruments only
-            # Append the resource and the instrument idn to devices dictionary
-            for resource in resource_tools:
-                try:
-                    logger.info(f"Opening resource: {resource}")
-                    resource_idn = self._resource_manager.open_resource(resource).query("*IDN?")
-                    logger.info(f"Opened instrument: {resource_idn}")
-                    if 'SANTEC' in resource_idn:
-                        devices['Name'].append(resource_idn)
-                        devices['Resource'].append(resource)
-                        devices['Interface'].append("GPIB")
-                except RuntimeError as err:
-                    logger.info(f"Error while opening resource: {resource}, {err}")
-                    print(f"Unexpected error while opening resource: {resource}, {err=}, {type(err)=}")
+        for resource in resource_tools:
+            self.open_gpib_resource(resource, devices)
 
-        # USB instruments
+    def open_gpib_resource(self, resource: str, devices: dict) -> None:
+        """
+        Opens a GPIB resource and appends it to the device dictionary if it
+        is identified as a SANTEC instrument.
+
+        Parameters:
+            resource (str): The resource string to be opened.
+            devices (dict): The dictionary where the found SANTEC instrument
+                            will be stored.
+
+        Raises:
+            RuntimeError: If there is an error while opening the resource.
+        """
+        try:
+            logger.info(f"Opening resource: {resource}")
+            resource_idn = self._resource_manager.open_resource(resource).query("*IDN?")
+            logger.info(f"Opened instrument: {resource_idn}")
+            if 'SANTEC' in resource_idn:
+                devices['Name'].append(resource_idn)
+                devices['Resource'].append(resource)
+                devices['Interface'].append("GPIB")
+        except RuntimeError as err:
+            logger.info(f"Error while opening resource: {resource}, {err}")
+
+    @staticmethod
+    def detect_usb_resources(devices: dict) -> None:
+        """
+        Detects USB resources and appends them to the provided devices' dictionary.
+
+        Parameters:
+            devices (dict): The dictionary where detected USB resources will be stored.
+        """
         logger.info("Getting USB resources")
         main_communication = MainCommunication()
         usb_resources = list(main_communication.Get_USB_Resouce())
         logger.info(f"Available USB resources: {usb_resources}")
-        if len(usb_resources) > 0:
-            for i, value in enumerate(usb_resources):
-                usb_id = f"USB{i}"
-                devices['Name'].append(value)
-                devices['Resource'].append(usb_id)
-                devices['Interface'].append("USB ")
 
-        # Zipping devices dictionary 'Name' and 'Resource' into a list
+        for i, value in enumerate(usb_resources):
+            usb_id = f"USB{i}"
+            devices['Name'].append(value)
+            devices['Resource'].append(usb_id)
+            devices['Interface'].append("USB")
+
+    @staticmethod
+    def sort_devices(devices: dict) -> None:
+        """
+        Sorts the device dictionary by the type of instrument (TSL vs. MPM)
+        and prints the sorted list of detected instruments.
+
+        Parameters:
+            devices (dict): The dictionary containing detected devices.
+        """
         devices_list = list(zip(devices['Name'], devices['Resource'], devices['Interface']))
-
-        if not len(devices_list) > 0:
-            logger.critical("No TSL or MPM instruments were found.")
-            raise RuntimeError("No TSL or MPM instruments were found.")
-
-        # Sorting the device list in order from TSL to MPM instruments
-        devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
-
-        # Unzipping the sorted devices list and assigning key & values of device dictionary
+        devices_list.sort(key=lambda x: x[0].startswith('SANTEC,MPM'))
         devices['Name'], devices['Resource'], devices['Interface'] = zip(*devices_list)
 
-        # Prints all the detected SANTEC instruments in order of TSL to MPM
         print("Present Instruments: ")
         for i in range(len(devices['Name'])):
             print(i + 1, ": ", devices['Interface'][i], " | ", devices['Name'][i])
 
-        if "SME" in mode:
-            # Prints all the detected DAQ devices
-            logger.info("Getting DAQ devices.")
-            daq_devices = self._system.devices.device_names
-            logger.info(f"Current DAQ devices: {daq_devices}")
-            if not len(daq_devices) > 0:
-                logger.critical("No DAQ device was found.")
-                raise RuntimeError("No DAQ device was found.")
-            print("Detected DAQ devices: ")
-            for i in daq_devices:
-                logger.info(f"Detected DAQ device: {i}")
-                print(self._system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
+    def select_instruments(self, devices: dict) -> None:
+        """
+        Prompts the user to select TSL and MPM instruments and stores their addresses
+        in the class attributes.
 
-        tsl_instrument_address = None
-        mpm_instrument_address = None
+        Parameters:
+            devices (dict): The dictionary containing information about the detected instruments.
+        """
+        self.__cached_tsl_address = self.user_select_instrument(devices, "Laser instrument")
+        self.__cached_mpm_address = self.user_select_instrument(devices, "Power meter instrument")
 
-        # User laser instrument selection
-        selection = int(input("\nSelect Laser instrument: "))
+    def user_select_instrument(self, devices: dict, instrument: str) -> str:
+        """
+        Prompts the user to select an instrument from the provided devices dictionary
+        and returns the selected instrument's address.
+
+        Parameters:
+            devices (dict): The dictionary containing detected instruments.
+            instrument (str): The current instrument.
+
+        Returns:
+            str: The resource name of the selected instrument.
+
+        Raises:
+            RuntimeError: If there is an error while opening the selected resource.
+        """
+        selection = int(input(f"Select {instrument}: "))
         selected_resource = devices['Resource'][selection - 1]
-        logger.info(f"Selected laser instrument: {selected_resource}")
-        # Connect GPIB into a buffer
-        logger.info(f"Opening laser instrument resource: {selected_resource}")
+        logger.info(f"Selected {instrument}: {selected_resource}")
+
         try:
             buffer = self._resource_manager.open_resource(selected_resource)
-            # buffer.read_termination = "\r\n"
-            # set the TSL to CRLF delimiter
-            buffer.write('SYST:COMM:GPIB:DEL 2')
-            tsl_instrument_address = buffer.resource_name
-            logger.info(f"Opened laser instrument: {tsl_instrument_address}")
+            idn = buffer.query('*IDN?')
+            if 'TSL' in idn:
+                buffer.write('SYST:COMM:GPIB:DEL 2')  # Set the TSL to CRLF delimiter
+            instrument_address = buffer.resource_name
+            logger.info(f"Opened {instrument_address} instrument: {idn}")
+            return instrument_address
         except RuntimeError as err:
             logger.info(f"Error while opening resource: {selected_resource}, {err}")
             print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
 
-        # User power meter instrument selection
-        selection = int(input("Select Power meter: "))
-        selected_resource = devices['Resource'][selection - 1]
-        logger.info(f"Selected power meter instrument: {selected_resource}")
-        # connect GPIB into a buffer
-        logger.info(f"Opening power meter instrument resource: {selected_resource}")
-        try:
-            buffer = self._resource_manager.open_resource(selected_resource)
-            # buffer.read_termination = "\r\n"
-            mpm_instrument_address = buffer.resource_name
-            logger.info(f"Opened power meter instrument: {mpm_instrument_address}")
-        except RuntimeError as err:
-            logger.info(f"Error while opening resource: {selected_resource}, {err}")
-            print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
+    def select_daq_device(self, devices: dict) -> None:
+        """
+        Prompts the user to select a DAQ device from the available devices
+        and stores its address.
 
-        self.__cached_tsl_address = tsl_instrument_address
-        self.__cached_mpm_address = mpm_instrument_address
+        Parameters:
+            devices (dict): The dictionary containing information about the detected instruments.
 
-        if mode == 'SME':
-            # User daq device selection
-            selection = input("Select DAQ board: ")
-            daq_device_address = self._system.devices[int(selection) - 1 - len(devices['Name'])].name
-            logger.info(f"Selected DAQ instrument: {daq_device_address}")
-            self.__cached_daq_address = daq_device_address
+        Raises:
+            RuntimeError: If no DAQ device is found.
+        """
+        logger.info("Getting DAQ devices.")
+        daq_devices = self._system.devices.device_names
+        logger.info(f"Current DAQ devices: {daq_devices}")
+
+        if not daq_devices:
+            logger.critical("No DAQ device was found.")
+            raise RuntimeError("No DAQ device was found.")
+
+        print("\nDetected DAQ devices: ")
+        for i, value in enumerate(daq_devices):
+            logger.info(f"Detected DAQ device: {value}")
+            print((i + 1) + len(devices['Name']), ": ", value)
+
+        selection = input("Select DAQ board: ")
+        daq_device_address = self._system.devices[int(selection) - 1 - len(devices['Name'])].name
+        logger.info(f"Selected DAQ instrument: {daq_device_address}")
+        self.__cached_daq_address = daq_device_address
 
     def get_tsl_address(self) -> str:
         """
