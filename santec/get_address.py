@@ -112,12 +112,15 @@ class GetAddress:
         # Zipping devices dictionary 'Name' and 'Resource' into a list
         devices_list = list(zip(devices['Name'], devices['Resource'], devices['Interface']))
 
-        if len(devices_list) > 0:
-            # Sorting the device list in order from TSL to MPM instruments
-            devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
+        if not len(devices_list) > 0:
+            logger.critical("No TSL or MPM instruments found.")
+            raise RuntimeError("No TSL or MPM instruments found.")
 
-            # Unzipping the sorted devices list and assigning key & values of device dictionary
-            devices['Name'], devices['Resource'], devices['Interface'] = zip(*devices_list)
+        # Sorting the device list in order from TSL to MPM instruments
+        devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
+
+        # Unzipping the sorted devices list and assigning key & values of device dictionary
+        devices['Name'], devices['Resource'], devices['Interface'] = zip(*devices_list)
 
         # Prints all the detected SANTEC instruments in order of TSL to MPM
         print("Present Instruments: ")
@@ -126,15 +129,16 @@ class GetAddress:
 
         if mode == 'SME':
             # Prints all the detected DAQ devices
-            print("Detected DAQ devices: ")
             logger.info("Getting DAQ devices.")
-            for i in self._system.devices.device_names:
+            daq_devices = self._system.devices.device_names
+            logger.info(f"Current DAQ devices: {daq_devices}")
+            if not len(daq_devices) > 0:
+                logger.critical("No DAQ device found.")
+                raise RuntimeError("No DAQ device found.")
+            print("Detected DAQ devices: ")
+            for i in daq_devices:
                 logger.info(f"Detected DAQ device: {i}")
                 print(self._system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
-
-        if len(devices) == 0 and len(usb_devices) == 0:
-            logger.critical("No TSL or MPM instruments connected!!")
-            raise Exception("No TSL or MPM instruments connected!!")
 
         TSL = None
         OPM = None
