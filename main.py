@@ -156,7 +156,7 @@ def main():
 
     device_address = GetAddress()
 
-    device_address.initialize_instrument_addresses('SME')
+    device_address.initialize_instrument_addresses()
     tsl_address = device_address.get_tsl_address()
     mpm_address = device_address.get_mpm_address()
     dev_address = device_address.get_dev_address()
