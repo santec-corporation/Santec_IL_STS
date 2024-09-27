@@ -1,78 +1,70 @@
 # -*- coding: utf-8 -*-
-from . import logger
 
 """
 Get Instrument Addresses.
-Connection modes: GPIB, LAN, USB(TSL).
+Connection modes: GPIB, LAN or USB(only TSL).
 
 @organization: Santec Holdings Corp.
 """
 
-import os
-import clr
-import time
 import pyvisa
 import nidaqmx
 
 # Import Santec communication class from Santec namespace
 from Santec.Communication import MainCommunication
 
+# Import program logger
+from . import logger
+
 
 class GetAddress:
+    """
+    A class to get the GPIB or USB addresses of TSL, MPM and DAQ instruments/devices.
+
+    Attributes:
+        _resource_manager (ResourceManager): pyvisa's ResourceManager class.
+        _resources (tuple[str]): Gets the list of connected gpib resources.
+        _system (Any): Gets the list of connected DAQ devices.
+        __cached_tsl_address: Stores the TSL instrument address
+        __cached_mpm_address: Stores the MPM instrument address
+        __cached_daq_address: Stores the DAQ device address
+        is_disposed (bool): Stores the state of instrument connections disposed.
+    """
     _resource_manager = pyvisa.ResourceManager()    # Initializing pyvisa resource manager class
     _resources = _resource_manager.list_resources()     # Getting a list of all detected instruments
     _system = nidaqmx.system.System.local()     # Getting a list of all detected DAQ devices
 
-    # Instrument attributes
-    GPIB_address: int
-    IPAddress: str
-    USB_Address: str
-    Port: int
-
     def __init__(self):
-        """ Initializing TSL, MPM, and DAQ objects. """
-        self.__cached_TSL_Address = None
-        self.__cached_MPM_Address = None
-        self.__cached_DAQ_Address = None
-        self.is_disposed = False
+        self.__cached_tsl_address: str = ""
+        self.__cached_mpm_address: str = ""
+        self.__cached_daq_address: str = ""
+        self.is_disposed: bool = False
 
-    def get_tsl_address(self):
+    def initialize_instrument_addresses(self, mode: str = "SME") -> None:
         """
-        Initialized a TSL instrument
-        """
-        if self.__cached_TSL_Address is None:
-            self.initialize_instrument_addresses()
-        return self.__cached_TSL_Address
+        Detects and displays all the Santec GPIB and USB instrument connections.
+        Also, detects and displays the DAQ devices.
 
-    def get_mpm_address(self):
-        """
-        Initialized MPM instrument
-        """
-        if self.__cached_MPM_Address is None:
-            self.initialize_instrument_addresses()
-        return self.__cached_MPM_Address
+        Parameters:
+            mode (str): Current STS operation mode.
+                        Default vale: "SME".
 
-    def get_dev_address(self):
-        """
-        Initialized DAQ device
-        """
-        if self.__cached_DAQ_Address is None:
-            self.initialize_instrument_addresses()
-        return self.__cached_DAQ_Address
+        **Information**
+            Upon detecting and displaying the instruments/devices,
+            the user shall select their laser, power meter and daq device for operation.
+            The selected instrument's addresses will be stored into the class attributes,
+                __cached_tsl_address: TSL instrument address
+                __cached_mpm_address: MPM instrument address
+                __cached_daq_address: DAQ device address
+            These addresses can be accessed by using the following methods:
+                get_tsl_address: returns the selected TSL instrument address
+                get_mpm_address: returns the selected MPM instrument address
+                get_dev_address: returns the selected DAQ device address
 
-    def initialize_instrument_addresses(self,
-                                        mode: str = ""):
-        """
-        Each device needs to prompt for a different connection type
-        Returns
-        -------
-        TSL : str
-            DESCRIPTION.
-        OPM : str
-            DESCRIPTION.
-        DAQ : str
-            DESCRIPTION.
-
+        Raises:
+            Exception: If opening a gpib resource fails.
+            RuntimeError: If no TSL or MPM instruments are found,
+                        or if no DAQ device is found.
         """
         logger.info("Initializing Instrument Addresses")
         devices = {'Name': [], 'Resource': [], 'Interface': []}      # Initializing an empty dictionary of devices.
@@ -93,9 +85,9 @@ class GetAddress:
                         devices['Name'].append(resource_idn)
                         devices['Resource'].append(resource)
                         devices['Interface'].append("GPIB")
-                except Exception as err:
+                except RuntimeError as err:
                     logger.info(f"Error while opening resource: {resource}, {err}")
-                    print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
+                    print(f"Unexpected error while opening resource: {resource}, {err=}, {type(err)=}")
 
         # USB instruments
         logger.info("Getting USB resources")
@@ -103,9 +95,9 @@ class GetAddress:
         usb_resources = list(main_communication.Get_USB_Resouce())
         logger.info(f"Available USB resources: {usb_resources}")
         if len(usb_resources) > 0:
-            for i in range(len(usb_resources)):
+            for i, value in enumerate(usb_resources):
                 usb_id = f"USB{i}"
-                devices['Name'].append(usb_resources[i])
+                devices['Name'].append(value)
                 devices['Resource'].append(usb_id)
                 devices['Interface'].append("USB ")
 
@@ -113,8 +105,8 @@ class GetAddress:
         devices_list = list(zip(devices['Name'], devices['Resource'], devices['Interface']))
 
         if not len(devices_list) > 0:
-            logger.critical("No TSL or MPM instruments found.")
-            raise RuntimeError("No TSL or MPM instruments found.")
+            logger.critical("No TSL or MPM instruments were found.")
+            raise RuntimeError("No TSL or MPM instruments were found.")
 
         # Sorting the device list in order from TSL to MPM instruments
         devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
@@ -127,21 +119,21 @@ class GetAddress:
         for i in range(len(devices['Name'])):
             print(i + 1, ": ", devices['Interface'][i], " | ", devices['Name'][i])
 
-        if mode == 'SME':
+        if "SME" in mode:
             # Prints all the detected DAQ devices
             logger.info("Getting DAQ devices.")
             daq_devices = self._system.devices.device_names
             logger.info(f"Current DAQ devices: {daq_devices}")
             if not len(daq_devices) > 0:
-                logger.critical("No DAQ device found.")
-                raise RuntimeError("No DAQ device found.")
+                logger.critical("No DAQ device was found.")
+                raise RuntimeError("No DAQ device was found.")
             print("Detected DAQ devices: ")
             for i in daq_devices:
                 logger.info(f"Detected DAQ device: {i}")
                 print(self._system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
 
-        TSL = None
-        OPM = None
+        tsl_instrument_address = None
+        mpm_instrument_address = None
 
         # User laser instrument selection
         selection = int(input("\nSelect Laser instrument: "))
@@ -154,11 +146,11 @@ class GetAddress:
             # buffer.read_termination = "\r\n"
             # set the TSL to CRLF delimiter
             buffer.write('SYST:COMM:GPIB:DEL 2')
-            TSL = buffer.resource_name
-            logger.info(f"Opened laser instrument: {TSL}")
-        except Exception as err:
+            tsl_instrument_address = buffer.resource_name
+            logger.info(f"Opened laser instrument: {tsl_instrument_address}")
+        except RuntimeError as err:
             logger.info(f"Error while opening resource: {selected_resource}, {err}")
-            print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
+            print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
 
         # User power meter instrument selection
         selection = int(input("Select Power meter: "))
@@ -169,29 +161,67 @@ class GetAddress:
         try:
             buffer = self._resource_manager.open_resource(selected_resource)
             # buffer.read_termination = "\r\n"
-            OPM = buffer.resource_name
-            logger.info(f"Opened power meter instrument: {OPM}")
-        except Exception as err:
+            mpm_instrument_address = buffer.resource_name
+            logger.info(f"Opened power meter instrument: {mpm_instrument_address}")
+        except RuntimeError as err:
             logger.info(f"Error while opening resource: {selected_resource}, {err}")
-            print(f"Unexpected error while opening resource: {err=}, {type(err)=}")
+            print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
 
-        self.__cached_TSL_Address = TSL
-        self.__cached_MPM_Address = OPM
+        self.__cached_tsl_address = tsl_instrument_address
+        self.__cached_mpm_address = mpm_instrument_address
 
         if mode == 'SME':
             # User daq device selection
             selection = input("Select DAQ board: ")
-            DAQ = self._system.devices[int(selection) - 1 - len(devices['Name'])].name
-            logger.info(f"Selected DAQ instrument: {DAQ}")
-            self.__cached_DAQ_Address = DAQ
+            daq_device_address = self._system.devices[int(selection) - 1 - len(devices['Name'])].name
+            logger.info(f"Selected DAQ instrument: {daq_device_address}")
+            self.__cached_daq_address = daq_device_address
 
-        return None
+    def get_tsl_address(self) -> str:
+        """
+        Returns:
+            The user selected TSL instrument address.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_tsl_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_tsl_address
+
+    def get_mpm_address(self) -> str:
+        """
+        Returns:
+            The user selected MPM instrument address.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_mpm_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_mpm_address
+
+    def get_dev_address(self) -> str:
+        """
+        Returns:
+            The user selected DAQ device address.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_daq_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_daq_address
 
     def dispose(self) -> None:
+        """
+        Disposes / clears all the instrument connection objects.
+
+        Objects cleared are:
+            _resource_manager
+            _system
+            __cached_tsl_address
+            __cached_mpm_address
+            __cached_daq_address
+        """
         logger.info("Destroying instrument objects.")
         if not self.is_disposed:
             self._resource_manager.close()
             self._system = None
-            self.__cached_TSL_Address = None
-            self.__cached_MPM_Address = None
-            self.__cached_DAQ_Address = None
+            self.__cached_tsl_address = None
+            self.__cached_mpm_address = None
+            self.__cached_daq_address = None
