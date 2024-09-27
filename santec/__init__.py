@@ -17,9 +17,9 @@ __author__ = "Chentir MT"
 __organization__ = "Santec Holdings Corporation"
 __description__ = "Program to measure the Insertion Loss using the Swept Test System"
 __url__ = "https://github.com/santec-corporation/Santec_IL_STS"
-__date__ = "2024-09-23"
+__date__ = "2024-09-27"
 __license__ = "GNU General Public License v3.0"
-__copyright__ = f"Copyright 2022-{datetime.date.today().year}, {__organization__}"
+__copyright__ = f"Copyright 2021-{datetime.date.today().year}, {__organization__}"
 
 
 # Date and time for logging
