@@ -26,22 +26,21 @@ __copyright__ = f"Copyright 2021-{datetime.date.today().year}, {__organization__
 dt = datetime.datetime.now()
 dt = dt.strftime("%Y%m%d")
 
+# Logger details
 PROJECT_NAME = "SANTEC_IL_STS"
 OUTPUT_LOGGER_NAME = f"output_{dt}.log"
 
 
-# Setup logging
 def setup_logging(level=logging.DEBUG, file_write_mode='w'):
     """
+    Set up logging for the application.
 
-    Parameters
-    ----------
-    level: int | Logging mode
-    file_write_mode: str | Logging file write mode
+    Parameters:
+        level (int): The logging level to use.
+        file_write_mode (str): The mode for writing to the log file ('w' or 'a').
 
-    Returns
-    -------
-    setup_logger: Logger = logging.getLogger(PROJECT_NAME)
+    Returns:
+        Logger: The configured logger instance.
     """
     setup_logger = logging.getLogger(PROJECT_NAME)
     setup_logger.setLevel(level)
@@ -64,12 +63,21 @@ logger.addHandler(logging.NullHandler())
 
 
 def log_to_screen(level=logging.DEBUG) -> None:
-    """ Log to screen. """
+    """ Log messages to the console at the specified level.
+
+    Parameters:
+        level (int): The logging level for console output.
+    """
     log_to_stream(None, level)
 
 
 def log_to_stream(stream_output, level=logging.DEBUG) -> None:
-    """ Log to stream. """
+    """ Log messages to a specified output stream.
+
+    Parameters:
+        stream_output: The output stream for logging (e.g., console).
+        level (int): The logging level for the stream output.
+    """
     logger.setLevel(level)
     ch = logging.StreamHandler(stream_output)
     ch.setLevel(level)
@@ -80,15 +88,15 @@ def log_to_stream(stream_output, level=logging.DEBUG) -> None:
     logger.addHandler(ch)
 
 
-# Add the Santec DLL to the root.
+# Add the Santec DLLs to the root.
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
 logger.info("Getting DLL path, root: %s", ROOT)
 # print(ROOT)    # Uncomment in to check if the root was selected properly
 
-PATH1 = 'InstrumentDLL'
-PATH2 = 'STSProcess'
-result1 = clr.AddReference(ROOT + PATH1)  # Add the Instrument DLL to the root
-result2 = clr.AddReference(ROOT + PATH2)  # Add the STSProcess DLL to the root
+DLL1 = 'InstrumentDLL'
+DLL2 = 'STSProcess'
+result1 = clr.AddReference(ROOT + DLL1)  # Add the Instrument DLL to the root
+result2 = clr.AddReference(ROOT + DLL2)  # Add the STSProcess DLL to the root
 logger.info("Adding Instrument DLL to the root, result: %s", result1)
 logger.info("Adding STSProcess DLL to the root, result: %s", result2)
 # print(result1, result2)     # Comment in to check if the DLLs were added.
@@ -99,10 +107,8 @@ from santec import file_logging
 from .get_address import GetAddress
 from .sts_process import StsProcess
 from .daq_device_class import SpuDevice
-from .mpm_instrument_class import MpmInstrument
 from .tsl_instrument_class import TslInstrument
-from .error_handing_class import (InstrumentError, STSProcessError,
-                                  instrument_error_strings, sts_process_error_strings)
+from .mpm_instrument_class import MpmInstrument
 
 __all__ = [
     "StsProcess",
@@ -111,9 +117,5 @@ __all__ = [
     "SpuDevice",
     "GetAddress",
     "file_logging",
-    "InstrumentError",
-    "STSProcessError",
-    "instrument_error_strings",
-    "sts_process_error_strings",
-    "logger"
+    "log_to_screen"
 ]
