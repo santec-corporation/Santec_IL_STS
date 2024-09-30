@@ -16,7 +16,7 @@ from Santec.STSProcess import *
 from .daq_device_class import SpuDevice
 from .mpm_instrument_class import MpmInstrument
 from .tsl_instrument_class import TslInstrument
-from .error_handing_class import STSProcessError, sts_process_error_strings
+from .error_handling_class import STSProcessError, sts_process_error_strings
 
 # Import program logger
 from . import logger

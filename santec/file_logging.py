@@ -17,7 +17,7 @@ from datetime import datetime
 # Importing STS process and instrument classes
 from .sts_process import StsProcess
 from .tsl_instrument_class import TslInstrument
-from .error_handing_class import sts_process_error_strings
+from .error_handling_class import sts_process_error_strings
 
 now = datetime.now()        # Get the current date and time
 formatted_datetime = now.strftime("%Y%m%d_%Hhr%Mm%Ssec")        # Format the date and time as YYYY-MM-DD HH:MM:SS

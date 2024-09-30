@@ -15,7 +15,7 @@ from Santec.Communication import CommunicationMethod  # Enumeration Class
 from Santec.Communication import GPIBConnectType  # Enumeration Class
 
 # Importing instrument error strings
-from .error_handing_class import InstrumentError, instrument_error_strings
+from .error_handling_class import InstrumentError, instrument_error_strings
 
 # Import program logger
 from . import logger

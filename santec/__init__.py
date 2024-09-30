@@ -12,7 +12,7 @@ import datetime
 import clr
 
 # About
-__version__ = "2.7.61"
+__version__ = "2.7.62"
 __author__ = "Chentir MT"
 __organization__ = "Santec Holdings Corporation"
 __description__ = "Program to measure the Insertion Loss using the Swept Test System"
@@ -109,6 +109,8 @@ from .sts_process import StsProcess
 from .daq_device_class import SpuDevice
 from .tsl_instrument_class import TslInstrument
 from .mpm_instrument_class import MpmInstrument
+from .error_handling_class import (InstrumentError, STSProcessError,
+                                   instrument_error_strings, sts_process_error_strings)
 
 __all__ = [
     "StsProcess",
