@@ -11,7 +11,7 @@ from Santec import TSL, ExceptionCode, CommunicationTerminator
 from Santec.Communication import CommunicationMethod, GPIBConnectType
 
 # Importing instrument error strings
-from .error_handing_class import InstrumentError, instrument_error_strings
+from .error_handling_class import InstrumentError, instrument_error_strings
 
 # Import program logger
 from . import logger
