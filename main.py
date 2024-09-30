@@ -1,33 +1,27 @@
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+"""
+Santec IL STS
+"""
 
 import os
 import json
 import time
-
 from matplotlib.pyplot import plot, show
 
-# Importing high-level santec package and its modules
+# Importing modules from the santec directory
 from santec import (TslInstrument, MpmInstrument, SpuDevice,
                     GetAddress, file_logging, StsProcess)
 
 
-def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data):
+def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data: dict) -> None:
     """
-    Setting sweep parameters. Will ask for:
+    Set sweep parameters for the TSL instrument.
 
-        start_wavelength:  Starting wavelength (nm)
-        stop_wavelength:   Stopping wavelength (nm)
-        sweep_step:       Sweep sweep_step (pm)
-        sweep_speed:      Sweep sweep_speed (nm/sec).
-                    In the case of TSL-570, the code will prompt
-                    invite to select a sweep_speed from a list.
-        power:      Output power (dBm)
-
-    These arguments will be passed to the connected_tsl object.
-
-    Args:
-        connected_tsl (TslInstrument): Instanced TSL class.
-        previous_param_data: If previous sweep process data is selected.
+    Parameters:
+        connected_tsl (TslInstrument): Instance of the TSL class.
+        previous_param_data (dict): Previous sweep process data, if available.
 
     Returns:
         None
@@ -35,8 +29,7 @@ def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data):
     if previous_param_data is not None:
         start_wavelength = float(previous_param_data["start_wavelength"])
         stop_wavelength = float(previous_param_data["stop_wavelength"])
-        sweep_step = float(
-            previous_param_data["sweep_step"])  # sweep_step is .001, but sweep_step is .1. we need the nm value.
+        sweep_step = float(previous_param_data["sweep_step"])
         sweep_speed = float(previous_param_data["sweep_speed"])
         power = float(previous_param_data["power"])
 
@@ -44,8 +37,7 @@ def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data):
         print("Stop Wavelength (nm): " + str(stop_wavelength))
         print("Sweep Step (nm): " + str(sweep_step))  # nm, not pm.
         print("Sweep Speed (nm): " + str(sweep_speed))
-        print("Output Power (nm): " + str(power))
-
+        print("Output Power (dBm): " + str(power))
     else:
         start_wavelength = float(input("\nInput Start Wavelength (nm): "))
         stop_wavelength = float(input("Input Stop Wavelength (nm): "))
@@ -67,16 +59,20 @@ def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data):
             print("Invalid value of Output Power ( <=10 dBm )")
             power = float(input("Input Output Power (dBm): "))
 
-    # Now that we have our parameters, set them on the TSL.
-    # TSL Power setting
+    # Set TSL parameters
     connected_tsl.set_power(power)
     connected_tsl.set_sweep_parameters(start_wavelength, stop_wavelength, sweep_step, sweep_speed)
 
 
-def prompt_and_get_previous_param_data(file_last_scan_params):
+def prompt_and_get_previous_param_data(file_last_scan_params: str) -> dict | None:
     """
-    If a file for a previous scan exists, then ask the user if it should be used to load ranges, channels,
-    previous reference data, etc.
+    Prompt user to load previous parameter settings if available.
+
+    Parameters:
+        file_last_scan_params (str): Path to the file containing last scan parameters.
+
+    Returns:
+        dict: Previous settings loaded from the file, or None if not available.
     """
     if not os.path.exists(file_last_scan_params):
         return None
@@ -93,12 +89,13 @@ def prompt_and_get_previous_param_data(file_last_scan_params):
     return previous_settings
 
 
-def prompt_and_get_previous_reference_data():
+def prompt_and_get_previous_reference_data() -> dict | None:
     """
-    Ask the user if they want to use the previous reference data (if it exists).
-    If so, then load it.
-    """
+    Ask user if they want to use the previous reference data if it exists.
 
+    Returns:
+        dict: Previous reference data loaded from the file, or None if not available.
+    """
     if not os.path.exists(file_logging.FILE_LAST_SCAN_REFERENCE_JSON):
         return None
 
@@ -108,61 +105,65 @@ def prompt_and_get_previous_reference_data():
     if ans not in "Yy":
         return None
 
-    # Get the file size. If It's huge, then the load will freeze for a few seconds.
+    # Get the file size.
     int_file_size = int(os.path.getsize(file_logging.FILE_LAST_SCAN_REFERENCE_JSON))
-    if int_file_size > 1000000:
-        str_file_size = str(int(int_file_size / 1000 / 1000)) + " MB"
-    else:
-        str_file_size = str(int(int_file_size / 1000)) + " KB"
+    str_file_size = f"{int_file_size / 1000000:.2f} MB" if int_file_size > 1000000 else f"{int_file_size / 1000:.2f} KB"
 
     print("Opening " + str_file_size + " file '" + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "'...")
-    # load the json data.
+    # Load the json data.
     with open(file_logging.FILE_LAST_SCAN_REFERENCE_JSON, encoding='utf-8') as json_file:
         previous_reference = json.load(json_file)
     return previous_reference
 
 
-def save_all_data(tsl, previous_param_data, ilsts):
-    # Save the parameters, whether we have an MPM or not.
-    # But only if there is no save file, or the user just set new settings.
+def save_all_data(tsl: TslInstrument, previous_param_data: dict, ilsts: StsProcess) -> None:
+    """
+    Save measurement and reference data to files.
+
+    Parameters:
+        tsl (TslInstrument): Instance of the TSL class.
+        previous_param_data (dict): Previous sweep process data, if available.
+        ilsts (StsProcess): Instance of the ILSTS class.
+
+    Returns:
+        None
+    """
     if previous_param_data is None:
         print("Saving parameters to file " + file_logging.FILE_LAST_SCAN_PARAMS + "...")
         file_logging.save_sts_parameter_data(tsl, ilsts, file_logging.FILE_LAST_SCAN_PARAMS)
 
-    # Save IL measurement data
     print("\nSaving measurement data to file " + file_logging.FILE_MEASUREMENT_DATA_RESULTS + "...")
     file_logging.save_measurement_data(ilsts, file_logging.FILE_MEASUREMENT_DATA_RESULTS)
 
-    # Save reference data
     print("Saving reference csv data to file " + file_logging.FILE_REFERENCE_DATA_RESULTS + "...")
     file_logging.save_reference_result_data(ilsts, file_logging.FILE_REFERENCE_DATA_RESULTS)
 
-    # Save dut data
-    print("Saving reference csv data to file " + file_logging.FILE_DUT_DATA_RESULTS + "...")
+    print("Saving DUT data to file " + file_logging.FILE_DUT_DATA_RESULTS + "...")
     file_logging.save_dut_result_data(ilsts, file_logging.FILE_DUT_DATA_RESULTS)
 
-    # Save reference data into json file
     print("Saving reference json to file " + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "...")
     file_logging.save_reference_data_json(ilsts, file_logging.FILE_LAST_SCAN_REFERENCE_JSON)
 
 
-def main():
+def main() -> None:
     """
-    Main method of this project
+    Main method of the project.
+    Connects to devices, sets parameters, and performs measurements.
+
+    Returns:
+        None
     """
     mpm = None
     dev = None
-    ilsts = None
 
     device_address = GetAddress()
-
     device_address.initialize_instrument_addresses()
     tsl_address = device_address.get_tsl_address()
     mpm_address = device_address.get_mpm_address()
     dev_address = device_address.get_dev_address()
     interface = 'GPIB'
 
-    # Only connect to the devices that the user wants to connect
+    # Connect to the devices
     if tsl_address is not None:
         tsl = TslInstrument(interface, tsl_address)
         tsl.connect()
@@ -179,43 +180,37 @@ def main():
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
-        file_logging.FILE_LAST_SCAN_PARAMS)  # might be empty, if there is no data, or if the user chose to not load it.
-    setting_tsl_sweep_params(tsl, previous_param_data)  # previous_param_data might be none
+        file_logging.FILE_LAST_SCAN_PARAMS)
+    setting_tsl_sweep_params(tsl, previous_param_data)
 
-    # If there is an MPM, then create an instance of ILSTS
-    if mpm.address is not None:
+    # If there is an MPM, create an instance of ILSTS
+    if mpm is not None:
         ilsts = StsProcess(tsl, mpm, dev)
-
         ilsts.set_selected_channels(previous_param_data)
         ilsts.set_selected_ranges(previous_param_data)
 
-        ilsts.set_sts_data_struct()  # will automatically use either newly-input data, or saved data from the previous_param_data.
-        ilsts.set_parameters()  # will automatically use either newly-input data, or saved data from the previous_param_data.
+        ilsts.set_sts_data_struct()
+        ilsts.set_parameters()
 
         previous_ref_data_array = None
         if previous_param_data is not None:
-            # Determine if we should load reference data
-            previous_ref_data_array = prompt_and_get_previous_reference_data()  # trigger, monitor, and log_data. Might be null if the user said no, or the file didn't exist.
+            previous_ref_data_array = prompt_and_get_previous_reference_data()
         if previous_ref_data_array is not None:
-            ilsts.reference_data_array = previous_ref_data_array  # ensures that we always have an array, empty or otherwise.
+            ilsts.reference_data_array = previous_ref_data_array
 
         if len(ilsts.reference_data_array) == 0:
-
             print("\nConnect for Reference measurement and press ENTER")
             print("Reference process:")
             ilsts.sts_reference()
-
         else:
-            # Load the reference data from file.
             print("Loading reference data...")
-            ilsts.sts_reference_from_saved_file()  # loads from the cached array reference_data_array which is a property of ilsts
+            ilsts.sts_reference_from_saved_file()
 
         # Perform the sweeps
         ans = "y"
         while ans in "yY":
             print("\nDUT measurement")
             reps = ""
-
             while not reps.isnumeric():
                 reps = input("Input repeat count, and connect the DUT and press ENTER: ")
                 if not reps.isnumeric():
@@ -230,7 +225,7 @@ def main():
                     show()
                 time.sleep(2)
 
-            # Get and store dut scan data of each channel, each range
+            # Get and store DUT scan data
             ilsts.get_dut_data()
 
             ans = input("\nRedo Scan ? (y/n): ")
