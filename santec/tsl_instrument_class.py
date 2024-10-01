@@ -61,13 +61,15 @@ class TslInstrument(TslData):
 
     Parameters:
         interface (str): The TSL instrument interface or connection type.
-                        Example: GPIB, LAN or USB
-        address (str): The connection address of the TSL.
+                        Supported types: GPIB, LAN or USB
+        address (str): The address for the instrument, which can be a GPIB address (e.g., 'GPIB::1')
+                    or a LAN address (e.g., '192.168.1.100')
+                    or a USB Address (e.g., 'USB0')
         port (int): In case of LAN connection, the port number of the TSL.
                     Default value = 5000.
-        gpib_connect_type (str): In case of GPIB connection, the connection type of the GPIB,
-                                if National Instruments, gpib_connect_type="NI",
-                                if Keysight Instruments, gpib_connect_type="Keysight".
+        gpib_connect_type (str | optional): In case of GPIB connection, the connection type of the GPIB,
+                                if using National Instruments, gpib_connect_type="NI",
+                                if using Keysight Instruments, gpib_connect_type="Keysight".
                                 Default: "NI"
 
     Raises:
@@ -77,7 +79,7 @@ class TslInstrument(TslData):
                  interface: str,
                  address: str,
                  port: int = 5000,
-                 gpib_connect_type: str = "NI"):
+                 gpib_connect_type: str = "ni"):
         logger.info("Initializing Tsl Instrument class.")
         self.__tsl = TSL()
         self.interface = interface.lower()
