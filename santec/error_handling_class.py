@@ -21,20 +21,14 @@ def instrument_error_strings(errorcode):
     """
     Instrument error strings.
 
-    Parameters
-    ----------
-    errorcode : int
-        Passed by DLL.
+    Parameters:
+        errorcode (int): Passed by DLL.
 
     Returns
-    -------
-    str
-        InstrumentDLL Error string.
+        str: InstrumentDLL Error string.
 
-    Raises
-    ------
-    InstrumentError
-        If the error code is not recognized.
+    Raises:
+        InstrumentError: If the error code is not recognized.
     """
     instrument_error = {
         -2147483648: "Unknown",
@@ -65,20 +59,14 @@ def sts_process_error_strings(errorcode):
     """
     STS Process error strings.
 
-    Parameters
-    ----------
-    errorcode : int
-        Passed by DLL.
+    Parameters:
+        errorcode (int): Passed by DLL.
 
-    Returns
-    -------
-    str
-        STSProcess DLL Error string.
+    Returns:
+        str: STSProcess DLL Error string.
 
-    Raises
-    ------
-    STSProcessError
-        If the error code is not recognized.
+    Raises:
+        STSProcessError: If the error code is not recognized.
     """
     process_error = {
         -2147483648: "Unknown",
