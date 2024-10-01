@@ -143,6 +143,63 @@ class TslInstrument(TslData):
         if not self.get_550_flag():
             self.get_max_power()
 
+        self.check_laser_diode_status()
+
+    def check_laser_diode_status(self) -> int:
+        """
+        Checks if the TSL laser diode is switched ON, else throws a RuntimeError.
+
+        Returns:
+            int: The errorcode of the laser diode status read operation.
+                errorcode = 0, means read operation successful.
+                errorcode != 0, means read operation failed.
+
+        Raises:
+            InstrumentError: If checking laser diode status fails.
+            RuntimeError: If laser diode is not switched ON.
+        """
+        logger.info("Checking laser diode status")
+        ld_status = TSL.LD_Status
+        status = ld_status.LD_OFF
+        errorcode, status = self.__tsl.Get_LD_Status(status)
+        if errorcode != 0:
+            logger.warning("Error while checking TSL ld status",
+                           str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        if status != ld_status.LD_ON:
+            logger.critical("TSL Laser Diode not switched ON.")
+            raise RuntimeError("TSL Laser Diode not switched ON, please run the program once the laser diode is ON.")
+        logger.info("Laser diode ON.")
+        return errorcode
+
+    def set_laser_diode_status(self, state: str = 'on') -> int:
+        """
+        Sets the TSL laser diode status.
+
+        Parameters:
+            state (str): State of the laser diode, 'on' or 'off'.
+
+        Returns:
+            int: The errorcode of the laser diode status read operation.
+                errorcode = 0, means read operation successful.
+                errorcode != 0, means read operation failed.
+
+        Raises:
+            InstrumentError: If setting the laser diode fails.
+        """
+        logger.info("Setting laser diode status to: %s", state)
+        ld_status = TSL.LD_Status
+        status = ld_status.LD_ON
+        if 'off' in state.lower():
+            status = ld_status.LD_OFF
+        errorcode = self.__tsl.Set_LD_Status(status)
+        if errorcode != 0:
+            logger.warning("Error while setting TSL ld status",
+                           str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info("Laser diode status set to: %s", state)
+        return errorcode
+
     def query_tsl(self, command: str) -> tuple[int, str]:
         """
         Queries the TSL instrument with a command,
