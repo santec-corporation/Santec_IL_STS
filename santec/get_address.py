@@ -92,9 +92,9 @@ class GetAddress:
         logger.info(f"Available GPIB resources: {resource_tools}")
 
         for resource in resource_tools:
-            self.open_gpib_resource(resource, devices)
+            self.check_gpib_resource(resource, devices)
 
-    def open_gpib_resource(self, resource: str, devices: dict) -> None:
+    def check_gpib_resource(self, resource: str, devices: dict) -> None:
         """
         Opens a GPIB resource and appends it to the device dictionary if it
         is identified as a SANTEC instrument.
