@@ -109,8 +109,6 @@ from .sts_process import StsProcess
 from .daq_device_class import SpuDevice
 from .tsl_instrument_class import TslInstrument
 from .mpm_instrument_class import MpmInstrument
-from .error_handling_class import (InstrumentError, STSProcessError,
-                                   instrument_error_strings, sts_process_error_strings)
 
 __all__ = [
     "StsProcess",
