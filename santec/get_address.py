@@ -92,9 +92,9 @@ class GetAddress:
         logger.info(f"Available GPIB resources: {resource_tools}")
 
         for resource in resource_tools:
-            self.open_gpib_resource(resource, devices)
+            self.check_gpib_resource(resource, devices)
 
-    def open_gpib_resource(self, resource: str, devices: dict) -> None:
+    def check_gpib_resource(self, resource: str, devices: dict) -> None:
         """
         Opens a GPIB resource and appends it to the device dictionary if it
         is identified as a SANTEC instrument.
@@ -109,12 +109,14 @@ class GetAddress:
         """
         try:
             logger.info(f"Opening resource: {resource}")
-            resource_idn = self._resource_manager.open_resource(resource).query("*IDN?")
+            instrument = (self._resource_manager.open_resource(resource))
+            resource_idn = instrument.query("*IDN?")
             logger.info(f"Opened instrument: {resource_idn}")
             if 'SANTEC' in resource_idn:
                 devices['Name'].append(resource_idn)
                 devices['Resource'].append(resource)
                 devices['Interface'].append("GPIB")
+            instrument.close()
         except RuntimeError as err:
             logger.info(f"Error while opening resource: {resource}, {err}")
 
