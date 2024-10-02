@@ -76,6 +76,10 @@ class GetAddress:
         devices = {'Name': [], 'Resource': [], 'Interface': []}
         self.detect_gpib_resources(devices)
         self.detect_usb_resources(devices)
+        logger.info(f"Current devices: {devices['Name']}, {devices['Resource']}, {devices['Interface']}")
+        if len(devices['Resource']) < 2:
+            logger.critical(f"TSL or MPM instruments not connected.")
+            raise Exception("TSL or MPM instruments not connected!!!")
         self.sort_devices(devices)
 
         return devices
