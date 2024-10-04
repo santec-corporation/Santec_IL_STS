@@ -119,7 +119,7 @@ class MpmInstrument(MpmData):
                 raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         except InstrumentError as e:
-            print(f"Error occurred: {e}")
+            raise RuntimeError(f"Error occurred: {e}")
 
         logger.info("Connected to Mpm instrument.")
 
