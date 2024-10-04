@@ -44,6 +44,15 @@ The Swept Test System IL PDL Software is designed to function with:
 - _TSL-510, TSL-550, TSL-710 and TSL-570 laser series_
 - _MPM-210 and MPM210H power meter series_
 
+### Supported Instrument Connections 
+_TSL-510, TSL550 and TSL-710_
+- GPIB 
+
+_TSL-570 and TSL-770_
+- GPIB
+- USB
+- LAN / Ethernet
+
 ---
 
 ## Installation
