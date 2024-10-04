@@ -80,8 +80,8 @@ class TslDevice:
         # When GPIB communication
         if self.interface == "GPIB":
             self.__tsl.Terminator = CommunicationTerminator.CrLf
-            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             self.__tsl.GPIBBoard = int(self.address.split('::')[0][-1])
+            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             self.__tsl.GPIBConnectType = GPIBConnectType.NI4882  # For Keysight cable use: GPIBConnectType.KeysightIO
             errorcode = self.__tsl.Connect(CommunicationMethod.GPIB)
 
@@ -111,7 +111,7 @@ class TslDevice:
 
         self.get_spec_wavelength()  # Gets TSL spec wavelength(nm)
 
-        if not self.get_550_flag():
+        if not self.get_tsl_type_flag():
             self.get_max_power()
 
         return None
@@ -133,17 +133,17 @@ class TslDevice:
         status, response = self.__tsl.Read("")
         return status, response
 
-    def get_550_flag(self):
+    def get_tsl_type_flag(self):
         """
-        Checks if the connected TSL is TSL-550/TSL-710
+        Checks if the connected TSL is TSL-510/TSL-550/TSL-710
 
         Returns:
-            bool: True if TSL-550/TSL-710; else False.
+            bool: True if TSL-510/TSL-550/TSL-710; else False.
         """
 
         tsl_name = self.__tsl.Information.ProductName
 
-        return tsl_name in ("TSL-550", "TSL-710")
+        return tsl_name in ("TSL-510", "TSL-550", "TSL-710")
 
     def get_spec_wavelength(self):
         """
