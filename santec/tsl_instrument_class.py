@@ -137,7 +137,7 @@ class TslInstrument(TslData):
                 raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         except InstrumentError as e:
-            print(f"Error occurred: {e}")
+            raise RuntimeError(f"Error occurred: {e}")
 
         logger.info("Connected to Tsl instrument.")
         self.get_spec_wavelength()  # Gets TSL spec wavelength(nm)
