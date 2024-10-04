@@ -142,7 +142,7 @@ class TslInstrument(TslData):
         logger.info("Connected to Tsl instrument.")
         self.get_spec_wavelength()  # Gets TSL spec wavelength(nm)
 
-        if not self.get_550_flag():
+        if not self.get_tsl_type_flag():
             self.get_max_power()
 
         self.check_laser_diode_status()
@@ -268,18 +268,19 @@ class TslInstrument(TslData):
             logger.error(f"Failed to read TSL, {e}")
             raise RuntimeError(f"read_tsl failed: {e}")
 
-    def get_550_flag(self) -> bool:
+    def get_tsl_type_flag(self) -> bool:
         """
-        Checks if the connected TSL is a TSL-550 or TSL-710.
+        Checks if the connected TSL is of the type:
+            TSL-510, TSL-550 or TSL-710.
 
         Returns:
-            bool: True if TSL-550 or TSL-710,
+            bool: True if TSL-510, TSL-550 or TSL-710,
                   else False.
         """
         logger.info("Get TSL name")
         tsl_name = self.__tsl.Information.ProductName
         logger.info(f"TSL name: {tsl_name}")
-        return tsl_name in ("TSL-550", "TSL-710")
+        return tsl_name in ("TSL-510", "TSL-550", "TSL-710")
 
     def get_spec_wavelength(self) -> None:
         """

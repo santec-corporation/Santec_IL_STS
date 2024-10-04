@@ -43,7 +43,7 @@ def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data: 
         stop_wavelength = float(input("Input Stop Wavelength (nm): "))
         sweep_step = float(input("Input Sweep Step (pm): ")) / 1000
 
-        if connected_tsl.get_550_flag() is True:
+        if connected_tsl.get_tsl_type_flag() is True:
             sweep_speed = float(input("Input Sweep Speed (nm/sec): "))
         else:
             num = 1
