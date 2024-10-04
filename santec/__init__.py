@@ -9,18 +9,22 @@ Santec IL STS process.
 import os
 import logging
 import datetime
+import argparse
+import ctypes
+import sys
+import platform
 import clr
 
 # About
 __version__ = "2.7.84"
 __author__ = "Chentir MT"
+__project_name__ = "Santec_IL_STS"
 __organization__ = "Santec Holdings Corporation"
 __description__ = "Program to measure the Insertion Loss using the Swept Test System"
 __url__ = "https://github.com/santec-corporation/Santec_IL_STS"
 __date__ = "2024-10-04"
 __license__ = "GNU General Public License v3.0"
 __copyright__ = f"Copyright 2021-{datetime.date.today().year}, {__organization__}"
-
 
 # Date and time for logging
 dt = datetime.datetime.now()
@@ -31,35 +35,59 @@ PROJECT_NAME = "SANTEC_IL_STS"
 OUTPUT_LOGGER_NAME = f"output_{dt}.log"
 
 
-def setup_logging(level=logging.DEBUG, file_write_mode='w'):
+def setup_logging(level=logging.DEBUG, file_write_mode='w', enable_logging=True):
     """
     Set up logging for the application.
 
     Parameters:
         level (int): The logging level to use.
         file_write_mode (str): The mode for writing to the log file ('w' or 'a').
+        enable_logging (bool):
 
     Returns:
         Logger: The configured logger instance.
     """
     setup_logger = logging.getLogger(PROJECT_NAME)
-    setup_logger.setLevel(level)
 
-    file_handler = logging.FileHandler(OUTPUT_LOGGER_NAME, mode=file_write_mode)
-    file_handler.setLevel(level)
+    if enable_logging:
+        setup_logger.setLevel(level)
+        file_handler = logging.FileHandler(OUTPUT_LOGGER_NAME, mode=file_write_mode)
+        file_handler.setLevel(level)
 
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(formatter)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
 
-    if setup_logger.hasHandlers():
-        setup_logger.handlers.clear()
+        if setup_logger.hasHandlers():
+            setup_logger.handlers.clear()
 
-    setup_logger.addHandler(file_handler)
+        setup_logger.addHandler(file_handler)
+        setup_logger.addHandler(logging.NullHandler())
+    else:
+        setup_logger.setLevel(logging.NOTSET)
     return setup_logger
 
 
-logger = setup_logging()
-logger.addHandler(logging.NullHandler())
+parser = argparse.ArgumentParser(description='Configure logging.')
+parser.add_argument('--enable_logging', type=bool, default=False, help='Enable logging')
+args = parser.parse_args()
+logger = setup_logging(enable_logging=args.enable_logging)
+
+
+def log_run_info():
+    """ Log program run info. """
+    logger.info(f"Project Name: {__project_name__}")
+    logger.info(f"Project Version: {__version__}")
+    info = [
+        f"Python Version: {sys.version}",
+        f"Python Implementation: {platform.python_implementation()}"
+        f"Architecture: {platform.architecture()[0]}",
+        f"Operating System: {platform.system()} {platform.release()}",
+        f"Platform ID: {platform.platform()}",
+        f"Machine: {platform.machine()}",
+        f"Processor: {platform.processor()}"
+    ]
+    for line in info:
+        logger.info(line)
 
 
 def log_to_screen(level=logging.DEBUG) -> None:
@@ -87,6 +115,8 @@ def log_to_stream(stream_output, level=logging.DEBUG) -> None:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+
+log_run_info()
 
 # Add the Santec DLLs to the root.
 ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
@@ -116,6 +146,6 @@ __all__ = [
     "MpmInstrument",
     "SpuDevice",
     "GetAddress",
-    "file_saving.py",
+    "file_saving",
     "log_to_screen"
 ]
