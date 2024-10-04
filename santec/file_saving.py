@@ -23,7 +23,7 @@ now = datetime.now()        # Get the current date and time
 formatted_datetime = now.strftime("%Y%m%d_%Hhr%Mm%Ssec")        # Format the date and time as YYYY-MM-DD HH:MM:SS
 
 FILE_LAST_SCAN_PARAMS = "last_scan_params.json"
-FILE_LAST_SCAN_REFERENCE_JSON = "last_scan_reference_data.json"
+FILE_LAST_SCAN_REFERENCE_DATA = "last_scan_reference_data.dat"
 FILE_MEASUREMENT_DATA_RESULTS = f"data_measurement_{formatted_datetime}.csv"
 FILE_REFERENCE_DATA_RESULTS = f"data_reference_{formatted_datetime}.csv"
 FILE_DUT_DATA_RESULTS = f"data_dut_{formatted_datetime}.csv"
@@ -55,15 +55,12 @@ def save_sts_parameter_data(tsl: TslInstrument,
         json.dump(json_data, export_file, indent=4)
 
 
-def save_reference_data_json(ilsts: StsProcess,
-                             str_filename: str):
-    """ Save reference data as a json file. """
+def save_reference_data(ilsts: StsProcess, str_filename: str):
+    """ Save reference data as a data file. """
     check_and_rename_old_file(str_filename)
-
-    with open(str_filename, 'w', encoding='utf-8') as export_file:
-        json.dump(
-            ilsts.reference_data_array,
-            export_file)     # No indents or newlines for this large file. If needed, then look at the CSV instead.
+    data = str(ilsts.reference_data_array).replace("'", '"')
+    with open(str_filename, 'w', encoding='utf-8') as file:
+        file.write(data)
 
 
 def check_and_rename_old_file(filename: str):

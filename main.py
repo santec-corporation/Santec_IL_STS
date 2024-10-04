@@ -12,7 +12,7 @@ from matplotlib.pyplot import plot, show
 
 # Importing modules from the santec directory
 from santec import (TslInstrument, MpmInstrument, SpuDevice,
-                    GetAddress, file_logging, StsProcess)
+                    GetAddress, file_saving, StsProcess)
 
 
 def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data: dict) -> None:
@@ -94,25 +94,26 @@ def prompt_and_get_previous_reference_data() -> dict | None:
     Ask user if they want to use the previous reference data if it exists.
 
     Returns:
-        dict: Previous reference data loaded from the file, or None if not available.
+        dict: Previous reference data loaded from the file,
+        None: if reference data is not available.
     """
-    if not os.path.exists(file_logging.FILE_LAST_SCAN_REFERENCE_JSON):
+    if not os.path.exists(file_saving.FILE_LAST_SCAN_REFERENCE_DATA):
         return None
 
     ans = input("\nWould you like to use the most recent reference data from file '{}'? [y|n]: "
-                .format(file_logging.FILE_LAST_SCAN_REFERENCE_JSON))
+                .format(file_saving.FILE_LAST_SCAN_REFERENCE_DATA))
 
     if ans not in "Yy":
         return None
 
     # Get the file size.
-    int_file_size = int(os.path.getsize(file_logging.FILE_LAST_SCAN_REFERENCE_JSON))
+    int_file_size = int(os.path.getsize(file_saving.FILE_LAST_SCAN_REFERENCE_DATA))
     str_file_size = f"{int_file_size / 1000000:.2f} MB" if int_file_size > 1000000 else f"{int_file_size / 1000:.2f} KB"
 
-    print("Opening " + str_file_size + " file '" + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "'...")
-    # Load the json data.
-    with open(file_logging.FILE_LAST_SCAN_REFERENCE_JSON, encoding='utf-8') as json_file:
-        previous_reference = json.load(json_file)
+    print("Opening " + str_file_size + " file '" + file_saving.FILE_LAST_SCAN_REFERENCE_DATA + "'...")
+    with open(file_saving.FILE_LAST_SCAN_REFERENCE_DATA, 'r', encoding='utf-8') as file:
+        data = file.read()
+        previous_reference = json.loads(data)
     return previous_reference
 
 
@@ -129,20 +130,20 @@ def save_all_data(tsl: TslInstrument, previous_param_data: dict, ilsts: StsProce
         None
     """
     if previous_param_data is None:
-        print("Saving parameters to file " + file_logging.FILE_LAST_SCAN_PARAMS + "...")
-        file_logging.save_sts_parameter_data(tsl, ilsts, file_logging.FILE_LAST_SCAN_PARAMS)
+        print("Saving parameters to file " + file_saving.FILE_LAST_SCAN_PARAMS + "...")
+        file_saving.save_sts_parameter_data(tsl, ilsts, file_saving.FILE_LAST_SCAN_PARAMS)
 
-    print("\nSaving measurement data to file " + file_logging.FILE_MEASUREMENT_DATA_RESULTS + "...")
-    file_logging.save_measurement_data(ilsts, file_logging.FILE_MEASUREMENT_DATA_RESULTS)
+    print("\nSaving measurement data to file " + file_saving.FILE_MEASUREMENT_DATA_RESULTS + "...")
+    file_saving.save_measurement_data(ilsts, file_saving.FILE_MEASUREMENT_DATA_RESULTS)
 
-    print("Saving reference csv data to file " + file_logging.FILE_REFERENCE_DATA_RESULTS + "...")
-    file_logging.save_reference_result_data(ilsts, file_logging.FILE_REFERENCE_DATA_RESULTS)
+    print("Saving reference csv data to file " + file_saving.FILE_REFERENCE_DATA_RESULTS + "...")
+    file_saving.save_reference_result_data(ilsts, file_saving.FILE_REFERENCE_DATA_RESULTS)
 
-    print("Saving DUT data to file " + file_logging.FILE_DUT_DATA_RESULTS + "...")
-    file_logging.save_dut_result_data(ilsts, file_logging.FILE_DUT_DATA_RESULTS)
+    print("Saving DUT data to file " + file_saving.FILE_DUT_DATA_RESULTS + "...")
+    file_saving.save_dut_result_data(ilsts, file_saving.FILE_DUT_DATA_RESULTS)
 
-    print("Saving reference json to file " + file_logging.FILE_LAST_SCAN_REFERENCE_JSON + "...")
-    file_logging.save_reference_data_json(ilsts, file_logging.FILE_LAST_SCAN_REFERENCE_JSON)
+    print("Saving reference data to file " + file_saving.FILE_LAST_SCAN_REFERENCE_DATA + "...")
+    file_saving.save_reference_data(ilsts, file_saving.FILE_LAST_SCAN_REFERENCE_DATA)
 
 
 def main() -> None:
@@ -180,7 +181,7 @@ def main() -> None:
 
     # Set the TSL properties
     previous_param_data = prompt_and_get_previous_param_data(
-        file_logging.FILE_LAST_SCAN_PARAMS)
+        file_saving.FILE_LAST_SCAN_PARAMS)
     setting_tsl_sweep_params(tsl, previous_param_data)
 
     # If there is an MPM, create an instance of ILSTS
