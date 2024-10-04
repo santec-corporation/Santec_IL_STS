@@ -12,7 +12,7 @@ from matplotlib.pyplot import plot, show
 
 # Importing modules from the santec directory
 from santec import (TslInstrument, MpmInstrument, SpuDevice,
-                    GetAddress, file_saving, StsProcess)
+                    GetAddress, file_saving, StsProcess, log_to_screen)
 
 
 def setting_tsl_sweep_params(connected_tsl: TslInstrument, previous_param_data: dict) -> None:
