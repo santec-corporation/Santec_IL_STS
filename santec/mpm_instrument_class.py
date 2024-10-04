@@ -10,9 +10,8 @@ MPM Instrument Class.
 from numpy import array
 
 # Importing from Santec namespace
-from Santec import MPM  # Importing MPM class
-from Santec.Communication import CommunicationMethod  # Enumeration Class
-from Santec.Communication import GPIBConnectType  # Enumeration Class
+from Santec import MPM, CommunicationTerminator
+from Santec.Communication import CommunicationMethod, GPIBConnectType  # Enumeration Class
 
 # Importing instrument error strings
 from .error_handling_class import InstrumentError, instrument_error_strings
@@ -95,8 +94,9 @@ class MpmInstrument(MpmData):
         communication_type = None
         logger.info("Connect Mpm instrument")
         if "gpib" in self.interface:
+            self.__mpm.Terminator = CommunicationTerminator.CrLf
+            self.__mpm.GPIBBoard = int(self.address.split('::')[0][-1])
             self.__mpm.GPIBAddress = int(self.address.split('::')[1])
-            self.__mpm.BordNumber = int(self.address.split('::')[0][-1])
             if "ni" in self.gpib_connect_type:
                 self.__mpm.GPIBConnectType = GPIBConnectType.NI4882
             elif "keysight" in self.gpib_connect_type:
@@ -105,7 +105,7 @@ class MpmInstrument(MpmData):
 
         elif "lan" in self.interface:
             self.__mpm.IPAddress = self.address
-            self.__mpm.port = self.port     # Default Port = 5000.
+            self.__mpm.Port = self.port     # Default Port = 5000.
             communication_type = CommunicationMethod.TCPIP
 
         self.__mpm.TimeOut = 5000  # timeout value for MPM

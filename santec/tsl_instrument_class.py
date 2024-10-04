@@ -108,8 +108,8 @@ class TslInstrument(TslData):
         if "gpib" in self.interface:
             logger.info("Connect Tsl instrument, type GPIB")
             self.__tsl.Terminator = CommunicationTerminator.CrLf
-            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             self.__tsl.GPIBBoard = int(self.address.split('::')[0][-1])
+            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             if "ni" in self.gpib_connect_type:
                 self.__tsl.GPIBConnectType = GPIBConnectType.NI4882
             elif "keysight" in self.gpib_connect_type:
