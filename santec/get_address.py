@@ -171,7 +171,8 @@ class GetAddress:
         self.__cached_tsl_address = self.user_select_instrument(devices, "Laser instrument")
         self.__cached_mpm_address = self.user_select_instrument(devices, "Power meter instrument")
 
-    def user_select_instrument(self, devices: dict, instrument: str) -> str:
+    @staticmethod
+    def user_select_instrument(devices: dict, instrument: str) -> str:
         """
         Prompts the user to select an instrument from the provided devices dictionary
         and returns the selected instrument's address.
@@ -190,17 +191,19 @@ class GetAddress:
         selected_resource = devices['Resource'][selection - 1]
         logger.info(f"Selected {instrument}: {selected_resource}")
 
-        try:
-            buffer = self._resource_manager.open_resource(selected_resource)
-            idn = buffer.query('*IDN?')
-            if 'TSL' in idn:
-                buffer.write('SYST:COMM:GPIB:DEL 2')  # Set the TSL to CRLF delimiter
-            instrument_address = buffer.resource_name
-            logger.info(f"Opened {instrument_address} instrument: {idn}")
-            return instrument_address
-        except RuntimeError as err:
-            logger.info(f"Error while opening resource: {selected_resource}, {err}")
-            print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
+        return selected_resource
+
+        # try:
+        #     buffer = self._resource_manager.open_resource(selected_resource)
+        #     idn = buffer.query('*IDN?')
+        #     if 'TSL' in idn:
+        #         buffer.write('SYST:COMM:GPIB:DEL 2')  # Set the TSL to CRLF delimiter
+        #     instrument_address = buffer.resource_name
+        #     logger.info(f"Opened {instrument_address} instrument: {idn}")
+        #     return instrument_address
+        # except RuntimeError as err:
+        #     logger.info(f"Error while opening resource: {selected_resource}, {err}")
+        #     print(f"Unexpected error while opening resource: {selected_resource}, {err=}, {type(err)=}")
 
     def select_daq_device(self, devices: dict) -> None:
         """
