@@ -33,10 +33,10 @@ from Santec.Communication import GPIBConnectType  # Enumeration Class
 class MpmDevice:
     """ MPM device class """
 
-    def __init__(self, interface: str, address: str, port: int = None):
+    def __init__(self, interface: str, address: str, port: int = 5000):
         self.__mpm = MPM()
         self.interface = interface
-        self.address = address.split('::')[1]
+        self.address = address
         self.port = port
 
         self.averaging_time = None
@@ -54,8 +54,8 @@ class MpmDevice:
         """
         if self.interface == "GPIB":
             mpm_communication_method = CommunicationMethod.GPIB
-            self.__mpm.GPIBAddress = int(self.address)
-            self.__mpm.BordNumber = 0
+            self.__mpm.GPIBAddress = int(self.address.split('::')[1])
+            self.__mpm.BordNumber = int(self.address.split('::')[0][-1])
             self.__mpm.GPIBConnectType = GPIBConnectType.NI4882
         else:
             mpm_communication_method = CommunicationMethod.TCPIP
