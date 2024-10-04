@@ -55,7 +55,7 @@ _TSL-570 and TSL-770_
 
 ---
 
-## Installation
+## Installation and Execution
 
 ### Cloning the Repository
 
@@ -65,9 +65,33 @@ To clone the repository, use the following command in your terminal:
 git clone https://github.com/santec-corporation/Santec_IL_STS.git
 ```
 
-
 ### Downloading the Latest Release,
 You can download the latest release directly from the [Releases](https://github.com/santec-corporation/Santec_IL_STS/releases) page.
+
+### Executing the Program
+1. Navigate to the Project Directory,
+   ```bash
+    cd Santec_IL_STS
+   ```
+   
+2. Install the requirements, 
+   ```bash
+    pip install -r docs/requirements.txt
+   ```
+
+3. Run the Program,
+   ```bash
+    python main.py
+   ```
+
+Optional steps,
+
+4. Enable logging and log to file,
+   ```bash
+    python main.py --enable_logging=True
+   ```
+
+5. Log to the screen, call the `log_to_screen()` method in `main.py`.    
 
 ### Python Installation
 
