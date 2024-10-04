@@ -54,13 +54,13 @@ class MpmDevice:
         """
         if self.interface == "GPIB":
             mpm_communication_method = CommunicationMethod.GPIB
+            self.__mpm.GPIBBoard = int(self.address.split('::')[0][-1])
             self.__mpm.GPIBAddress = int(self.address.split('::')[1])
-            self.__mpm.BordNumber = int(self.address.split('::')[0][-1])
             self.__mpm.GPIBConnectType = GPIBConnectType.NI4882
         else:
             mpm_communication_method = CommunicationMethod.TCPIP
             self.__mpm.IPAddress = self.address
-            self.__mpm.port = self.port  # port = 5000
+            self.__mpm.Port = self.port  # port = 5000
 
         self.__mpm.TimeOut = 5000  # timeout value for MPM
 

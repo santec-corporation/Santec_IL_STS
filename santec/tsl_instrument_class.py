@@ -80,8 +80,8 @@ class TslDevice:
         # When GPIB communication
         if self.interface == "GPIB":
             self.__tsl.Terminator = CommunicationTerminator.CrLf
-            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             self.__tsl.GPIBBoard = int(self.address.split('::')[0][-1])
+            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
             self.__tsl.GPIBConnectType = GPIBConnectType.NI4882  # For Keysight cable use: GPIBConnectType.KeysightIO
             errorcode = self.__tsl.Connect(CommunicationMethod.GPIB)
 
