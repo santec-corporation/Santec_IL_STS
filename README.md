@@ -41,7 +41,7 @@ The **Santec_IL_STS** is designed to configure and operate the Santec Swept Test
 
 ### Supported Instruments
 The Swept Test System IL PDL Software is designed to function with:
-- _TSL-550, TSL-710 and TSL-570 laser series_
+- _TSL-510, TSL-550, TSL-710 and TSL-570 laser series_
 - _MPM-210 and MPM210H power meter series_
 
 ---
