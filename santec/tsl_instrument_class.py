@@ -102,6 +102,27 @@ class TslInstrument(TslData):
     def __str__(self):
         return "TslInstrument"
 
+    def check_supported_instruments(self):
+        """
+        Checks if the current instrument is supported based on its product name and interface.
+
+        This method validates the instrument's connection interface against known supported
+        configurations.
+        If the interface is not valid or does not match the requirements for
+        the specified product name, a warning is logged and a RuntimeError is raised.
+
+        Raises:
+            RuntimeError: If the instrument interface is unsupported for the given product name.
+        """
+        if self.interface not in "gpibusb":
+            return
+
+        instrument = self.instrument
+        if instrument.ProductName in ["TSL-510", "TSL-550", "TSL-710"]:
+            if instrument.Interface != "GPIB":
+                logger.warning(f"{instrument.ProductName} is supported via GPIB only.")
+                raise RuntimeError(f"{instrument.ProductName} is supported via GPIB only.")
+
     def connect(self) -> None:
         """
         Establishes connection with the TSL instrument.
@@ -109,6 +130,7 @@ class TslInstrument(TslData):
         Raises:
             InstrumentError: If establishing connection fails.
         """
+        self.check_supported_instruments()
         communication_type = None
         logger.info("Connect Tsl instrument")
         if self.instrument is not None:
