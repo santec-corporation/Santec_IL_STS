@@ -1,5 +1,5 @@
 
-# Detailed README
+## Detailed README
 
 > [!IMPORTANT]    
 > ⚠️ Crucial information below.
@@ -16,6 +16,8 @@
 - [sts_process.py]: Processes data from the Swept Test System.
 - [error_handling_class.py]: Manages errors related to Instrument DLL and STS Process DLL.
 - [file_logging.py]: Records operational data for the Swept Test System.
+
+---
 
 ## How to Run the Script
 
@@ -59,6 +61,52 @@ If recorded reference data is available, the script will prompt you to upload th
 - If no further measurements are required, the script will save the reference and DUT data.
 - The instruments will be disconnected automatically.
 
+---
+
+## Sweep Configuration Parameters
+
+File type: [JSON](https://www.json.org/json-en.html) <br>
+File name: **last_scan_params.json**
+
+### Example:
+  ```json
+  {
+      "selected_chans": [
+          ["0", "1"],
+          ["0", "2"]
+      ],
+      "selected_ranges": [
+          1,
+          2
+      ],
+      "start_wavelength": 1500.0,
+      "stop_wavelength": 1600.0,
+      "sweep_step": 0.1,
+      "sweep_speed": 50.0,
+      "power": 0.0,
+      "actual_step": 0.1
+  }
+  ```
+### Customization Tips
+**Channel Selection:** Adjust the selected_chans array to include any channels necessary for your analysis.
+Each combination allows you to compare different configurations.
+
+**Range Selection:** Modify selected_ranges to select specific ranges, according to your experimental design.
+Ensure the indices match your available range options.
+
+**Wavelength Settings:**
+Change start_wavelength and stop_wavelength to define the spectral range of interest for your measurements.
+
+**Sweep Parameters:**
+
+**Step Size:** Tweak sweep_step for finer or coarser sampling; smaller steps yield more detailed data.
+**Speed:** Adjust sweep_speed based on how quickly you need results versus the precision required.
+**Power Adjustment:**
+Set the power parameter based on your equipment's requirements and desired sensitivity during measurements.
+
+**Actual Step:** The step size between two TSL triggers. This value is obtained after setting the TSL sweep parameters, refer to `set_sweep_parameters` of the `tsl_instrument_class`.
+
+---
 
 ## About Santec Swept Test System
 

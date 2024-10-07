@@ -137,4 +137,4 @@ Optional steps,
 
 <br/>
 
-### For more information about the project, read the detailed readme [here](https://github.com/santec-corporation/Santec_IL_STS/blob/stable/docs/README-detailed.md).
+### For more information about the project, read the detailed readme [here](https://github.com/santec-corporation/Santec_IL_STS/blob/stable/docs/README.md).
