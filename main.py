@@ -222,9 +222,12 @@ def main() -> None:
                 ilsts.sts_measurement()
                 user_map_display = input("\nDo you want to view the graph ?? (y/n): ")
                 if user_map_display == "y":
-                    plot(ilsts.wavelength_table, ilsts.il)
-                    show()
-                time.sleep(2)
+                    try:
+                        plot(ilsts.wavelength_table, ilsts.il)
+                        show()
+                    except Exception as e:
+                        print(f"Error while displaying graph, {e}")
+                time.sleep(1)
 
             # Get and store DUT scan data
             ilsts.get_dut_data()
