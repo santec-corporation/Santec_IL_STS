@@ -159,24 +159,24 @@ def main() -> None:
 
     device_address = GetAddress()
     device_address.initialize_instrument_addresses()
-    tsl_address = device_address.get_tsl_address()
-    mpm_address = device_address.get_mpm_address()
+    tsl_instrument = device_address.get_tsl_address()
+    mpm_instrument = device_address.get_mpm_address()
     dev_address = device_address.get_dev_address()
     interface = 'GPIB'
 
     # Connect to the devices
-    if tsl_address is not None:
-        tsl = TslInstrument(interface, tsl_address)
+    if tsl_instrument is not None:
+        tsl = TslInstrument(interface, instrument=tsl_instrument)
         tsl.connect()
     else:
         raise Exception("There must be a TSL connected")
 
-    if mpm_address is not None:
-        mpm = MpmInstrument(interface, mpm_address)
+    if mpm_instrument is not None:
+        mpm = MpmInstrument(interface, instrument=mpm_instrument)
         mpm.connect()
 
     if dev_address is not None:
-        dev = SpuDevice(dev_address)
+        dev = SpuDevice(device_name=dev_address)
         dev.connect()
 
     # Set the TSL properties

@@ -12,6 +12,7 @@ from Santec.Communication import CommunicationMethod, GPIBConnectType
 
 # Importing instrument error strings
 from .error_handling_class import InstrumentError, instrument_error_strings
+from .get_address import Instrument
 
 # Import program logger
 from . import logger
@@ -53,8 +54,9 @@ class TslInstrument(TslData):
         __tsl (TSL): The TSL class from the namespace Santec.
         interface (str): The TSL instrument interface or connection type.
                         Example: GPIB, LAN or USB
-        address (str): The connection address of the TSL.
+        ip_address (str): The connection ip_address of the TSL.
         port (int): In case of LAN connection, the port number of the TSL.
+        instrument (Instrument): The instrument object in case of GPIB or USB connection.
         gpib_connect_type (str): In case of GPIB connection, the connection type of the GPIB,
                                 if National Instruments, gpib_connect_type="NI",
                                 if Keysight Instruments, gpib_connect_type="Keysight".
@@ -62,11 +64,12 @@ class TslInstrument(TslData):
     Parameters:
         interface (str): The TSL instrument interface or connection type.
                         Supported types: GPIB, LAN or USB
-        address (str): The address for the instrument, which can be a GPIB address (e.g., 'GPIB::1')
-                    or a LAN address (e.g., '192.168.1.100')
+        ip_address (str): The ip_address for the instrument, which can be a GPIB ip_address (e.g., 'GPIB::1')
+                    or a LAN ip_address (e.g., '192.168.1.100')
                     or a USB Address (e.g., 'USB0')
         port (int): In case of LAN connection, the port number of the TSL.
                     Default value = 5000.
+        instrument (Instrument): The instrument object in case of GPIB or USB connection.
         gpib_connect_type (str | optional): In case of GPIB connection, the connection type of the GPIB,
                                 if using National Instruments, gpib_connect_type="NI",
                                 if using Keysight Instruments, gpib_connect_type="Keysight".
@@ -75,19 +78,22 @@ class TslInstrument(TslData):
     Raises:
         Exception: If the provided interface is not GPIB, LAN or USB.
     """
+
     def __init__(self,
                  interface: str,
-                 address: str,
+                 ip_address: str = "",
                  port: int = 5000,
+                 instrument: Instrument = None,
                  gpib_connect_type: str = "ni"):
         logger.info("Initializing Tsl Instrument class.")
         self.__tsl = TSL()
         self.interface = interface.lower()
-        self.address = address
+        self.ip_address = ip_address
         self.port = port
+        self.instrument = instrument
         self.gpib_connect_type = gpib_connect_type.lower()
-        logger.info(f"Tsl Instrument details, Interface: {self.interface}, Address: {self.address},"
-                    f" Port: {self.port}, Gpib connect type: {self.gpib_connect_type}")
+        logger.info(f"Tsl Instrument details, Interface: {interface}, Address: {ip_address},"
+                    f" Port: {port}, Instrument:{instrument}, Gpib connect type: {gpib_connect_type}")
 
         if interface not in ("GPIB", "LAN", "USB"):
             logger.warning(f"Invalid interface type, this interface {interface} is not supported.")
@@ -105,35 +111,42 @@ class TslInstrument(TslData):
         """
         communication_type = None
         logger.info("Connect Tsl instrument")
-        if "gpib" in self.interface:
-            logger.info("Connect Tsl instrument, type GPIB")
-            self.__tsl.Terminator = CommunicationTerminator.CrLf
-            self.__tsl.GPIBBoard = int(self.address.split('::')[0][-1])
-            self.__tsl.GPIBAddress = int(self.address.split('::')[1])
-            if "ni" in self.gpib_connect_type:
-                self.__tsl.GPIBConnectType = GPIBConnectType.NI4882
-            elif "keysight" in self.gpib_connect_type:
-                self.__tsl.GPIBConnectType = GPIBConnectType.KeysightIO
-            communication_type = CommunicationMethod.GPIB
+        if self.instrument is not None:
+            instrument_resource = self.instrument.ResourceValue
+            if "gpib" in self.interface:
+                logger.info("Connect Tsl instrument, type GPIB")
+                self.__tsl.Terminator = CommunicationTerminator.CrLf
+                self.__tsl.GPIBBoard = int(instrument_resource.split('::')[0][-1])
+                self.__tsl.GPIBAddress = int(instrument_resource.split('::')[1])
+                if "ni" in self.gpib_connect_type:
+                    self.__tsl.GPIBConnectType = GPIBConnectType.NI4882
+                elif "keysight" in self.gpib_connect_type:
+                    self.__tsl.GPIBConnectType = GPIBConnectType.KeysightIO
+                communication_type = CommunicationMethod.GPIB
+
+            elif "usb" in self.interface:
+                logger.info("Connect Tsl instrument, type USB")
+                self.__tsl.DeviceID = int(instrument_resource[-1])
+                self.__tsl.Terminator = CommunicationTerminator.Cr
+                communication_type = CommunicationMethod.USB
 
         elif "lan" in self.interface:
             logger.info("Connect Tsl instrument, type LAN")
             self.__tsl.Terminator = CommunicationTerminator.Cr
-            self.__tsl.IPAddress = self.address
+            self.__tsl.IPAddress = self.ip_address
             self.__tsl.Port = self.port
             communication_type = CommunicationMethod.TCPIP
 
-        elif "usb" in self.interface:
-            logger.info("Connect Tsl instrument, type USB")
-            self.__tsl.DeviceID = int(self.address[-1])
-            self.__tsl.Terminator = CommunicationTerminator.Cr
-            communication_type = CommunicationMethod.USB
+        if communication_type is None:
+            logger.error("TSL instrument not initialized.")
+            raise RuntimeError("TSL instrument not initialized.")
 
         try:
             errorcode = self.__tsl.Connect(communication_type)
             if errorcode != 0:
                 self.__tsl.DisConnect()
-                logger.critical("Tsl instrument connection error ", str(errorcode) + ": " + instrument_error_strings(errorcode))
+                logger.critical("Tsl instrument connection error ",
+                                str(errorcode) + ": " + instrument_error_strings(errorcode))
                 raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         except InstrumentError as e:
@@ -294,7 +307,8 @@ class TslInstrument(TslData):
 
         logger.info(f"TSL spec wavelength: min_wav={self.spec_min_wav}, max_wav={self.spec_max_wav}")
         if errorcode != 0:
-            logger.warning("Error while getting TSL spec wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.warning("Error while getting TSL spec wavelength",
+                           str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def get_sweep_speed_table(self) -> list[float]:
@@ -351,7 +365,8 @@ class TslInstrument(TslData):
         logger.info(f"TSL max power: {self.max_power}")
 
         if errorcode != 0:
-            logger.error("Error while getting TSL max power", str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while getting TSL max power",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
     def set_power(self, power: float) -> None:
@@ -394,15 +409,16 @@ class TslInstrument(TslData):
         errorcode = self.__tsl.Set_Wavelength(wavelength)
 
         if errorcode != 0:
-            logger.error(f"Error while setting TSL wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error(f"Error while setting TSL wavelength",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         errorcode = self.__tsl.TSL_Busy_Check(3000)
 
         if errorcode != 0:
-            logger.error(f"Error while setting TSL wavelength", str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error(f"Error while setting TSL wavelength",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
-
 
     def set_sweep_parameters(self,
                              start_wavelength: float,
@@ -436,7 +452,8 @@ class TslInstrument(TslData):
                                                                              0)
 
         if errorcode != 0:
-            logger.error("Error while setting TSL sweep params", str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while setting TSL sweep params",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
             raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
 
         logger.info(f"TSL sweep params set, actual_step={self.actual_step}")

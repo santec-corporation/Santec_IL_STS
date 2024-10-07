@@ -15,6 +15,7 @@ from Santec.Communication import CommunicationMethod, GPIBConnectType  # Enumera
 
 # Importing instrument error strings
 from .error_handling_class import InstrumentError, instrument_error_strings
+from .get_address import Instrument
 
 # Import program logger
 from . import logger
@@ -42,8 +43,9 @@ class MpmInstrument(MpmData):
         __mpm (MPM): The MPM class from the namespace Santec.
         interface (str): The MPM instrument interface or connection type.
                         Example: GPIB or LAN
-        address (str): The connection address of the MPM.
+        ip_address (str): The connection ip_address of the MPM.
         port (int): In case of LAN connection, the port number of the MPM.
+        instrument (Instrument): The instrument object in case of GPIB or USB connection.
         gpib_connect_type (str): In case of GPIB connection, the connection type of the GPIB,
                                 if National Instruments, gpib_connect_type="NI",
                                 if Keysight Instruments, gpib_connect_type="Keysight".
@@ -51,10 +53,11 @@ class MpmInstrument(MpmData):
     Parameters:
         interface (str): The TSL instrument interface or connection type.
                         Supported types: GPIB, LAN or USB
-        address (str): The address for the instrument, which can be a GPIB address (e.g., 'GPIB0::10::INSTR')
-                    or a LAN address (e.g., '192.168.1.100').
+        ip_address (str): The ip_address for the instrument, which can be a GPIB ip_address (e.g., 'GPIB0::10::INSTR')
+                    or a LAN ip_address (e.g., '192.168.1.100').
         port (int): In case of LAN connection, the port number of the TSL.
                     Default value = 5000.
+        instrument (Instrument): The instrument object in case of GPIB or USB connection.
         gpib_connect_type (str | optional): In case of GPIB connection, the connection type of the GPIB,
                                 if using National Instruments, gpib_connect_type="NI",
                                 if using Keysight Instruments, gpib_connect_type="Keysight".
@@ -65,17 +68,19 @@ class MpmInstrument(MpmData):
     """
     def __init__(self,
                  interface: str,
-                 address: str,
+                 ip_address: str = "",
                  port: int = 5000,
+                 instrument: Instrument = None,
                  gpib_connect_type: str = "ni"):
         logger.info("Initializing Mpm Instrument class.")
         self.__mpm = MPM()
         self.interface = interface.lower()
-        self.address = address
+        self.ip_address = ip_address
         self.port = port
+        self.instrument = instrument
         self.gpib_connect_type = gpib_connect_type.lower()
-        logger.info(f"Mpm Instrument details, Interface: {self.interface}, Address: {self.address},"
-                    f" Port: {self.port}, Gpib connect type: {self.gpib_connect_type}")
+        logger.info(f"Mpm Instrument details, Interface: {interface}, Address: {ip_address},"
+                    f" Port: {port}, Instrument:{instrument}, Gpib connect type: {gpib_connect_type}")
 
         if interface not in ("GPIB", "LAN"):
             logger.warning(f"Invalid interface type, this interface {interface} is not supported.")
@@ -89,26 +94,32 @@ class MpmInstrument(MpmData):
         Method handling the connection protocol of the MPM.
 
         Raises:
-            Exception: In case failed to connect to the MPM.
+            RuntimeError: In case failed to connect to the MPM.
         """
         communication_type = None
         logger.info("Connect Mpm instrument")
-        if "gpib" in self.interface:
-            self.__mpm.Terminator = CommunicationTerminator.CrLf
-            self.__mpm.GPIBBoard = int(self.address.split('::')[0][-1])
-            self.__mpm.GPIBAddress = int(self.address.split('::')[1])
-            if "ni" in self.gpib_connect_type:
-                self.__mpm.GPIBConnectType = GPIBConnectType.NI4882
-            elif "keysight" in self.gpib_connect_type:
-                self.__mpm.GPIBConnectType = GPIBConnectType.KeysightIO
-            communication_type = CommunicationMethod.GPIB
+        if self.instrument is not None:
+            instrument_resource = self.instrument.ResourceValue
+            if "gpib" in self.interface:
+                self.__mpm.Terminator = CommunicationTerminator.CrLf
+                self.__mpm.GPIBBoard = int(instrument_resource.split('::')[0][-1])
+                self.__mpm.GPIBAddress = int(instrument_resource.split('::')[1])
+                if "ni" in self.gpib_connect_type:
+                    self.__mpm.GPIBConnectType = GPIBConnectType.NI4882
+                elif "keysight" in self.gpib_connect_type:
+                    self.__mpm.GPIBConnectType = GPIBConnectType.KeysightIO
+                communication_type = CommunicationMethod.GPIB
 
         elif "lan" in self.interface:
-            self.__mpm.IPAddress = self.address
+            self.__mpm.IPAddress = self.ip_address
             self.__mpm.Port = self.port     # Default Port = 5000.
+            self.__mpm.TimeOut = 5000  # timeout value for MPM
             communication_type = CommunicationMethod.TCPIP
 
-        self.__mpm.TimeOut = 5000  # timeout value for MPM
+        if communication_type is None:
+            logger.error("MPM instrument not initialized.")
+            raise RuntimeError("MPM instrument not initialized.")
+
         try:
             errorcode = self.__mpm.Connect(communication_type)        # Establish the connection
 
