@@ -21,6 +21,10 @@
 
 ## How to Run the Script
 
+Verify the instrument connections before running the script, <br>
+- [Front Connections](https://github.com/santec-corporation/Santec_IL_STS/blob/stable/docs/connection_front.png)
+- [Rear Connections](https://github.com/santec-corporation/Santec_IL_STS/blob/stable/docs/connection_rear.png)
+
 #### 1. Initialize the System
 Run the `main.py` script to launch the measurement interface. 
 
