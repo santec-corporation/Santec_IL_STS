@@ -45,8 +45,8 @@ class GetAddress:
     _system = nidaqmx.system.System.local()     # Getting a list of all detected DAQ devices
 
     def __init__(self):
-        self.__cached_tsl_address: str = ""
-        self.__cached_mpm_address: str = ""
+        self.__cached_tsl_address = None
+        self.__cached_mpm_address = None
         self.__cached_daq_address: str = ""
         self.is_disposed: bool = False
 
@@ -194,17 +194,17 @@ class GetAddress:
         self.__cached_mpm_address = self.user_select_instrument(instruments, "Power meter instrument")
 
     @staticmethod
-    def user_select_instrument(instruments: list, instrument: str) -> str:
+    def user_select_instrument(instruments: list, instrument: str) -> Instrument:
         """
         Prompts the user to select an instrument from the provided instruments list
-        and returns the selected instrument's ip_address.
+        and returns the selected instrument of type Instrument class.
 
         Parameters:
             instruments (list): The list containing detected instruments.
             instrument (str): The current instrument.
 
         Returns:
-            str: The resource name of the selected instrument.
+            Instrument: The selected instrument of type Instrument class.
         """
         selection = int(input(f"Select {instrument}: "))
         selected_instrument = instruments[selection - 1]
@@ -241,20 +241,20 @@ class GetAddress:
         logger.info(f"Selected DAQ instrument: {daq_device_address}")
         self.__cached_daq_address = daq_device_address
 
-    def get_tsl_address(self) -> str:
+    def get_tsl_address(self) -> Instrument:
         """
         Returns:
-            The user selected TSL instrument ip_address.
+            The user selected TSL instrument.
             Returns empty string if initialize_instrument_addresses was not initialized.
         """
         if self.__cached_tsl_address is None:
             self.initialize_instrument_addresses()
         return self.__cached_tsl_address
 
-    def get_mpm_address(self) -> str:
+    def get_mpm_address(self) -> Instrument:
         """
         Returns:
-            The user selected MPM instrument ip_address.
+            The user selected MPM instrument.
             Returns empty string if initialize_instrument_addresses was not initialized.
         """
         if self.__cached_mpm_address is None:
