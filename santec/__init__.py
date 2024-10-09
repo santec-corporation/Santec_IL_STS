@@ -75,8 +75,7 @@ logger = setup_logging(enable_logging=args.enable_logging)
 
 def log_run_info():
     """ Log program run info. """
-    logger.info(f"Project Name: {__project_name__}")
-    logger.info(f"Project Version: {__version__}")
+    logger.info(f"Project Version: {__version__}, Date: {__date__}")
     info = [
         f"Python Version: {sys.version}",
         f"Python Implementation: {platform.python_implementation()}"
