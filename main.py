@@ -8,7 +8,7 @@ Santec IL STS
 import os
 import json
 import time
-from matplotlib.pyplot import plot, show
+import matplotlib.pyplot as plt
 
 # Importing modules from the santec directory
 from santec import (TslInstrument, MpmInstrument, SpuDevice,
@@ -146,6 +146,14 @@ def save_all_data(tsl: TslInstrument, previous_param_data: dict, ilsts: StsProce
     file_saving.save_reference_data(ilsts, file_saving.FILE_LAST_SCAN_REFERENCE_DATA)
 
 
+def display_graph(wavelength: list, il_data: list):
+    try:
+        plt.plot(wavelength, il_data)
+        plt.show()
+    except Exception as e:
+        print(f"Error while displaying graph, {e}")
+
+
 def main() -> None:
     """
     Main method of the project.
@@ -222,11 +230,7 @@ def main() -> None:
                 ilsts.sts_measurement()
                 user_map_display = input("\nDo you want to view the graph ?? (y/n): ")
                 if user_map_display == "y":
-                    try:
-                        plot(ilsts.wavelength_table, ilsts.il)
-                        show()
-                    except Exception as e:
-                        print(f"Error while displaying graph, {e}")
+                    display_graph(ilsts.wavelength_table, ilsts.il)
                 time.sleep(1)
 
             # Get and store DUT scan data
