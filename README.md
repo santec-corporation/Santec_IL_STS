@@ -8,7 +8,8 @@ Program to measure Insertion Loss using the Santec's Swept Test System. <br> <br
 
 ## Overview
 
-The **Santec_IL_STS** is designed to configure and operate the Santec Swept Test System (STS), allowing users to perform Wavelength-Dependent Loss (WDL) characterization of passive optical devices. This tool facilitates the measurement of Insertion Loss (IL) using Santec's TSL and MPM series instruments.
+The **Santec_IL_STS** is designed to configure and operate the Santec Swept Test System (STS). <br>
+This tool facilitates the measurement of Insertion Loss (IL) using Santec's TSL and MPM series instruments.
 
 ---
 
@@ -26,8 +27,8 @@ The **Santec_IL_STS** is designed to configure and operate the Santec Swept Test
 
 ### System Requirements
 
-- **OS:** Windows 10 / 8 / 7
-- **Python:** Any version (Latest version 3.12 recommended)
+- **OS:** Windows 10 
+- **Python:** Any version (Version 3.12 recommended)
 - **Drivers:** 
   - NI-488.2: [Version 20](https://www.ni.com/en/support/downloads/drivers/download.ni-488-2.html#345631)
   - NI-DAQmx: [Version 20](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#346240)
@@ -41,7 +42,7 @@ The **Santec_IL_STS** is designed to configure and operate the Santec Swept Test
 
 ### Supported Instruments
 The Swept Test System IL PDL Software is designed to function with:
-- _TSL-510, TSL-550, TSL-710 and TSL-570 laser series_
+- _TSL-510, TSL-550, TSL-570, TSL-710 and TSL-770 laser series_
 - _MPM-210 and MPM210H power meter series_
 
 ### Supported Instrument Connections 
@@ -49,13 +50,19 @@ _TSL-510, TSL550 and TSL-710_
 - GPIB 
 
 _TSL-570 and TSL-770_
-- GPIB
-- USB
-- LAN / Ethernet
+- GPIB, USB, or LAN
 
 ---
 
 ## Installation and Execution
+
+### Python Installation
+
+**Download and Install Python:**
+Version 3.12 recommended.
+   - Go to the [Python Downloads](https://www.python.org/downloads/) page.
+   - Download the latest version.
+   - Follow the installation instructions for your operating system.
 
 ### Cloning the Repository
 
@@ -74,7 +81,7 @@ You can download the latest release directly from the [Releases](https://github.
     cd Santec_IL_STS
    ```
    
-2. Install the requirements, 
+2. Install the dependencies, 
    ```bash
     pip install -r docs/requirements.txt
    ```
@@ -91,49 +98,24 @@ Optional steps,
     python main.py --enable_logging=True
    ```
 
-5. Log to the screen, call the `log_to_screen()` method in `main.py`.    
+5. Log to the screen, call the `log_to_screen()` method in `main.py`.
 
-### Python Installation
+### Upgrading Dependencies
 
-1. **Download and Install Python:**
-   - Go to the [Python Downloads](https://www.python.org/downloads/) page.
-   - Download the latest version (3.12 recommended).
-   - Follow the installation instructions for your operating system.
-
-2. **Upgrade Python Package:**
-   - Open your command line and execute:
-     ```bash
-     pip install --upgrade python
-     ```
-
-### Install Dependencies
-
-- **Install pythonnet:**
+- **Upgrade pythonnet:**
   ```bash
-  pip install pythonnet
+  pip install --upgrade pythonnet
   ```
-    - **Upgrade:**
-    ```bash
-    pip install --upgrade pythonnet
-    ```
 
-- **Install pyvisa:**
+- **Upgrade pyvisa:**
   ```bash
-  pip install pyvisa
+  pip install --upgrade pyvisa
   ```
-  - **Upgrade:**
-    ```bash
-    pip install --upgrade pyvisa
-    ```
   
-- **Install nidaqmx:**
+- **Upgrade nidaqmx:**
   ```bash
-  pip install nidaqmx
+  pip install --upgrade nidaqmx
   ```
-  - **Upgrade:**
-    ```bash
-    pip install --upgrade nidaqmx
-    ```
 
 <br/>
 
