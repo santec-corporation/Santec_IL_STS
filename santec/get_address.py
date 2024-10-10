@@ -1,151 +1,291 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Fri Feb 28 11:24:04 2020
+Get Instrument Addresses.
+Connection modes: GPIB, LAN or USB(only TSL).
 
-@author: chentir
-@organization: santec holdings corp.
+@organization: Santec Holdings Corp.
 """
 
-# Basic imports
-import time
-
-# Importing pyvisa and nidaqmx -> to control TSL and MPM, and DAQ device
 import pyvisa
 import nidaqmx
 
-# Initializing pyvisa resource manager class
-resource_manager = pyvisa.ResourceManager()
+# Import Santec communication class from Santec namespace
+from Santec.Communication import MainCommunication
 
-# Getting a list of all detected instruments
-resources = resource_manager.list_resources()
+# Import program logger
+from . import logger
 
-# Getting a list of all detected DAQ devices
-system = nidaqmx.system.System.local()
+
+class Instrument:
+    Idn: str = ""
+    VendorName: str = ""
+    ProductName: str = ""
+    SerialNumber: int = 12345678
+    VersionNumber: str = ""
+    Interface: str = ""
+    ResourceValue: str = ""
 
 
 class GetAddress:
+    """
+    A class to get the GPIB or USB addresses of TSL, MPM and DAQ instruments/devices.
+
+    Attributes:
+        _resource_manager (ResourceManager): pyvisa's ResourceManager class.
+        _resources (tuple[str]): Gets the list of connected gpib resources.
+        _system (Any): Gets the list of connected DAQ devices.
+        __cached_tsl_address: Stores the TSL instrument ip_address
+        __cached_mpm_address: Stores the MPM instrument ip_address
+        __cached_daq_address: Stores the DAQ device ip_address
+        is_disposed (bool): Stores the state of instrument connections disposed.
+    """
+    _resource_manager = pyvisa.ResourceManager()    # Initializing pyvisa resource manager class
+    _resources = _resource_manager.list_resources()     # Getting a list of all detected instruments
+    _system = nidaqmx.system.System.local()     # Getting a list of all detected DAQ devices
+
     def __init__(self):
-        """ Initializing TSL, MPM and DAQ objects """
-        self.__cached_TSL_Address = None
-        self.__cached_MPM_Address = None
-        self.__cached_DAQ_Address = None
+        self.__cached_tsl_address = None
+        self.__cached_mpm_address = None
+        self.__cached_daq_address: str = ""
+        self.is_disposed: bool = False
+
+    def initialize_instrument_addresses(self, mode: str = "SME") -> None:
+        """
+        Detects and displays all the Santec GPIB and USB instrument connections,
+        as well as the DAQ devices.
+
+        Parameters:
+            mode (str): Current STS operation mode.
+            Default value: "SME".
+
+        Raises:
+            RuntimeError: If no TSL or MPM instruments are found.
+        """
+        logger.info("Initializing Instrument Addresses")
+        instruments = self.detect_instruments()
+
+        if not instruments:
+            logger.critical("No TSL or MPM instruments were found.")
+            raise RuntimeError("No TSL or MPM instruments were found.")
+
+        self.select_instruments(instruments)
+
+        if mode == 'SME':
+            self.select_daq_device(instruments)
+
+    def detect_instruments(self) -> list:
+        """
+        Detects GPIB and USB instruments and returns a list of Instrument objects.
+
+        Returns:
+            list: A list of detected Instrument objects.
+        """
+        instruments = []
+        self.detect_gpib_resources(instruments)
+        self.detect_usb_resources(instruments)
+
+        logger.info(f"Current instruments: {instruments}")
+        if len(instruments) < 2:
+            logger.critical(f"TSL or MPM instruments not connected.")
+            raise Exception("TSL or MPM instruments not connected!!!")
+
+        self.sort_devices(instruments)
+
+        return instruments
+
+    def detect_gpib_resources(self, instruments: list) -> None:
+        """
+        Detects GPIB resources and appends them to the provided instruments list.
+
+        Parameters:
+            instruments (list): The list where detected GPIB resources will be stored.
+        """
+        logger.info("Getting GPIB resources")
+        resource_tools = [i for i in self._resources if 'GPIB' in i]
+        logger.info(f"Available GPIB resources: {resource_tools}")
+
+        for resource in resource_tools:
+            self.check_gpib_resource(resource, instruments)
+
+    def check_gpib_resource(self, resource: str, instruments: list) -> None:
+        """
+        Opens a GPIB resource and appends it to the instrument list if it
+        is identified as a SANTEC instrument.
+
+        Parameters:
+            resource (str): The resource string to be opened.
+            instruments (list): The list where the found SANTEC instrument will be stored.
+
+        Raises:
+            RuntimeError: If there is an error while opening the resource.
+        """
+        try:
+            logger.info(f"Opening resource: {resource}")
+            instrument = self._resource_manager.open_resource(resource)
+            resource_idn = instrument.query("*IDN?")
+            logger.info(f"Opened instrument: {resource_idn}")
+
+            if 'SANTEC' in resource_idn:
+                instr = Instrument()
+                idn = resource_idn.split(',')
+                instr.Idn = resource_idn
+                instr.VendorName = idn[0]
+                instr.ProductName = idn[1]
+                instr.SerialNumber = int(idn[2])
+                instr.VersionNumber = idn[3]
+                instr.ResourceValue = resource
+                instr.Interface = "GPIB"
+                instruments.append(instr)
+            instrument.close()
+        except RuntimeError as err:
+            logger.info(f"Error while opening resource: {resource}, {err}")
 
     @staticmethod
-    def Connection_Info_Class():
+    def detect_usb_resources(instruments: list) -> None:
         """
-        Instruments attributes
+        Detects USB resources and appends them to the provided instruments list.
+
+        Parameters:
+            instruments (list): The list where detected USB resources will be stored.
         """
-        GPIB_address: int
-        IPAddress: str
-        USB_Address: str
-        Port: int
+        logger.info("Getting USB resources")
+        main_communication = MainCommunication()
+        usb_resources = list(main_communication.Get_USB_Resouce())
+        logger.info(f"Available USB resources: {usb_resources}")
 
-    def Get_Tsl_Address(self):
+        for i, value in enumerate(usb_resources):
+            usb_id = f"USB{i}"
+            instr = Instrument()
+            idn = value.strip("'").split('_')
+            instr.Idn = value
+            instr.VendorName = "SANTEC"
+            instr.ProductName = idn[0]
+            instr.SerialNumber = int(idn[1])
+            instr.VersionNumber = "NA"
+            instr.ResourceValue = usb_id
+            instr.Interface = "USB"
+            instruments.append(instr)
+
+    @staticmethod
+    def sort_devices(instruments: list) -> None:
         """
-        Initialized TSL instrument
+        Sorts the instrument list by the type of instrument (TSL vs. MPM)
+        and prints the sorted list of detected instruments.
+
+        Parameters:
+            instruments (list): The list containing detected instruments.
         """
-        if self.__cached_TSL_Address is None:
-            self.Initialize_Device_Addresses()
-        return self.__cached_TSL_Address
+        instruments.sort(key=lambda x: x.Idn.startswith('SANTEC,MPM'))
 
-    def Get_Mpm_Address(self):
+        print("Present Instruments: ")
+        for i, instr in enumerate(instruments):
+            print(i + 1, ": ", instr.Interface, " | ", instr.Idn)
+
+    def select_instruments(self, instruments: list) -> None:
         """
-        Initialized MPM instrument
+        Prompts the user to select TSL and MPM instruments and stores their addresses
+        in the class attributes.
+
+        Parameters:
+            instruments (list): The list containing information about the detected instruments.
         """
-        if self.__cached_MPM_Address is None:
-            self.Initialize_Device_Addresses()
-        return self.__cached_MPM_Address
+        self.__cached_tsl_address = self.user_select_instrument(instruments, "Laser instrument")
+        self.__cached_mpm_address = self.user_select_instrument(instruments, "Power meter instrument")
 
-    def Get_Dev_Address(self):
+    @staticmethod
+    def user_select_instrument(instruments: list, instrument: str) -> Instrument:
         """
-        Initialized DAQ device
+        Prompts the user to select an instrument from the provided instruments list
+        and returns the selected instrument of type Instrument class.
+
+        Parameters:
+            instruments (list): The list containing detected instruments.
+            instrument (str): The current instrument.
+
+        Returns:
+            Instrument: The selected instrument of type Instrument class.
         """
-        if self.__cached_DAQ_Address is None:
-            self.Initialize_Device_Addresses()
-        return self.__cached_DAQ_Address
+        selection = int(input(f"Select {instrument}: "))
+        selected_instrument = instruments[selection - 1]
+        logger.info(f"Selected {instrument}: {selected_instrument.ResourceValue}")
 
-    def Initialize_Device_Addresses(self, mode: str = ""):
+        return selected_instrument
+
+    def select_daq_device(self, instruments: list) -> None:
         """
-        Each device needs to prompt for a different connection type
-        Returns
-        -------
-        TSL : str
-            DESCRIPTION.
-        OPM : str
-            DESCRIPTION.
-        DAQ : str
-            DESCRIPTION.
+        Prompts the user to select a DAQ device from the available devices
+        and stores its ip_address.
 
+        Parameters:
+            instruments (list): The list containing information about the detected instruments.
+
+        Raises:
+            RuntimeError: If no DAQ device is found.
         """
-        # Initializing an empty dictionary
-        devices = {'Name': [], 'Resource': []}
+        logger.info("Getting DAQ devices.")
+        daq_devices = self._system.devices.device_names
+        logger.info(f"Current DAQ devices: {daq_devices}")
 
-        # Gets and sorts GPIB connections only
-        resource_tools = [i for i in resources if 'GPIB' in i]
+        if not daq_devices:
+            logger.critical("No DAQ device was found.")
+            raise RuntimeError("No DAQ device was found.")
 
-        # Open the resources from the resource tools list and filter out SANTEC instruments only
-        # Append the resource and teh instrument idn to devices dictionary
-        for resource in resource_tools:
-            try:
-                resource_idn = resource_manager.open_resource(resource).query("*IDN?")
-                if 'SANTEC' in resource_idn:
-                    devices['Name'].append(resource_idn)
-                    devices['Resource'].append(resource)
-            except Exception as err:
-                print(f"Unexpected {err=}, {type(err)=}")
+        print("\nDetected DAQ devices: ")
+        for i, value in enumerate(daq_devices):
+            logger.info(f"Detected DAQ device: {value}")
+            print((i + 1) + len(instruments), ": ", value)
 
-        # Zipping devices dictionary 'Name' and 'Resource' into a list
-        devices_list = list(zip(devices['Name'], devices['Resource']))
+        selection = input("Select DAQ board: ")
+        daq_device_address = self._system.devices[int(selection) - 1 - len(instruments)].name
+        logger.info(f"Selected DAQ instrument: {daq_device_address}")
+        self.__cached_daq_address = daq_device_address
 
-        # Sorting the devices list in order from TSL to MPM instruments
-        devices_list = sorted(devices_list, key=lambda x: x[0].startswith('SANTEC,MPM'))
+    def get_tsl_address(self) -> Instrument:
+        """
+        Returns:
+            The user selected TSL instrument.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_tsl_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_tsl_address
 
-        # Unzipping the sorted devices list and assigning key & values of devices dictionary
-        devices['Name'], devices['Resource'] = zip(*devices_list)
+    def get_mpm_address(self) -> Instrument:
+        """
+        Returns:
+            The user selected MPM instrument.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_mpm_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_mpm_address
 
-        # Prints all the detected SANTEC GPIB instruments in order of TSL to MPM
-        print("Present GPIB Instruments: ")
-        for i in range(len(devices['Name'])):
-            print(i + 1, ": ", devices['Name'][i])
+    def get_dev_address(self) -> str:
+        """
+        Returns:
+            The user selected DAQ device ip_address.
+            Returns empty string if initialize_instrument_addresses was not initialized.
+        """
+        if self.__cached_daq_address is None:
+            self.initialize_instrument_addresses()
+        return self.__cached_daq_address
 
-        if mode == 'SME':
-            # Prints all the detected DAQ devices
-            print("Detected DAQ devices: ")
-            for i in system.devices.device_names:
-                print(system.devices.device_names.index(i) + 1 + len(devices['Name']), ": ", i)
+    def dispose(self) -> None:
+        """
+        Disposes / clears all the instrument connection objects.
 
-        time.sleep(0.2)
-
-        # User laser instrument selection
-        selection = int(input("\nSelect Laser instrument: "))
-        selected_resource = devices['Resource'][selection - 1]
-        # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(selected_resource)
-        # buffer.read_termination = "\r\n"
-        # set the TSL to CRLF delimiter
-        buffer.write('SYST:COMM:GPIB:DEL 2')
-        TSL = buffer.resource_name
-
-        # User power meter instrument selection
-        selection = int(input("Select Power meter: "))
-        selected_resource = devices['Resource'][selection - 1]
-        # connect GPIB into a buffer
-        buffer = resource_manager.open_resource(selected_resource)
-        # buffer.read_termination = "\r\n"
-        OPM = buffer.resource_name
-
-        DAQ = None
-        if mode == 'SME':
-            # User daq device selection
-            selection = input("Select DAQ board: ")
-            DAQ = system.devices[int(selection) - 1 - len(devices['Name'])].name
-
-        # Assigning all the user selected instruments
-        self.__cached_TSL_Address = TSL
-        self.__cached_MPM_Address = OPM
-
-        if mode == 'SME':
-            self.__cached_DAQ_Address = DAQ
-
-        return None
+        Objects cleared are:
+            _resource_manager
+            _system
+            __cached_tsl_address
+            __cached_mpm_address
+            __cached_daq_address
+        """
+        logger.info("Destroying instrument objects.")
+        if not self.is_disposed:
+            self._resource_manager.close()
+            self._system = None
+            self.__cached_tsl_address = None
+            self.__cached_mpm_address = None
+            self.__cached_daq_address = None

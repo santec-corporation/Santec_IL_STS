@@ -1,122 +1,143 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Thu Mar 24 20:04:16 2022
+DAQ Device Class.
 
-@author: chentir
-@organization: santec holdings corp.
+@organization: Santec Holdings Corp.
 """
-
-# Basic imports
-import os
-import clr
-
-# Importing instrument error strings
-from santec.error_handing_class import instrument_error_strings
-
-# Adding Instrument DLL to the reference
-ROOT = str(os.path.dirname(__file__)) + '\\DLL\\'
-# print(ROOT)    """ <-- uncomment in to check if the root was selected properly """
-
-PATH1 = 'InstrumentDLL'
-ans = clr.AddReference(ROOT + PATH1)
-# print(ans) #<-- comment in to check if the DLL was added properly
-
 
 # Importing SPU class from the DLL
 from Santec import SPU
 
+# Importing instrument error strings
+from .error_handling_class import InstrumentError, instrument_error_strings
+
+# Import program logger
+from . import logger
+
 
 class SpuDevice:
-    """ DAQ board device class """
+    """
+    SPU device class to control and command the DAQ device.
 
-    def __init__(self, device_name: str):
+    Attributes:
+        __spu (SPU): The SPU class from the namespace Santec.
+        _device_name (str): The name of the DAQ device.
+
+    Parameters:
+        device_name (str): The name of the DAQ device.
+
+    Raises:
+        None
+    """
+    def __init__(self,
+                 device_name: str):
+        logger.info("Initializing Spu Instrument class.")
         self.__spu = SPU()
-        self.__deviceName = device_name
+        self._device_name = device_name
+        logger.info(f"Spu Device details, Device Name: {device_name}")
 
-    def ConnectSPU(self):
+    def connect(self) -> None:
         """
-        Connects the DAQ board (SPU Connect).
-
-        Parameters
-        ----------
-        device_name : TYPE
-            DESCRIPTION.
-
-        Raises
-        ------
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        """
-        self.__spu.DeviceName = str(self.__deviceName)
-
-        errorcode, device_answer = self.__spu.Connect("")
-        if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
-
-        return instrument_error_strings(errorcode)
-
-    # SPU Set logging parameter
-    def set_logging_parameters(self,
-                               start_wavelength,
-                               stop_wavelength,
-                               sweep_speed,
-                               tsl_actual_step):
-        """
-        Set SPU sampling parameters
-        Args:
-            start_wavelength (float): Input the start wavelength value.
-            stop_wavelength (float): Input the stop wavelength value.
-            sweep_speed (float): Input the sweep sweep_speed value.
-            tsl_actual_step (float): Input the sweep sweep_step wavelength value.
+        Establishes connection with a DAQ board.
 
         Raises:
-            Exception
+            InstrumentError: If the connection fails with an error code.
         """
+        logger.info("Connect Spu device")
+        self.__spu.DeviceName = str(self._device_name)
+        device_answer = None
+        try:
+            errorcode, device_answer = self.__spu.Connect("")
+            if errorcode != 0:
+                logger.critical("Spu instrument connection error ",
+                                str(errorcode) + ": " + instrument_error_strings(errorcode))
+                raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        except InstrumentError as e:
+            print(f"Error occurred: {e}")
+        logger.info(f"Connected to Spu device. device_answer: {device_answer}")
 
+    def set_logging_parameters(self,
+                               start_wavelength: float,
+                               stop_wavelength: float,
+                               sweep_speed: float,
+                               tsl_actual_step: float) -> None:
+        """
+        Set SPU logging parameters for DAQ sampling.
+
+        Parameters:
+            start_wavelength (float): Start wavelength value of the sweep.
+            stop_wavelength (float): Stop wavelength value of the sweep.
+            sweep_speed (float): Speed value of the sweep.
+            tsl_actual_step (float): Step wavelength value of the sweep.
+
+        Raises:
+            InstrumentError: If setting the logging parameters to the DAQ device fails.
+        """
+        logger.info(f"Set SPU logging params: start_wavelength={start_wavelength}, stop_wavelength={stop_wavelength}, "
+                    f"sweep_speed={sweep_speed}, tsl_actual_step={tsl_actual_step}")
         errorcode = self.__spu.Set_Sampling_Parameter(start_wavelength,
                                                       stop_wavelength,
                                                       sweep_speed,
                                                       tsl_actual_step)
 
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while setting SPU logging params, ",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info(f"SPU logging params set.")
 
-        return instrument_error_strings(errorcode)
-
-    def sampling_start(self):
+    def sampling_start(self) -> None:
         """ Starts the SPU sampling """
+        logger.info("SPU sampling start")
         errorcode = self.__spu.Sampling_Start()
         if errorcode != 0:
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while SPU sampling start, ",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info("SPU sampling started.")
 
-    def sampling_wait(self):
+    def sampling_wait(self) -> None:
         """ SPU wait for sampling """
+        logger.info("SPU sampling wait")
         errorcode = self.__spu.Waiting_for_sampling()
         if errorcode != 0:
-            raise RuntimeError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while SPU sampling wait, ",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info("SPU sampling wait done.")
 
-    def get_sampling_raw(self):
+    def get_sampling_raw_data(self) -> tuple[list[float], list[float]]:
         """
-        SPU get raw data
+        Gets the raw sampling data from the DAQ device.
 
-        returns:
-        A list of trigger and monitor data
+        Raises:
+            InstrumentError: If getting the raw sampling data from the DAQ device fails.
+
+        Returns:
+            tuple[list[float], list[float]]: A tuple containing two lists:
+                - The first list contains the TSL trigger data of a float type.
+                - The second list contains the power monitor data of a float type.
         """
+        logger.info("SPU get sampling raw data")
         errorcode, trigger, monitor = self.__spu.Get_Sampling_Rawdata(
             None, None)
         if errorcode != 0:
-            raise Exception(str(errorcode) + ": " + instrument_error_strings(errorcode))
+            logger.error("Error while getting SPU sampling raw data, ",
+                         str(errorcode) + ": " + instrument_error_strings(errorcode))
+            raise InstrumentError(str(errorcode) + ": " + instrument_error_strings(errorcode))
+        logger.info(f"SPU sampling raw data acquired, data length: trigger={len(trigger)}, monitor={len(monitor)}")
         return trigger, monitor
 
-    def Disconnect(self):
+    def disconnect(self) -> None:
         """
-        Disconnects the spu device
+        Disconnects the connection from the DAQ device.
+
+        Raises:
+              RuntimeError: If disconnecting the DAQ device fails.
         """
-        self.__spu.DisConnect()
+        try:
+            self.__spu.DisConnect()
+            logger.info("SPU connection disconnected.")
+        except RuntimeError as e:
+            logger.error(f"Error while disconnecting the SPU connection, {e}")
