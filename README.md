@@ -39,6 +39,10 @@ This tool facilitates the measurement of Insertion Loss (IL) using Santec's TSL 
 - [pythonnet](https://pythonnet.github.io/) : Also known as `clr`, for .NET interoperability
 - [pyvisa](https://pyvisa.readthedocs.io/en/latest/index.html) : For controlling measurement devices
 - [nidaqmx](https://nidaqmx-python.readthedocs.io/en/latest/) : API for NIDAQ driver interaction
+- Santec DLLs: _Instrument DLL_, _STSProcess DLL_ and _FTD2XX_NET DLL_.
+  <br>
+  Refer to the DLL documentation here:
+  [About DLLs](https://github.com/santec-corporation/Santec_IL_STS/blob/stable/santec/DLL/README.md)
 
 ### Supported Instruments
 The Swept Test System IL PDL Software is designed to function with:
